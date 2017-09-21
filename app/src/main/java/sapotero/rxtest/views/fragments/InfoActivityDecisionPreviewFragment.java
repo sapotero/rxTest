@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.fragments;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.util.Base64;
@@ -29,7 +27,6 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 
@@ -59,7 +56,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -94,7 +90,6 @@ import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
 
-@SuppressLint("ValidFragment")
 public class InfoActivityDecisionPreviewFragment extends PreviewFragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject ISettings settings;
@@ -103,26 +98,30 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   private ToolbarManager toolbarManager;
 
-  @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
-  @BindView(R.id.activity_info_decision_preview_action_wrapper) LinearLayout action_wrapper;
-
-  @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
-  @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
   @BindView(R.id.decision_view_root) LinearLayout decision_view_root;
 
-  @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
+  @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
+  @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
+  @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
+  @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
+  @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
   @BindView(R.id.activity_info_decision_preview_magnifer) ImageButton magnifer;
 
+  @BindView(R.id.activity_info_decision_preview_action_wrapper) LinearLayout action_wrapper;
+  @BindView(R.id.activity_info_decision_preview_action_text)  TextView action_text;
+
+  @BindView(R.id.activity_info_decision_preview_buttons_wrapper) LinearLayout buttons_wrapper;
   @BindView(R.id.activity_info_decision_preview_next_person) Button next_person_button;
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
-  @BindView(R.id.activity_info_decision_preview_buttons_wrapper) LinearLayout buttons_wrapper;
+
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
-  @BindView(R.id.activity_info_decision_preview_action_text)  TextView action_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
-  @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
+
   @BindView(R.id.activity_info_decision_bottom_line) View bottom_line;
+
+  private String TAG = this.getClass().getSimpleName();
 
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
@@ -130,25 +129,18 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private Unbinder binder;
   private String uid;
   private RDecisionEntity current_decision;
-  private String TAG = this.getClass().getSimpleName();
   private GestureDetector gestureDetector;
   private RDocumentEntity doc;
-  private InfoActivityDecisionPreviewFragment fragment;
   private SelectTemplateDialogFragment templates;
-  private MaterialDialog.Builder prev_dialog;
 
   private boolean buttonsEnabled = true;
 
   public InfoActivityDecisionPreviewFragment() {
   }
 
-  public InfoActivityDecisionPreviewFragment(ToolbarManager toolbarManager) {
+  public InfoActivityDecisionPreviewFragment withToolbarManager(ToolbarManager toolbarManager) {
     this.toolbarManager = toolbarManager;
-  }
-
-  @OnClick(R.id.activity_info_decision_preview_magnifer)
-  public void expandView(){
-    magnifer();
+    return this;
   }
 
   // Approve current decision
@@ -175,7 +167,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
             params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
             operationManager.execute(operation, params);
-            updateAfteButtonPressed();
+            updateAfterButtonPressed();
             EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
           })
           .autoDismiss(true);
@@ -192,7 +184,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
       operationManager.execute(operation, params);
-      updateAfteButtonPressed();
+      updateAfterButtonPressed();
       EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
     }
 
@@ -208,11 +200,9 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
     if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
-
       showPrevDialog(null);
 
     } else {
-
       CommandFactory.Operation operation;
       operation =CommandFactory.Operation.REJECT_DECISION;
 
@@ -221,32 +211,33 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
       operationManager.execute(operation, params);
-      updateAfteButtonPressed();
+      updateAfterButtonPressed();
       EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
     }
   }
 
   private void showPrevDialog(String text) {
-    prev_dialog = new MaterialDialog.Builder( getContext() )
+    InfoActivityDecisionPreviewFragment fragment = this;
+
+    MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(getContext())
       .content(R.string.decision_reject_body)
       .cancelable(true)
       .positiveText(R.string.yes)
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
-
-        CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
+        CommandFactory.Operation operation = CommandFactory.Operation.REJECT_DECISION;
 
         CommandParams commandParams = new CommandParams();
-        commandParams.setDecisionId( current_decision.getUid() );
-        commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
+        commandParams.setDecisionId(current_decision.getUid());
+        commandParams.setDecisionModel(new DecisionMapper().toFormattedModel(current_decision));
 
-        if ( settings.isShowCommentPost() ) {
+        if (settings.isShowCommentPost() && dialog1.getInputEditText() != null) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
         }
 
         operationManager.execute(operation, commandParams);
-        updateAfteButtonPressed();
-        EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+        updateAfterButtonPressed();
+        EventBus.getDefault().post(new ShowNextDocumentEvent(settings.getUid()));
       })
       .autoDismiss(true);
 
@@ -258,22 +249,20 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         .inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
         .neutralText("Шаблон")
-        .onNeutral(new MaterialDialog.SingleButtonCallback() {
-          @Override
-          public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        .onNeutral((dialog, which) -> {
+          templates = new SelectTemplateDialogFragment();
+          templates.setType("rejection");
+          templates.registerCallBack( fragment );
 
-            templates = new SelectTemplateDialogFragment();
-            templates.setType("rejection");
-            templates.registerCallBack( fragment );
-
-            templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
-          }
+          templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
         });
     }
 
     if ( text != null ){
       MaterialDialog build = prev_dialog.build();
-      build.getInputEditText().setText(text);
+      if ( build.getInputEditText() != null ) {
+        build.getInputEditText().setText(text);
+      }
       build.show();
     } else {
       MaterialDialog build = prev_dialog.build();
@@ -281,7 +270,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
   }
 
-  private void updateAfteButtonPressed() {
+  private void updateAfterButtonPressed() {
     try {
       decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
       current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
@@ -379,8 +368,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     EsdApplication.getManagerComponent().inject(this);
     binder = ButterKnife.bind(this, view);
 
-    fragment = this;
-
     if ( !buttonsEnabled ) {
       buttons_wrapper.setVisibility(View.GONE);
       bottom_line.setVisibility(View.GONE);
@@ -462,7 +449,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     next_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
     prev_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
 
-    showDecisionCardTollbarMenuItems(true);
+    showDecisionCardToolbarMenuItems(true);
 
     // FIX для ссылок
     if (current_decision == null) {
@@ -483,7 +470,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     // resolved https://tasks.n-core.ru/browse/MVDESD-13146
     // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
     // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
-    if ( doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
+    if ( doc != null && doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
       if ( current_decision != null &&
            current_decision.getSignerId() != null &&
            current_decision.getSignerId().equals( settings.getCurrentUserId() ) ){
@@ -502,7 +489,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       }
     }
 
-    if ( doc.isProcessed() != null && doc.isProcessed() && !current_decision.isApproved() ){
+    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && !current_decision.isApproved() ){
       next_person_button.setVisibility( View.INVISIBLE );
       prev_person_button.setVisibility( View.INVISIBLE );
     }
@@ -517,7 +504,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13423
     //  Отображать информацию от кого поступила резолюция
-    updateActionText(true);
+    updateActionText();
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-14142
     // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
@@ -543,8 +530,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   // resolved https://tasks.n-core.ru/browse/MVDESD-13423
   // Так нужно отображать, но есть проблемы на стороне СЭДика
   // Поэтому пока не используем честный способ, а просто показываем последнее действие
-  private void updateActionText(Boolean showAsFake) {
-
+  private void updateActionText() {
     dataStore
       .select(RActionEntity.class)
       .where(RActionEntity.DOCUMENT_ID.eq(doc.getId()))
@@ -559,47 +545,16 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           Timber.tag(TAG).w(" %s | %s", data.getUpdatedAt(), data.getToS() );
           setActionText( data.getToS() );
         },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
+        error -> Timber.tag(TAG).e(error)
       );
 
-    if (doc != null && doc.getActions() != null && doc.getActions().size() > 0){
-      // refactor
-      // убрать эту дичь
-      if( showAsFake ) {
-
-      } else {
-
-        ArrayList<RActionEntity> list = new ArrayList<>();
-
-        for ( RAction act: doc.getActions() ) {
-          RActionEntity _act = (RActionEntity) act;
-
-          if (Objects.equals(_act.getAddressedToId(), settings.getCurrentUserId())){
-            list.add( _act );
-          }
-        }
-
-        if ( list.size() == 1 ){
-          setActionText(list.get(0).getToS());
-        } else if ( list.size() >= 2 ){
-          Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
-          setActionText( list.get( list.size()-1 ).getToS() );
-        } else {
-          action_wrapper.setVisibility(View.GONE);
-        }
-
-      }
-
-    } else {
+    if ( !(doc != null && doc.getActions() != null && doc.getActions().size() > 0) ) {
       action_wrapper.setVisibility(View.GONE);
     }
   }
 
   private void setActionText(String action_temporary_text) {
-    String organization = "";
-    String user = "";
+    String organization;
 
     Timber.tag(TAG).e("action_temporary_text: %s", action_temporary_text);
 
@@ -637,7 +592,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
 
-  private void showDecisionCardTollbarMenuItems(boolean visible) {
+  private void showDecisionCardToolbarMenuItems(boolean visible) {
     try {
       if (!visible){
         next_person_button.setVisibility( View.GONE );
@@ -664,6 +619,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     return this;
   }
 
+  @OnClick(R.id.activity_info_decision_preview_magnifer)
   public void magnifer(){
     Timber.tag(TAG).v("magnifer");
     DecisionSpinnerItem decision;
@@ -693,7 +649,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       
       .onPositive((dialog, which) -> {
 
-        if ( dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), current_decision.getComment()) ) {
+        if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), current_decision.getComment()) ) {
 
           CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
           CommandParams params = new CommandParams();
@@ -707,12 +663,12 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
           operationManager.execute( operation, params );
 
-          updateAfteButtonPressed();
+          updateAfterButtonPressed();
         }
         dialog.dismiss();
       })
       .onNegative((dialog, which) -> dialog.dismiss())
-      .onNeutral((dialog, which) -> dialog.getInputEditText().setText(""))
+      .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
       .autoDismiss(false)
       .cancelable(false)
       .build();
@@ -781,7 +737,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
-
         this.doc = doc;
 
         preview.showEmpty();
@@ -791,17 +746,16 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
           decision_spinner_adapter.clear();
 
-          List<DecisionSpinnerItem> unsorterd_decisions = new ArrayList<DecisionSpinnerItem>();
-
+          List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
 
           for (RDecision rDecision: doc.getDecisions()) {
             RDecisionEntity decision = (RDecisionEntity) rDecision;
-            unsorterd_decisions.add( new DecisionSpinnerItem( decision ) );
+            unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
           }
 
-          decision_spinner_adapter.addAll( unsorterd_decisions );
+          decision_spinner_adapter.addAll( unsorted_decisions );
 
-//           если есть резолюции, то отобразить первую
+          // если есть резолюции, то отобразить первую
           if ( decision_spinner_adapter.size() > 0 ) {
             current_decision = decision_spinner_adapter.getItem(0).getDecision();
             Timber.tag(TAG).e("decision_spinner_adapter > 0");
@@ -814,7 +768,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           }
 
           if (decision_spinner_adapter.size() >= 2){
-            decision_count.setText( String.format(" %s ", unsorterd_decisions.size()) );
+            decision_count.setText( String.format(" %s ", unsorted_decisions.size()) );
             decision_count.setVisibility(View.VISIBLE);
             invalidateSpinner(true);
           }
@@ -839,16 +793,15 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           comment_button.setVisibility(View.GONE);
           decision_count.setVisibility(View.GONE);
           invalidateSpinner(false);
-          showDecisionCardTollbarMenuItems(false);
+          showDecisionCardToolbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
 
           bottom_line.setVisibility( View.GONE);
 
-          updateActionText(true);
+          updateActionText();
         }
-      }, error -> {
-        Timber.tag(TAG).e(error);
-      });
+      },
+      error -> Timber.tag(TAG).e(error));
   }
 
   private void invalidateSpinner(boolean visibility) {
@@ -890,10 +843,9 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
   }
 
-  public class Preview{
-
-    private final Context context;
+  private class Preview{
     private String TAG = this.getClass().getSimpleName();
+    private final Context context;
 
     Preview(Context context) {
       this.context = context;
@@ -937,7 +889,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         Set<RBlock> _blocks = decision.getBlocks();
 
         ArrayList<RBlockEntity> blocks = new ArrayList<>();
-        for (RBlock b: _blocks){
+        for (RBlock b : _blocks){
           blocks.add( (RBlockEntity) b );
         }
 
@@ -1040,13 +992,11 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
 
 
-
-
       LinearLayout date_and_number_view = new LinearLayout(context);
       date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
 
       TextView numberView = new TextView(context);
-      numberView.setText( "№ " + registrationNumber );
+      numberView.setText( String .format( "%s", "№ " + registrationNumber ) );
       numberView.setTextColor( Color.BLACK );
       numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       numberView.setLayoutParams(viewsLayotuParams);
@@ -1077,13 +1027,12 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       relativeSigner.addView( signer_view );
       relativeSigner.addView( date_and_number_view );
 
-
       preview_bottom.addView( relativeSigner );
     }
 
     private void printUrgency(String urgency) {
       TextView urgencyView = new TextView(context);
-      urgencyView.setGravity(Gravity.RIGHT);
+      urgencyView.setGravity(Gravity.END);
       urgencyView.setAllCaps(true);
       urgencyView.setPaintFlags( Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.FAKE_BOLD_TEXT_FLAG );
       urgencyView.setText( urgency );
