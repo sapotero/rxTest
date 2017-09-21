@@ -6,12 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -25,9 +25,11 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.notification.RemoveAllNotificationEvent;
+import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
+import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
 
@@ -58,42 +60,33 @@ public class NotifyManager {
           return checkAllowedJournal(itemJournalStatus);
         })
         .buffer(5 ,TimeUnit.SECONDS)
-        .filter(new Func1<List<NotifyMessageModel>, Boolean>() {
-          @Override
-          public Boolean call(List<NotifyMessageModel> notifyMessageModels) {
-            return !notifyMessageModels.isEmpty();
-          }
-        })
-        .subscribe(new Action1<List<NotifyMessageModel>>() {
-          @Override
-          public void call(List<NotifyMessageModel> notifyMessageModels) {
-            if(notifyMessageModels.size() > 1) {
+        .filter(notifyMessageModels -> !notifyMessageModels.isEmpty())
+        .subscribe(notifyMessageModels -> {
+          if(notifyMessageModels.size() > 1) {
+            notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
+            String contentTitle = "Вам поступило новых документов: " + notifyMessageModels.size();
+            String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
+            generateSummaryNotifyMsg(contentTitle, contentText, 1);
+          } else {
+            for (NotifyMessageModel item : notifyMessageModels){
+              Document document = item.getDocument();
+              String filter = item.getFilter();
               notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
-              String contentTitle = "Вам поступило новых документов: " + notifyMessageModels.size();
+              String contentTitle = getTitle(getJournal(item)) + item.getDocument().getTitle();
               String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
-              generateNotifyMsg(contentTitle, contentText, 1);
-            } else {
-              for (NotifyMessageModel item : notifyMessageModels){
-                notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
-                String contentTitle = getTitle(getJournal(item)) + item.getDocument().getTitle();
-                String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
-                generateNotifyMsg(contentTitle, contentText, 1);
-              }
+              generateSingleNotifyMsg(contentTitle, contentText, document, filter, 1);
             }
           }
-        }, new Action1<Throwable>() {
-          @Override
-          public void call(Throwable throwable) {
-            Timber.tag(TAG).e("throwable = " + throwable);
-          }
-        });
+        }, throwable -> Timber.tag(TAG).e("throwable = " + throwable));
     }
   }
 
-  private void generateNotifyMsg(String contentTitle, String contentText, int currentNotificationId ){
+  private void generateSummaryNotifyMsg(String contentTitle, String contentText, int currentNotificationId ){
     NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
     
-    Intent openIntent = MainActivity.newIntent(appContext);
+    Intent openIntent = MainActivity.newIntent(appContext)
+      .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  );
+
     PendingIntent openPendingIntent = PendingIntent.getActivity(appContext, 0, openIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
     Intent intentDismiss = new Intent(appContext, NotificationDismissedReceiver.class);
@@ -109,6 +102,30 @@ public class NotifyManager {
       .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setVisibility(Notification.VISIBILITY_PUBLIC)
       .setContentIntent(openPendingIntent);
+    notificationManagerCompat.notify(currentNotificationId, builder.build());
+  }
+  private void generateSingleNotifyMsg(String contentTitle, String contentText, Document document,String filter, int currentNotificationId){
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+
+    Intent openIntent = InfoActivity.newIntent(appContext, document, filter, currentNotificationId);
+    TaskStackBuilder stackBuilder = TaskStackBuilder.create(appContext)
+      .addParentStack(InfoActivity.class)
+      .addNextIntent(openIntent);
+    PendingIntent pendingIntentOpenDoc = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_CANCEL_CURRENT);
+
+    Intent intentDismiss = new Intent(appContext, NotificationDismissedReceiver.class);
+    PendingIntent pendingIntentDismiss = PendingIntent.getBroadcast(appContext, 0, intentDismiss, PendingIntent.FLAG_CANCEL_CURRENT);
+
+    builder
+      .setContentTitle(contentTitle)
+      .setContentText(contentText)
+      .setSmallIcon(R.drawable.ic_error)
+      .setDeleteIntent(pendingIntentDismiss)
+      .setAutoCancel(true)
+      .setDefaults(Notification.DEFAULT_ALL)
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
+      .setVisibility(Notification.VISIBILITY_PUBLIC)
+      .setContentIntent(pendingIntentOpenDoc);
     notificationManagerCompat.notify(currentNotificationId, builder.build());
   }
 
