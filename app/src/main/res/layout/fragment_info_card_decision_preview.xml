@@ -141,6 +141,13 @@
 
         </LinearLayout>
 
+        <View
+            android:id="@+id/activity_info_decision_bottom_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/md_grey_100"
+            android:padding="@dimen/half_date_offset"/>
+
         <LinearLayout
             android:id="@+id/activity_info_decision_preview_buttons_wrapper"
             android:orientation="horizontal"
@@ -194,14 +201,5 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
     </LinearLayout>
-
-    <View
-        android:id="@+id/activity_info_decision_bottom_line"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/md_grey_100"
-        android:padding="@dimen/half_date_offset"
-        android:layout_marginBottom="48dp"
-        android:layout_gravity="bottom"/>
 
 </android.support.v7.widget.CardView>
