@@ -28,7 +28,7 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import timber.log.Timber;
 
-public class DecisionManager implements DecisionInterface, DecisionBuilder.Callback, PreviewBuilder.Callback {
+public class DecisionManager implements DecisionInterface, DecisionBuilder.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;

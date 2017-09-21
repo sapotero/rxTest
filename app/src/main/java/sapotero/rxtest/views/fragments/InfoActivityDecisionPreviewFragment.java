@@ -77,6 +77,7 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.padeg.Declension;
@@ -89,22 +90,22 @@ import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
 
-public class InfoActivityDecisionPreviewFragment extends PreviewFragment implements SelectTemplateDialogFragment.Callback{
+public class InfoActivityDecisionPreviewFragment extends PreviewFragment implements DecisionInterface, SelectTemplateDialogFragment.Callback{
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
-  @BindView(R.id.decision_view_root) LinearLayout decision_view_root;
-
-  @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
-  @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
-  @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
-
+  @BindView(R.id.activity_info_decision_control_panel) LinearLayout decision_control_panel;
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
   @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
   @BindView(R.id.activity_info_decision_preview_magnifer) ImageButton magnifer;
+
+  @BindView(R.id.decision_view_root) LinearLayout decision_view_root;
+  @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
+  @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
+  @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
 
   @BindView(R.id.activity_info_decision_preview_action_wrapper) LinearLayout action_wrapper;
   @BindView(R.id.activity_info_decision_preview_action_text)  TextView action_text;
@@ -118,18 +119,21 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   @BindView(R.id.activity_info_decision_bottom_line) View bottom_line;
 
+  private Unbinder binder;
+
   private String TAG = this.getClass().getSimpleName();
 
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
 
-  private Unbinder binder;
   private String uid;
-  private RDecisionEntity current_decision;
+  private RDecisionEntity current_decision; // used in InfoActivity and InfoNoMenuActivity
+  private Decision decision;  // used in DecisionConstructorActivity
   private RDocumentEntity doc;
   private SelectTemplateDialogFragment templates;
 
   private boolean buttonsEnabled = true;
+  private boolean isInEditor = false; // true if used in DecisionConstructorActivity
 
   public InfoActivityDecisionPreviewFragment() {
   }
@@ -357,27 +361,39 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       bottom_line.setVisibility(View.GONE);
     }
 
+    if ( isInEditor ) {
+      decision_control_panel.setVisibility(View.GONE);
+      action_wrapper.setVisibility(View.GONE);
+      buttons_wrapper.setVisibility(View.GONE);
+      bottom_line.setVisibility(View.GONE);
+    }
+
     return view;
   }
 
   private void invalidate() {
-    temporary.setVisibility(View.GONE);
+    if ( isInEditor ) {
+      // TODO: update in editor
 
-    setAdapter();
-    loadDocument();
+    } else {
+      temporary.setVisibility(View.GONE);
 
-    GestureDetector gestureDetector = new GestureDetector( getContext(),new GestureListener() );
+      preview = new Preview(getContext());
 
-    if ( buttonsEnabled ) {
-      decision_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-      preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+      setAdapter();
+      loadDocument();
+
+      GestureDetector gestureDetector = new GestureDetector( getContext(),new GestureListener() );
+
+      if ( buttonsEnabled ) {
+        decision_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+        preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+      }
+
+      initEvents();
+
+      sendDecisionVisibilityEvent();
     }
-
-    preview = new Preview(getContext());
-
-    initEvents();
-
-    sendDecisionVisibilityEvent();
   }
 
   private void setAdapter() {
@@ -505,7 +521,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void checkActiveDecision() {
-    if ( !decision_spinner_adapter.hasActiveDecision() ){
+    if ( !decision_spinner_adapter.hasActiveDecision() && !isInEditor ){
       Timber.tag(TAG).e("NO ACTIVE DECISION");
       EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
     }
@@ -600,6 +616,11 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   public InfoActivityDecisionPreviewFragment withEnableButtons(boolean buttonsEnabled) {
     this.buttonsEnabled = buttonsEnabled;
+    return this;
+  }
+
+  public InfoActivityDecisionPreviewFragment withInEditor(boolean isInEditor) {
+    this.isInEditor = isInEditor;
     return this;
   }
 
@@ -820,7 +841,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void sendDecisionVisibilityEvent() {
-    if (current_decision != null) {
+    if (current_decision != null && !isInEditor) {
       EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved(), current_decision.getUid(), null ) );
     }
   }
@@ -934,7 +955,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
       relativeSigner.setLayoutParams( relativeSigner_params );
 
-      LinearLayout.LayoutParams viewsLayotuParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+      LinearLayout.LayoutParams viewsLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 
       LinearLayout signer_view = new LinearLayout(context);
       signer_view.setOrientation(LinearLayout.VERTICAL);
@@ -961,7 +982,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      signerBlankTextView.setLayoutParams(viewsLayotuParams);
+      signerBlankTextView.setLayoutParams(viewsLayoutParams);
 
       LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -978,10 +999,10 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
 
       TextView numberView = new TextView(context);
-      numberView.setText( String .format( "%s", "№ " + registrationNumber ) );
+      numberView.setText( String.format( "%s", "№ " + registrationNumber ) );
       numberView.setTextColor( Color.BLACK );
       numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      numberView.setLayoutParams(viewsLayotuParams);
+      numberView.setLayoutParams(viewsLayoutParams);
       numberView.setGravity( Gravity.END );
 
       TextView dateView = new TextView(context);
@@ -989,15 +1010,13 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       dateView.setGravity( Gravity.START );
       dateView.setTextColor( Color.BLACK );
       dateView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      dateView.setLayoutParams(viewsLayotuParams);
+      dateView.setLayoutParams(viewsLayoutParams);
 
       date_and_number_view.addView(dateView);
       date_and_number_view.addView(numberView);
 
-
       if (decision.getSignBase64() != null){
         ImageView image = new ImageView(getContext());
-
 
         byte[] decodedString = Base64.decode( decision.getSignBase64() , Base64.DEFAULT);
         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
@@ -1148,7 +1167,9 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private void initEvents() {
     Timber.tag(TAG).v("initEvents");
     unregisterEventBus();
-    EventBus.getDefault().register(this);
+    if ( !isInEditor ) {
+      EventBus.getDefault().register(this);
+    }
   }
 
   private void unregisterEventBus() {
@@ -1203,5 +1224,16 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private void hideButtons() {
     next_person_button.setVisibility( View.INVISIBLE );
     prev_person_button.setVisibility( View.INVISIBLE );
+  }
+
+  /* DecisionInterface */
+  @Override
+  public Decision getDecision() {
+    return decision;
+  }
+
+  @Override
+  public void setDecision(Decision _decision_) {
+    decision = _decision_;
   }
 }
