@@ -87,13 +87,14 @@ public class InMemoryDocumentMapper {
     imd.setUser( document.getUser() );
 
 
-
-    try {
-      SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-      Date date = format.parse( document.getRegistrationDate() );
-      imd.setCreatedAt((int) (date.getTime()/1000) );
-    } catch (ParseException e) {
-      e.printStackTrace();
+    if (document.getRegistrationDate() != null) {
+      try {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date date = format.parse( document.getRegistrationDate() );
+        imd.setCreatedAt((int) (date.getTime()/1000) );
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
     }
 
 
