@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -94,11 +95,16 @@ import timber.log.Timber;
 
 public class DecisionPreviewFragment extends PreviewFragment implements DecisionInterface, SelectTemplateDialogFragment.Callback{
 
+  public static final int MIN_FONT_SIZE = 12;
+  public static final int SEEK_BAR_INIT_PROGRESS = 12;
+
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
   @BindView(R.id.activity_info_decision_root_layout) LinearLayout rootLayout;
+
+  @BindView(R.id.dialog_magnifier_decision_seekbar_font_size) SeekBar seekbar;
 
   @BindView(R.id.activity_info_decision_control_panel) LinearLayout decision_control_panel;
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
@@ -139,6 +145,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private RDocumentEntity doc;
   private SelectTemplateDialogFragment templates;
   private String regNumber = "";
+
+  private ArrayList<TextView> textLabels = new ArrayList<>();
 
   private boolean buttonsEnabled = true;
   private boolean isInEditor = false; // true if used in DecisionConstructorActivity
@@ -389,6 +397,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     EsdApplication.getManagerComponent().inject(this);
     binder = ButterKnife.bind(this, view);
 
+    preview = new Preview(getContext());
+
     if ( !buttonsEnabled ) {
       buttons_wrapper.setVisibility(View.GONE);
       bottom_line.setVisibility(View.GONE);
@@ -402,23 +412,48 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       bottom_line.setVisibility(View.GONE);
     }
 
-    return view;
-  }
-
-  private void invalidate() {
-    preview = new Preview(getContext());
-
     if ( isMagnifier ) {
       if (decisionSpinnerItem != null && decisionSpinnerItem.getDecision() != null){
         preview.show( decisionSpinnerItem.getDecision() );
       }
 
-    } else if ( isInEditor ) {
+      seekbar.setVisibility(View.VISIBLE);
+
+      seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+          updateTextSize(MIN_FONT_SIZE + progress);
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+        }
+      });
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13131
+      seekbar.setProgress(SEEK_BAR_INIT_PROGRESS);
+    }
+
+    return view;
+  }
+
+  public void updateTextSize(Integer size){
+    for (TextView view : textLabels) {
+      view.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+    }
+  }
+
+  private void invalidate() {
+    if ( isInEditor ) {
       if ( decision != null ) {
         preview.show( new DecisionMapper().toEntity( decision ) );
       }
 
-    } else {
+    } else if ( !isMagnifier ) {
       temporary.setVisibility(View.GONE);
 
       setAdapter();
@@ -1021,6 +1056,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         signerPositionView.setLayoutParams(param);
 
         signer_view.addView( signerPositionView );
+        textLabels.add( signerPositionView );
       }
 
       TextView signerBlankTextView = new TextView(context);
@@ -1075,6 +1111,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       relativeSigner.addView( date_and_number_view );
 
       preview_bottom.addView( relativeSigner );
+      textLabels.add( numberView );
+      textLabels.add( dateView );
+      textLabels.add( signerBlankTextView );
     }
 
     private void printUrgency(String urgency) {
@@ -1090,6 +1129,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       urgencyView.setLayoutParams(params);
 
       preview_head.addView( urgencyView );
+      textLabels.add( urgencyView );
     }
 
     private void printLetterHead(String letterhead) {
@@ -1099,6 +1139,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       letterHead.setTextColor( Color.BLACK );
       letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       preview_head.addView( letterHead );
+      textLabels.add( letterHead );
 
       if ( !isMagnifier ) {
         TextView delimiter = new TextView(context);
@@ -1131,6 +1172,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       block_view.setLayoutParams(params);
 
       preview_body.addView( block_view );
+      textLabels.add( block_view );
     }
 
     private void printAppealText(RBlock _block, Boolean isOnlyOneBlock) {
@@ -1153,6 +1195,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
 
       preview_body.addView( blockAppealView );
+      textLabels.add( blockAppealView );
     }
 
     private void printBlockPerformers(RBlock _block, Boolean isOnlyOneBlock) {
@@ -1205,6 +1248,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           performer_view.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
 
           users_view.addView(performer_view);
+          textLabels.add(performer_view);
         }
       }
 

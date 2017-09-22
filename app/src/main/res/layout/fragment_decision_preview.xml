@@ -3,6 +3,7 @@
 <android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="@dimen/half_date_offset"
@@ -13,6 +14,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+        <SeekBar
+            android:id="@+id/dialog_magnifier_decision_seekbar_font_size"
+            style="@android:style/Widget.Material.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="30"
+            android:padding="@dimen/half_date_offset"
+            android:progress="4"
+            android:visibility="gone"
+            tools:targetApi="n"/>
 
         <LinearLayout
             android:id="@+id/activity_info_decision_control_panel"
