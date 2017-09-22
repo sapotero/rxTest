@@ -40,7 +40,7 @@ import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
-import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import timber.log.Timber;
 
@@ -120,7 +120,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
     if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || isProject ) {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID), "PREVIEW" );
     } else {
-      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new DecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
     }
 
     fragmentTransaction.commit();

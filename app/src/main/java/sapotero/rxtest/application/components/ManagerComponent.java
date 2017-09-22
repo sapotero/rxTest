@@ -31,7 +31,7 @@ import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
-import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 
@@ -55,7 +55,7 @@ public interface ManagerComponent {
   void inject(MainService service);
   void inject(SearchResultAdapter searchResultAdapter);
 
-  void inject(InfoActivityDecisionPreviewFragment fragment);
+  void inject(DecisionPreviewFragment fragment);
   void inject(DecisionTemplateFragment fragment);
   void inject(StepperAuthFragment fragment);
 

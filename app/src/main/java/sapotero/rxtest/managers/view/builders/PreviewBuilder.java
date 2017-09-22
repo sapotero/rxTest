@@ -7,13 +7,13 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
-import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 
 public class PreviewBuilder implements DecisionInterface {
   private final FragmentManager fragmentManger;
 
   private Decision decision;
-  private InfoActivityDecisionPreviewFragment preview;
+  private DecisionPreviewFragment preview;
 
   public PreviewBuilder(FragmentManager fragmentManger, Decision decision) {
     this.fragmentManger = fragmentManger;
@@ -22,10 +22,10 @@ public class PreviewBuilder implements DecisionInterface {
 
   public void build() {
     if (preview == null){
-      preview = new InfoActivityDecisionPreviewFragment().withInEditor( true );
+      preview = new DecisionPreviewFragment().withInEditor( true );
       preview.setDecision( decision != null ? decision : getNewDecision() );
       FragmentTransaction transaction = fragmentManger.beginTransaction();
-      transaction.add( R.id.decision_constructor_decision_preview, preview, InfoActivityDecisionPreviewFragment.class.getSimpleName() );
+      transaction.add( R.id.decision_constructor_decision_preview, preview, DecisionPreviewFragment.class.getSimpleName() );
       transaction.commit();
     } else {
       preview.update();

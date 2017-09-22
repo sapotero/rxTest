@@ -90,7 +90,7 @@ import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
 
-public class InfoActivityDecisionPreviewFragment extends PreviewFragment implements DecisionInterface, SelectTemplateDialogFragment.Callback{
+public class DecisionPreviewFragment extends PreviewFragment implements DecisionInterface, SelectTemplateDialogFragment.Callback{
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -135,7 +135,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private boolean buttonsEnabled = true;
   private boolean isInEditor = false; // true if used in DecisionConstructorActivity
 
-  public InfoActivityDecisionPreviewFragment() {
+  public DecisionPreviewFragment() {
   }
 
   // Approve current decision
@@ -211,7 +211,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void showPrevDialog(String text) {
-    InfoActivityDecisionPreviewFragment fragment = this;
+    DecisionPreviewFragment fragment = this;
 
     MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(getContext())
       .content(R.string.decision_reject_body)
@@ -351,7 +351,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_info_card_decision_preview, container, false);
+    View view = inflater.inflate(R.layout.fragment_decision_preview, container, false);
 
     EsdApplication.getManagerComponent().inject(this);
     binder = ButterKnife.bind(this, view);
@@ -611,17 +611,17 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     unregisterEventBus();
   }
 
-  public InfoActivityDecisionPreviewFragment withUid(String uid) {
+  public DecisionPreviewFragment withUid(String uid) {
     this.uid = uid;
     return this;
   }
 
-  public InfoActivityDecisionPreviewFragment withEnableButtons(boolean buttonsEnabled) {
+  public DecisionPreviewFragment withEnableButtons(boolean buttonsEnabled) {
     this.buttonsEnabled = buttonsEnabled;
     return this;
   }
 
-  public InfoActivityDecisionPreviewFragment withInEditor(boolean isInEditor) {
+  public DecisionPreviewFragment withInEditor(boolean isInEditor) {
     this.isInEditor = isInEditor;
     return this;
   }
