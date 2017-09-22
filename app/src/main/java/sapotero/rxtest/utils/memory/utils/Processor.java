@@ -298,7 +298,7 @@ public class Processor {
         return Collections.singletonList("");
       })
 //      .buffer(200, TimeUnit.MILLISECONDS)
-      .subscribeOn(Schedulers.immediate())
+      .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
