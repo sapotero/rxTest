@@ -511,8 +511,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     //resolved https://tasks.n-core.ru/browse/MVDESD-14142
     // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
     // если подписант не текущий пользователь (или министр)
-    buttons_wrapper.setVisibility( isActiveOrRed() ? View.VISIBLE : View.GONE);
-    bottom_line.setVisibility( isActiveOrRed() ? View.VISIBLE : View.GONE);
+    buttons_wrapper.setVisibility( isActiveOrRed() && buttonsEnabled ? View.VISIBLE : View.GONE);
+    bottom_line.setVisibility( isActiveOrRed() && buttonsEnabled ? View.VISIBLE : View.GONE);
   }
 
   private boolean isActiveOrRed() {
@@ -824,7 +824,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
-    if (current_decision != null && current_decision.getUid() != null) {
+    if (!isInEditor && current_decision != null && current_decision.getUid() != null) {
 
       if (current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
         comment_button.setVisibility(View.VISIBLE);
