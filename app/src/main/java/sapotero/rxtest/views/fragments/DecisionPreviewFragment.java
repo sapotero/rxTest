@@ -1068,17 +1068,19 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       preview_head.addView( letterHead );
 
-      TextView delimiter = new TextView(context);
-      delimiter.setGravity(Gravity.CENTER);
-      delimiter.setHeight(1);
-      delimiter.setWidth(400);
-      delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
+      if ( !isMagnifier ) {
+        TextView delimiter = new TextView(context);
+        delimiter.setGravity(Gravity.CENTER);
+        delimiter.setHeight(1);
+        delimiter.setWidth(400);
+        delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
 
-      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-      params.setMargins(50, 10, 50, 10);
-      delimiter.setLayoutParams(params);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(50, 10, 50, 10);
+        delimiter.setLayoutParams(params);
 
-      preview_head.addView( delimiter );
+        preview_head.addView( delimiter );
+      }
     }
 
     private void printBlockText(RBlockEntity block, Boolean isOnlyOneBlock) {
@@ -1181,7 +1183,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void initEvents() {
     Timber.tag(TAG).v("initEvents");
     unregisterEventBus();
-    if ( !isInEditor ) {
+    if ( !isInEditor && !isMagnifier ) {
       EventBus.getDefault().register(this);
     }
   }
