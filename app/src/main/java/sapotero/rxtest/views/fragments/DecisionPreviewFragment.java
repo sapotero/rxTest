@@ -310,7 +310,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       Window window = getDialog().getWindow();
       if ( window != null ) {
-        // Set 200 px margins on left and right sides
+        // Set margins on left and right sides
         window.setLayout(width, 500); // height can by any value, because below we set dialog to occupy all screen height
         WindowManager.LayoutParams params = window.getAttributes();
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
