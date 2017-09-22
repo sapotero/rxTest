@@ -84,7 +84,6 @@ import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
-import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
@@ -129,11 +128,14 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private String uid;
   private RDecisionEntity current_decision; // used in InfoActivity and InfoNoMenuActivity
   private Decision decision;  // used in DecisionConstructorActivity
+  private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
   private RDocumentEntity doc;
   private SelectTemplateDialogFragment templates;
+  private String regNumber = "";
 
   private boolean buttonsEnabled = true;
   private boolean isInEditor = false; // true if used in DecisionConstructorActivity
+  private boolean isMagnifier = false; // true if used as magnifier
 
   public DecisionPreviewFragment() {
   }
@@ -361,7 +363,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       bottom_line.setVisibility(View.GONE);
     }
 
-    if ( isInEditor ) {
+    if ( isInEditor || isMagnifier ) {
       decision_control_panel.setVisibility(View.GONE);
       action_wrapper.setVisibility(View.GONE);
       buttons_wrapper.setVisibility(View.GONE);
@@ -374,7 +376,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void invalidate() {
     preview = new Preview(getContext());
 
-    if ( isInEditor ) {
+    if ( isMagnifier ) {
+      if (decisionSpinnerItem != null && decisionSpinnerItem.getDecision() != null){
+        preview.show( decisionSpinnerItem.getDecision() );
+      }
+
+    } else if ( isInEditor ) {
       if ( decision != null ) {
         preview.show( new DecisionMapper().toEntity( decision ) );
       }
@@ -626,19 +633,24 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     return this;
   }
 
-  @OnClick(R.id.activity_info_decision_preview_magnifer)
-  public void magnifer(){
-    Timber.tag(TAG).v("magnifer");
-    DecisionSpinnerItem decision;
-    DecisionMagniferFragment magnifer = new DecisionMagniferFragment();
+  public DecisionPreviewFragment withIsMagnifier(boolean isMagnifier) {
+    this.isMagnifier = isMagnifier;
+    return this;
+  }
 
-    if ( decision_spinner_adapter.size() > 0 ){
+  @OnClick(R.id.activity_info_decision_preview_magnifer)
+  public void magnifier(){
+    Timber.tag(TAG).v("magnifier");
+    DecisionSpinnerItem decision;
+    DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
+
+    if ( decision_spinner_adapter.size() > 0 ) {
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
-      magnifer.setDecision( decision );
-      magnifer.setRegNumber( doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
+      magnifier.setDecision( decision );
+      magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
     }
 
-    magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
+    magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
   }
 
   @OnClick(R.id.activity_info_decision_preview_comment)
@@ -923,7 +935,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         }
       }
 
-      printSigner( decision, doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
+      printSigner( decision, isMagnifier ? regNumber : ( doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() ) );
 
       sendDecisionVisibilityEvent();
     }
@@ -1226,6 +1238,14 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void hideButtons() {
     next_person_button.setVisibility( View.INVISIBLE );
     prev_person_button.setVisibility( View.INVISIBLE );
+  }
+
+  private void setRegNumber(String regNumber) {
+    this.regNumber = regNumber;
+  }
+
+  private void setDecision(DecisionSpinnerItem decision) {
+    this.decisionSpinnerItem = decision;
   }
 
   /* DecisionInterface */
