@@ -372,13 +372,15 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void invalidate() {
+    preview = new Preview(getContext());
+
     if ( isInEditor ) {
-      // TODO: update in editor
+      if ( decision != null ) {
+        preview.show( new DecisionMapper().toEntity( decision ) );
+      }
 
     } else {
       temporary.setVisibility(View.GONE);
-
-      preview = new Preview(getContext());
 
       setAdapter();
       loadDocument();
@@ -1015,7 +1017,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       date_and_number_view.addView(dateView);
       date_and_number_view.addView(numberView);
 
-      if (decision.getSignBase64() != null){
+      if (decision.getSignBase64() != null && !isInEditor) {
         ImageView image = new ImageView(getContext());
 
         byte[] decodedString = Base64.decode( decision.getSignBase64() , Base64.DEFAULT);
