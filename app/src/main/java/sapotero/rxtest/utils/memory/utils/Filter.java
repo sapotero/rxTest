@@ -207,7 +207,7 @@ public class Filter {
         result = -1;
       } else {
         // Sort by date
-        result = compareDates( o1.getDocument().getRegistrationDate(), o2.getDocument().getRegistrationDate() );
+        result = compareNumbers( o1.getCreatedAt(), o2.getCreatedAt() );
 
         // Sort by registration number
         if ( result == 0 ) {
@@ -249,7 +249,7 @@ public class Filter {
     } else if ( o2 == null || Objects.equals( o2, "" ) ) {
       result = -1;
     } else {
-        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+      SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
 
       try {
         Date date1 = format.parse( o1 );
@@ -290,6 +290,13 @@ public class Filter {
       result = num2.compareTo( num1 );  // вначале наибольший номер
     }
     return result;
+  }
+
+  private int compareNumbers(Integer o1, Integer o2) {
+    Long num1 = Long.valueOf( o1 );
+    Long num2 = Long.valueOf( o2 );
+
+    return num2.compareTo( num1 );
   }
 
   // Сравнение регистрационных номеров вида 3/17790032428

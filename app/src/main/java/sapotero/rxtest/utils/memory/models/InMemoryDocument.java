@@ -12,7 +12,7 @@ public class InMemoryDocument implements Serializable {
   public String filter;
   public Integer year;
   public String updatedAt;
-  public Integer createdAt;
+  public Integer createdAt = 0;
   public Boolean hasDecision = false;
   public Boolean processed   = false;
   public Boolean project     = false;
