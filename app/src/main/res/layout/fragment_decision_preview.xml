@@ -9,6 +9,7 @@
     app:cardElevation="2dp">
 
     <LinearLayout
+        android:id="@+id/activity_info_decision_root_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -62,6 +63,7 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/activity_info_decision_top_line"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/md_grey_100"

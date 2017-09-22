@@ -34,6 +34,8 @@
     <dimen name="ms_progress_bar_width">96dp</dimen>
     <dimen name="ms_progress_bar_height">3dp</dimen>
 
+    <dimen name="dialog_margin">130dp</dimen>
+
     <!-- TABS -->
     <dimen name="ms_step_tab_height">72dp</dimen>
     <dimen name="ms_step_tab_divider_length">72dp</dimen>

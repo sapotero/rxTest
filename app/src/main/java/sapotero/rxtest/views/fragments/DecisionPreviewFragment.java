@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -19,6 +20,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -95,11 +98,15 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
+  @BindView(R.id.activity_info_decision_root_layout) LinearLayout rootLayout;
+
   @BindView(R.id.activity_info_decision_control_panel) LinearLayout decision_control_panel;
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
   @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
   @BindView(R.id.activity_info_decision_preview_magnifer) ImageButton magnifer;
+
+  @BindView(R.id.activity_info_decision_top_line) View top_line;
 
   @BindView(R.id.decision_view_root) LinearLayout decision_view_root;
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
@@ -280,6 +287,30 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Override
   public void onResume() {
     super.onResume();
+
+    if ( isMagnifier ) {
+      // Set padding of the root CardView in magnifier dialog
+      int paddingTop = getResources().getDimensionPixelOffset(R.dimen.ms_tabs_container_lateral_padding);
+      int paddingBottom = getResources().getDimensionPixelOffset(R.dimen.activity_vertical_margin);
+      rootLayout.setPadding(paddingTop, paddingTop, paddingTop, paddingBottom);
+
+      // Get screen size in pixels
+      DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+      float screenWidth = displayMetrics.widthPixels;
+      int marginInPixels = getResources().getDimensionPixelOffset(R.dimen.dialog_margin);
+      int width = Math.round(screenWidth - (marginInPixels * 2));
+
+      Window window = getDialog().getWindow();
+      if ( window != null ) {
+        // Set 200 px margins on left and right sides
+        window.setLayout(width, 500); // height can by any value, because below we set dialog to occupy all screen height
+        WindowManager.LayoutParams params = window.getAttributes();
+        params.height = WindowManager.LayoutParams.MATCH_PARENT;
+        // Set magnifier to occupy all screen height
+        window.setAttributes(params);
+      }
+    }
+
     invalidate();
   }
 
@@ -365,6 +396,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     if ( isInEditor || isMagnifier ) {
       decision_control_panel.setVisibility(View.GONE);
+      top_line.setVisibility(View.GONE);
       action_wrapper.setVisibility(View.GONE);
       buttons_wrapper.setVisibility(View.GONE);
       bottom_line.setVisibility(View.GONE);
