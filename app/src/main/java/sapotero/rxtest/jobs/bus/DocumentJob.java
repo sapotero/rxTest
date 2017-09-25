@@ -15,7 +15,6 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -68,7 +67,7 @@ abstract class DocumentJob extends BaseJob {
 
     info
       .subscribeOn( Schedulers.io() )
-      .observeOn( AndroidSchedulers.mainThread() )
+      .observeOn( Schedulers.computation() )
       .subscribe(
         doc -> {
           EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid()) );
@@ -148,8 +147,8 @@ abstract class DocumentJob extends BaseJob {
     dataStore
       .insert( documentToSave )
       .toObservable()
-      .subscribeOn( Schedulers.io() )
-      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( Schedulers.computation() )
       .subscribe(
         result -> {
           Timber.tag(TAG).d("Created " + result.getUid());
@@ -163,8 +162,8 @@ abstract class DocumentJob extends BaseJob {
   void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
     dataStore
       .update( documentToUpdate )
-      .subscribeOn( Schedulers.io() )
-      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( Schedulers.computation() )
       .subscribe(
         result -> {
           Timber.tag(TAG).d("Updated MD5 " + result.getMd5());

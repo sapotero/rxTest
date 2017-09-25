@@ -31,14 +31,14 @@ android {
     productFlavors {
         prod {
             applicationId "sapotero.rxtest"
-            versionCode 60
-            versionName "6.0.0"
+            versionCode 61
+            versionName "6.1.0"
         }
 
         develop {
             applicationId "sapotero.rxtest"
-            versionCode 160
-            versionName "6.0.0"
+            versionCode 161
+            versionName "6.1.0"
         }
     }
 
@@ -168,7 +168,7 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
 
 
-    compile 'com.github.barteksc:android-pdf-viewer:2.7.0-beta.1'
+    compile 'com.github.barteksc:android-pdf-viewer:2.7.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
     // экран загрузки

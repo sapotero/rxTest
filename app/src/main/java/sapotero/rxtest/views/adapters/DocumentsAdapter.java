@@ -266,6 +266,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     documents = docs;
     recreateHash();
 
+//    notifyItemRangeChanged(0, documents.size());
     notifyDataSetChanged();
   }
 

@@ -12,6 +12,7 @@ public class InMemoryDocument implements Serializable {
   public String filter;
   public Integer year;
   public String updatedAt;
+  public Integer createdAt = 0;
   public Boolean hasDecision = false;
   public Boolean processed   = false;
   public Boolean project     = false;
@@ -30,6 +31,15 @@ public class InMemoryDocument implements Serializable {
 
   public InMemoryDocument setProject(Boolean project) {
     this.project = project;
+    return this;
+  }
+
+  public Integer getCreatedAt() {
+    return createdAt;
+  }
+
+  public InMemoryDocument setCreatedAt(Integer createdAt) {
+    this.createdAt = createdAt;
     return this;
   }
 

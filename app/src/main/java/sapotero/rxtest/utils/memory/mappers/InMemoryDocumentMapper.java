@@ -1,5 +1,9 @@
 package sapotero.rxtest.utils.memory.mappers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -81,6 +85,18 @@ public class InMemoryDocumentMapper {
     imd.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
     imd.setAsReady();
     imd.setUser( document.getUser() );
+
+
+    if (document.getRegistrationDate() != null) {
+      try {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date date = format.parse( document.getRegistrationDate() );
+        imd.setCreatedAt((int) (date.getTime()/1000) );
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
+    }
+
 
     return imd;
   }

@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -101,10 +100,10 @@ import static sapotero.rxtest.db.requery.utils.Journals.APPROVE_ASSIGN;
 import static sapotero.rxtest.db.requery.utils.Journals.CITIZEN_REQUESTS;
 import static sapotero.rxtest.db.requery.utils.Journals.FAVORITES;
 import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_DOCUMENTS;
+import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_ORDERS;
 import static sapotero.rxtest.db.requery.utils.Journals.IN_DOCUMENTS;
 import static sapotero.rxtest.db.requery.utils.Journals.ON_CONTROL;
 import static sapotero.rxtest.db.requery.utils.Journals.ORDERS;
-import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_ORDERS;
 import static sapotero.rxtest.db.requery.utils.Journals.ORDERS_DDO;
 import static sapotero.rxtest.db.requery.utils.Journals.PROCESSED;
 
@@ -158,6 +157,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private CompositeSubscription subscriptionSubstituteMode;
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
   private Subscription searchSubjectSubscription;
+
+  private PublishSubject<Boolean> updateSub = PublishSubject.create();
 
   private int menuIndex;
 
@@ -442,6 +443,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onResume() {
     super.onResume();
+
     initSearchSub();
     initSearch();
 
@@ -455,6 +457,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initDrawer();
 
     removeAllNotification();
+
+    createUpdateSub();
+    startUpdateSub();
   }
 
   private void startNetworkCheck() {
@@ -521,11 +526,25 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
+  private void createUpdateSub(){
+    updateSub = PublishSubject.create();
+  }
+  private void startUpdateSub(){
+    updateSub
+      .debounce(500, TimeUnit.MILLISECONDS)
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe( reloadDocuments -> {
+        Timber.tag("TabChanged").d( "MainActivity update: set %s", reloadDocuments);
+        settings.setTabChanged( reloadDocuments );
+        updateCount();
+        updateOrganizationFilter();
+
+      }, Timber::e);
+  }
+
   public void update(boolean reloadDocuments) {
-    Timber.tag("TabChanged").d( "MainActivity update: set %s", reloadDocuments);
-    settings.setTabChanged( reloadDocuments );
-    updateCount();
-    updateOrganizationFilter();
+    updateSub.onNext(reloadDocuments);
   }
 
   private void unsubscribe() {
