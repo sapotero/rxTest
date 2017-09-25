@@ -956,7 +956,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Timber.tag("getUrgencyText").v("%s", decision.getUrgencyText() );
       Timber.tag("getLetterhead").v("%s",  decision.getLetterhead() );
 
-      printLetterHead(decision.getLetterhead(), decision.getStatus());
+      if( decision.getLetterhead() != null ) {
+        printLetterHead(decision.getLetterhead());
+      }
 
       if( decision.getUrgencyText() != null ){
         printUrgency(decision.getUrgencyText());
@@ -1011,7 +1013,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Timber.tag(TAG).d( "showEmpty" );
 
       clear();
-      printLetterHead( getString(R.string.decision_blank), null );
+      printLetterHead( getString(R.string.decision_blank) );
       hideMagnifer();
     }
 
@@ -1107,6 +1109,19 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         relativeSigner.addView( image );
       }
 
+      // resolved https://tasks.n-core.ru/browse/MPSED-2144
+      // "Резолюция отклонена" на форме предпросмотра резолюции
+      String status = decision.getStatus();
+      if ( !isInEditor && Objects.equals( status, "canceled" ) ) {
+        TextView canceled = new TextView(context);
+        canceled.setText( "Резолюция отклонена" );
+        canceled.setGravity(Gravity.START);
+        canceled.setTextColor( Color.RED );
+        canceled.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+        relativeSigner.addView( canceled );
+        textLabels.add( canceled );
+      }
+
       relativeSigner.addView( signer_view );
       relativeSigner.addView( date_and_number_view );
 
@@ -1132,38 +1147,16 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       textLabels.add( urgencyView );
     }
 
-    private void printLetterHead(String letterhead, String status) {
-      FrameLayout letterHeadWrapper = new FrameLayout( context );
-      LinearLayout.LayoutParams wrapperParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-      letterHeadWrapper.setLayoutParams( wrapperParams );
+    private void printLetterHead(String letterhead) {
+      TextView letterHead = new TextView(context);
+      letterHead.setGravity(Gravity.CENTER);
+      letterHead.setText( letterhead );
+      letterHead.setTextColor( Color.BLACK );
+      letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+      preview_head.addView( letterHead );
+      textLabels.add( letterHead );
 
-      if ( letterhead != null ) {
-        TextView letterHead = new TextView(context);
-        letterHead.setGravity(Gravity.CENTER);
-        letterHead.setText( letterhead );
-        letterHead.setTextColor( Color.BLACK );
-        letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-        letterHeadWrapper.addView( letterHead );
-        textLabels.add( letterHead );
-      }
-
-      // TODO: remove this line
-      status = "canceled";
-
-      if ( !isInEditor && Objects.equals( status, "canceled" ) ) {
-        TextView canceled = new TextView(context);
-        canceled.setGravity(Gravity.END);
-        canceled.setAllCaps( true );
-        canceled.setText( "Отклонено" );
-        canceled.setTextColor( Color.RED );
-        canceled.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-        letterHeadWrapper.addView( canceled );
-        textLabels.add( canceled );
-      }
-
-      preview_head.addView( letterHeadWrapper );
-
-      if ( !isMagnifier && ( letterhead != null || status != null ) ) {
+      if ( !isMagnifier ) {
         TextView delimiter = new TextView(context);
         delimiter.setGravity(Gravity.CENTER);
         delimiter.setHeight(1);
