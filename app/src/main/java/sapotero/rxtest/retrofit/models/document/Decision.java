@@ -75,7 +75,7 @@ public class Decision implements Serializable {
     @SerializedName("show_position")
     @Expose
     private Boolean showPosition;
-    @SerializedName("star")
+    @SerializedName("status")
     @Expose
     private String status;
     @SerializedName("red")

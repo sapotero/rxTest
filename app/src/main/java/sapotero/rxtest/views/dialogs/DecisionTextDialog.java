@@ -25,9 +25,10 @@ public class DecisionTextDialog {
         .showListener(dialog -> {
           DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
           float screenWidth = displayMetrics.widthPixels;
-          int marginInPixels = 200;
+          int marginInPixels = context.getResources().getDimensionPixelOffset(R.dimen.dialog_margin);
           int width = Math.round(screenWidth - (marginInPixels * 2));
-          ((MaterialDialog) dialog).getWindow().setLayout(width, 500);
+          int height = context.getResources().getDimensionPixelOffset(R.dimen.decision_text_dialog_height);
+          ((MaterialDialog) dialog).getWindow().setLayout(width, height);
 
           textInput = (EditText) ((MaterialDialog) dialog)
             .getCustomView().findViewById(R.id.dialog_decision_text_input);

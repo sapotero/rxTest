@@ -48,10 +48,10 @@ import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
-import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialog;
 import timber.log.Timber;
 
-public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
+public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialog.Callback {
 
   @Inject ISettings settings;
 
@@ -86,7 +86,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private Block block;
   private PrimaryConsiderationAdapter adapter;
   private SelectOshsDialogFragment oshs;
-  private SelectTemplateDialogFragment templates;
+  private SelectTemplateDialog templates;
 
 
   public Callback callback;
@@ -578,14 +578,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @OnClick(R.id.fragment_decision_button_get_template)
   public void template(){
     Timber.tag("ADD template").e("CLICKED");
-
-    if (templates == null){
-      templates = new SelectTemplateDialogFragment();
-      templates.setType("decision");
-      templates.registerCallBack( this );
-    }
-
-    templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
+    templates = new SelectTemplateDialog( getContext(), this, SelectTemplateDialog.DECISION );
+    templates.show();
   }
 
   @OnClick(R.id.fragment_decision_button_add_people)

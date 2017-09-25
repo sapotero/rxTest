@@ -63,7 +63,7 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.adapters.utils.FragmentAdapter;
-import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
@@ -255,7 +255,7 @@ public class InfoActivity extends AppCompatActivity {
       removeAllFragments(fm);
 
       FragmentTransaction fragmentTransaction = fm.beginTransaction();
-      Fragment fragment = Objects.equals(TAG, "DECISION") ? new InfoActivityDecisionPreviewFragment(toolbarManager) : new RoutePreviewFragment();
+      Fragment fragment = Objects.equals(TAG, "DECISION") ? new DecisionPreviewFragment() : new RoutePreviewFragment();
       fragmentTransaction.addToBackStack(TAG);
       fragmentTransaction.replace( R.id.activity_info_preview_container, fragment, TAG );
       fragmentTransaction.commit();

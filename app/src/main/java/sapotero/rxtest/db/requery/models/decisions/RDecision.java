@@ -39,6 +39,7 @@ public abstract class RDecision {
   Boolean signerIsManager;
   Boolean showPosition;
   Boolean red;
+  String status;
 
   Boolean temporary;
 
