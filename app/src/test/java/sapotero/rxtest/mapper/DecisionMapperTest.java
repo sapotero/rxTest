@@ -47,6 +47,7 @@ public class DecisionMapperTest {
     dummyDecision.setRed( false );
     dummyDecision.setLetterheadFontSize( "12" );
     dummyDecision.setPerformersFontSize( "15" );
+    dummyDecision.setStatus( "canceled" );
 
     Block dummyBlock = BlockMapperTest.generateBlock();
     dummyDecision.getBlocks().add(dummyBlock);
@@ -83,6 +84,7 @@ public class DecisionMapperTest {
     assertEquals( expected.getRed(), actual.isRed() );
     assertEquals( expected.getLetterheadFontSize(), actual.getLetterheadFontSize() );
     assertEquals( expected.getPerformersFontSize(), actual.getPerformerFontSize() );
+    assertEquals( expected.getStatus(), actual.getStatus() );
 
     int index = 0;
     for (RBlock _block : actual.getBlocks() ) {
@@ -120,6 +122,7 @@ public class DecisionMapperTest {
     assertEquals( expected.getRed(), actual.getRed() );
     assertEquals( expected.getLetterheadFontSize(), actual.getLetterheadFontSize() );
     assertEquals( expected.getPerformersFontSize(), actual.getPerformersFontSize() );
+    assertEquals( expected.getStatus(), actual.getStatus() );
 
     int index = 0;
     for (Block block : actual.getBlocks() ) {
@@ -169,6 +172,7 @@ public class DecisionMapperTest {
     assertEquals( false, formattedModel.getRed() );
     assertEquals( "12", formattedModel.getLetterheadFontSize() );
     assertEquals( null, formattedModel.getPerformersFontSize() );
+    assertEquals( null, formattedModel.getStatus() );
 
     int index = 0;
     for (Block block : formattedModel.getBlocks() ) {

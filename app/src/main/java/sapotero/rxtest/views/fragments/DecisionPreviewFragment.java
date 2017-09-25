@@ -24,9 +24,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -954,9 +956,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Timber.tag("getUrgencyText").v("%s", decision.getUrgencyText() );
       Timber.tag("getLetterhead").v("%s",  decision.getLetterhead() );
 
-      if( decision.getLetterhead() != null ) {
-        printLetterHead(decision.getLetterhead());
-      }
+      printLetterHead(decision.getLetterhead(), decision.getStatus());
 
       if( decision.getUrgencyText() != null ){
         printUrgency(decision.getUrgencyText());
@@ -1011,7 +1011,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Timber.tag(TAG).d( "showEmpty" );
 
       clear();
-      printLetterHead( getString(R.string.decision_blank) );
+      printLetterHead( getString(R.string.decision_blank), null );
       hideMagnifer();
     }
 
@@ -1132,16 +1132,38 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       textLabels.add( urgencyView );
     }
 
-    private void printLetterHead(String letterhead) {
-      TextView letterHead = new TextView(context);
-      letterHead.setGravity(Gravity.CENTER);
-      letterHead.setText( letterhead );
-      letterHead.setTextColor( Color.BLACK );
-      letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      preview_head.addView( letterHead );
-      textLabels.add( letterHead );
+    private void printLetterHead(String letterhead, String status) {
+      FrameLayout letterHeadWrapper = new FrameLayout( context );
+      LinearLayout.LayoutParams wrapperParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+      letterHeadWrapper.setLayoutParams( wrapperParams );
 
-      if ( !isMagnifier ) {
+      if ( letterhead != null ) {
+        TextView letterHead = new TextView(context);
+        letterHead.setGravity(Gravity.CENTER);
+        letterHead.setText( letterhead );
+        letterHead.setTextColor( Color.BLACK );
+        letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+        letterHeadWrapper.addView( letterHead );
+        textLabels.add( letterHead );
+      }
+
+      // TODO: remove this line
+      status = "canceled";
+
+      if ( !isInEditor && Objects.equals( status, "canceled" ) ) {
+        TextView canceled = new TextView(context);
+        canceled.setGravity(Gravity.END);
+        canceled.setAllCaps( true );
+        canceled.setText( "Отклонено" );
+        canceled.setTextColor( Color.RED );
+        canceled.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+        letterHeadWrapper.addView( canceled );
+        textLabels.add( canceled );
+      }
+
+      preview_head.addView( letterHeadWrapper );
+
+      if ( !isMagnifier && ( letterhead != null || status != null ) ) {
         TextView delimiter = new TextView(context);
         delimiter.setGravity(Gravity.CENTER);
         delimiter.setHeight(1);
