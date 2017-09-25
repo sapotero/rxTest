@@ -24,11 +24,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -588,7 +586,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
     // если подписант не текущий пользователь (или министр)
     buttons_wrapper.setVisibility( isActiveOrRed() && buttonsEnabled ? View.VISIBLE : View.GONE);
-    bottom_line.setVisibility( isActiveOrRed() && buttonsEnabled ? View.VISIBLE : View.GONE);
+    bottom_line.setVisibility( ( approved || isActiveOrRed() && buttonsEnabled ) ? View.VISIBLE : View.GONE);
   }
 
   private boolean isActiveOrRed() {
