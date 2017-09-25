@@ -216,6 +216,7 @@ public class Processor {
         Timber.e(e);
       }
 
+      
       // изменилось MD5
       if ( Filter.isChanged(doc.getMd5(), document.getMd5()) ) {
 

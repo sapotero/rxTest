@@ -44,6 +44,12 @@ public interface AuthService {
     @Query("code") String code
   );
 
+  @GET("v2/oshs/manager.json")
+  Observable<ArrayList<Oshs>> getManager(
+    @Query("login") String username,
+    @Query("auth_token") String token
+  );
+
   @PUT("token/{username}.json")
   Observable<AuthSignToken> getAuth(
     @Path("username") String username,

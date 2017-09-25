@@ -11,6 +11,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RManagerEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -125,9 +126,16 @@ public abstract class DecisionCommand extends AbstractCommand {
       .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
       .get().firstOrNull();
 
+    Tuple manager = dataStore
+      .select(RManagerEntity.UID)
+      .get().firstOrNull();
+
     return
       // если активная резолюция
       signerIsCurrentUser()
+
+      // или подписант министр
+      || manager != null && manager.get(0).equals( getParams().getDecisionModel().getSignerId() )
 
       // или если подписывающий министр
       || red != null && red.get(0).equals(true);

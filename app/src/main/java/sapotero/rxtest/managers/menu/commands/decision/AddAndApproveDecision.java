@@ -45,10 +45,10 @@ public class AddAndApproveDecision extends DecisionCommand {
     setChangedInDb();
 
     // всегда перемещаем в обработанные при создании и подписании резолюции
-//    if ( isActiveOrRed() ) {
-    startProcessedOperationInMemory();
-    startProcessedOperationInDb();
-//    }
+    if ( isActiveOrRed() ) {
+      startProcessedOperationInMemory();
+      startProcessedOperationInDb();
+    }
 
 //    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }

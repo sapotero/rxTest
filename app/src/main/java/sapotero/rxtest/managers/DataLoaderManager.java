@@ -46,6 +46,7 @@ import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateColleagueJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
+import sapotero.rxtest.jobs.bus.CreateManagerJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
@@ -181,6 +182,22 @@ public class DataLoaderManager {
                       // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
                       if ( Objects.equals( login, settings.getLogin() ) ) {
                         jobManager.addJobInBackground(new CreateUrgencyJob(urgencies, login));
+                      }
+                    },
+                    error -> Timber.tag(TAG).e(error)
+                  )
+              );
+
+              // загрузка группы Руководство МВД
+
+              subscriptionInitV2.add(
+                auth.getManager(login, settings.getToken())
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe(
+                    users -> {
+                      if ( Objects.equals( login, settings.getLogin() ) ) {
+                        jobManager.addJobInBackground(new CreateManagerJob(users, login));
                       }
                     },
                     error -> Timber.tag(TAG).e(error)
