@@ -189,7 +189,7 @@ public class DataLoaderManager {
               );
 
               // загрузка группы Руководство МВД
-              
+
               subscriptionInitV2.add(
                 auth.getManager(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
