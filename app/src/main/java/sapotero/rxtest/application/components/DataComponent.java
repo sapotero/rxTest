@@ -25,7 +25,7 @@ import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFra
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
-import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialog;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
@@ -63,7 +63,7 @@ public interface DataComponent {
   void inject(InfoCardFieldsFragment fragment);
   void inject(InfoCardLinksFragment fragment);
   void inject(RoutePreviewFragment fragment);
-  void inject(SelectTemplateDialogFragment fragment);
+  void inject(SelectTemplateDialog fragment);
   void inject(InfoCardDialogFragment fragment);
   void inject(StepperChooseAuthTypeFragment fragment);
 

@@ -88,12 +88,12 @@ import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
-import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialog;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
 
-public class DecisionPreviewFragment extends PreviewFragment implements DecisionInterface, SelectTemplateDialogFragment.Callback{
+public class DecisionPreviewFragment extends PreviewFragment implements DecisionInterface, SelectTemplateDialog.Callback{
 
   public static final int MIN_FONT_SIZE = 12;
   public static final int SEEK_BAR_INIT_PROGRESS = 12;
@@ -143,7 +143,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private Decision decision;  // used in DecisionConstructorActivity
   private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
   private RDocumentEntity doc;
-  private SelectTemplateDialogFragment templates;
+  private SelectTemplateDialog templates;
   private String regNumber = "";
 
   private ArrayList<TextView> textLabels = new ArrayList<>();
@@ -261,11 +261,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
         .neutralText("Шаблон")
         .onNeutral((dialog, which) -> {
-          templates = new SelectTemplateDialogFragment();
-          templates.setType("rejection");
-          templates.registerCallBack( fragment );
-
-          templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
+          templates = new SelectTemplateDialog( getContext(), fragment, SelectTemplateDialog.REJECTION );
+          templates.show();
         });
     }
 
@@ -331,7 +328,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Override
   public void onSelectTemplate(String template) {
     showPrevDialog(template);
-    templates.dismiss();
   }
 
   private class GestureListener extends GestureDetector.SimpleOnGestureListener {
