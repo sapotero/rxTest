@@ -16,7 +16,6 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import sapotero.rxtest.application.scopes.NetworkScope;
 import sapotero.rxtest.utils.ISettings;
-import timber.log.Timber;
 
 @Module
 public class OkHttpModule {
