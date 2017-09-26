@@ -4,7 +4,6 @@ import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +16,7 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import sapotero.rxtest.application.scopes.NetworkScope;
 import sapotero.rxtest.utils.ISettings;
+import timber.log.Timber;
 
 @Module
 public class OkHttpModule {
@@ -78,9 +78,10 @@ public class OkHttpModule {
             return response;
 
           } catch (IOException e) {
-            if (e instanceof UnknownHostException) {
+
+//            if (e instanceof UnknownHostException) {
               settings.setOnline(false);
-            }
+//            }
             throw e;
           }
         })
