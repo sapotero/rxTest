@@ -25,7 +25,7 @@ public abstract class RManager {
   Boolean isGroup;
   String image;
 
-  @Index("fu_user_index")
+  @Index("manager_user_index")
   String  user;
 
 }
