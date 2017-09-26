@@ -179,6 +179,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     store.process(
       store.startTransactionFor( getParams().getDocument() )
         .setLabel(LabelType.SYNC)
+        .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
         .setState(InMemoryState.LOADING)
     );
   }
@@ -193,35 +194,55 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  private void removeSyncChanged() {
+  private void removeSyncChanged(boolean setUpdatedAt) {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .removeLabel(LabelType.SYNC)
-        .setState(InMemoryState.READY)
-    );
+    if ( setUpdatedAt ) {
+      store.process(
+        store.startTransactionFor( getParams().getDocument() )
+          .removeLabel(LabelType.SYNC)
+          .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+          .setState(InMemoryState.READY)
+      );
 
-    removeChangedInDb();
+    } else {
+      store.process(
+        store.startTransactionFor( getParams().getDocument() )
+          .removeLabel(LabelType.SYNC)
+          .setState(InMemoryState.READY)
+      );
+    }
+
+    removeChangedInDb( setUpdatedAt );
   }
 
-  protected void removeChangedInDb() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CHANGED, false)
-      .set( RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp() )
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
+  protected void removeChangedInDb(boolean setUpdatedAt) {
+    if ( setUpdatedAt ) {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.CHANGED, false)
+        .set( RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp() )
+        .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+        .get()
+        .value();
+
+    } else {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.CHANGED, false)
+        .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+        .get()
+        .value();
+    }
   }
 
   protected void finishOperationOnSuccess() {
-    removeSyncChanged();
+    removeSyncChanged(true);
     queueManager.setExecutedRemote(this);
   }
 
   protected void finishOperationOnError(List<String> errors) {
-    removeSyncChanged();
+    removeSyncChanged(false);
     queueManager.setExecutedWithError( this, errors );
   }
 
@@ -250,14 +271,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( callback != null ) {
       callback.onCommandExecuteSuccess( getType() );
     }
-
-    Transaction transaction = new Transaction();
-    transaction
-      .from( store.getDocuments().get(getParams().getDocument()) )
-      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp());
-//      .removeLabel(LabelType.SYNC);
-    store.process( transaction );
-
   }
 
   protected void sendErrorCallback(String errorMessage) {
@@ -298,9 +311,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void finishRejectedOperationOnSuccess() {
-    removeSyncChanged();
-
-
+    removeSyncChanged(true);
     setDocumentCondition( DocumentCondition.REJECTED );
     queueManager.setExecutedRemote(this);
   }
@@ -403,7 +414,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void finishProcessedOperationOnSuccess() {
-    removeSyncChanged();
+    removeSyncChanged(true);
     setDocumentCondition( DocumentCondition.PROCESSED );
     queueManager.setExecutedRemote(this);
   }
