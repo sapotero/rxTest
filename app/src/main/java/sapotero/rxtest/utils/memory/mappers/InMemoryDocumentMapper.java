@@ -2,11 +2,17 @@ package sapotero.rxtest.utils.memory.mappers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -24,7 +30,7 @@ public class InMemoryDocumentMapper {
     return imd;
   }
 
-  public static Document convert(RDocumentEntity doc) {
+  private static Document convert(RDocumentEntity doc) {
 
     Document document = new Document();
     document.setUid( doc.getUid() );
@@ -67,11 +73,29 @@ public class InMemoryDocumentMapper {
     return document;
   }
 
+  private static List<Decision> convertDecisions(RDocumentEntity document) {
+    List<Decision> decisions = new ArrayList<>();
+
+    if ( document != null && document.getDecisions() != null ) {
+      DecisionMapper decisionMapper = new DecisionMapper();
+
+      for ( RDecision decision : document.getDecisions() ) {
+        RDecisionEntity decisionEntity = (RDecisionEntity) decision;
+        Decision decisionModel = decisionMapper.toModel( decisionEntity );
+        decisions.add( decisionModel );
+      }
+    }
+
+    return decisions;
+  }
+
   public static InMemoryDocument fromDB(RDocumentEntity document) {
 
     InMemoryDocument imd = new InMemoryDocument();
     Document doc = convert(document);
     doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
+
+    List<Decision> decisions = convertDecisions(document);
 
     imd.setUid( document.getUid() );
     imd.setUpdatedAt( document.getUpdatedAt() );
@@ -79,6 +103,7 @@ public class InMemoryDocumentMapper {
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
     imd.setDocument( doc );
+    imd.setDecisions( decisions );
     imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
