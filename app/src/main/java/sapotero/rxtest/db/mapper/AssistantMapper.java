@@ -20,6 +20,7 @@ public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity>
     entity.setHeadId( model.getHeadId() );
     entity.setHeadName( model.getHeadName() );
     entity.setUser( login );
+    entity.setImage( model.getIImage() );
 
     return entity;
   }
@@ -34,6 +35,7 @@ public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity>
     model.setForDecision( entity.isForDecision() );
     model.setHeadId( entity.getHeadId() );
     model.setHeadName( entity.getHeadName() );
+    model.setImage( entity.getImage() );
 
     return model;
   }
@@ -52,6 +54,10 @@ public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity>
     people.setOrganization("");
     people.setAssistantId( entity.getAssistantId() );
     people.setGender("");
+
+    if (entity.getImage() != null) {
+      people.setIImage(entity.getImage());
+    }
     people.setIsOrganization( false );
     people.setSortIndex( entity.getSortIndex() );
 
