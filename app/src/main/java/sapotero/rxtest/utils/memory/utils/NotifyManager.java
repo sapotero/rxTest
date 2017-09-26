@@ -12,15 +12,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -54,76 +50,8 @@ public class NotifyManager {
     if (!notifyPubSubject.hasObservers()) {
       notifyPubSubject
         .filter(notifyMessageModel -> !notifyMessageModel.isFirstRunApp())
-        .filter(notifyMessageModel ->
-          {
-            Timber.tag(TAG).e("notifyMessageModel.getFilter() =" + notifyMessageModel.getFilter());
-            Timber.tag(TAG).e("notifyMessageModel .getIndex() = " + notifyMessageModel .getIndex());
-            Timber.tag(TAG).e("notifyMessageModel.getDocumentType() =" + notifyMessageModel.getDocumentType());
-            Timber.tag(TAG).e("notifyMessageModel.getSource() = " + notifyMessageModel.getSource());
-            Timber.tag(TAG).e("notifyMessageModel.getSource() = " + notifyMessageModel.getDocument().getUid());
-            Timber.tag(TAG).e("notifyMessageModel.getInMemoryDocument() = " + notifyMessageModel.getInMemoryDocument());
-
-//            Timber.tag(TAG).e("notifyMessageModel.getInMemoryDocument() = "+ notifyMessageModel.getInMemoryDocument().getState());
-//            Timber.tag(TAG).e("notifyMessageModel.getInMemoryDocument().getDocument().isProcessed() = " + notifyMessageModel.getInMemoryDocument().getDocument().isProcessed());
-//            Timber.tag(TAG).e("notifyMessageModel.getInMemoryDocument().getDocument().getChanged() = " + notifyMessageModel.getInMemoryDocument().getDocument().getChanged());
-//            Timber.tag(TAG).e("notifyMessageModel.getInMemoryDocument().getDocument().statusCode = " + notifyMessageModel.getInMemoryDocument().getDocument().statusCode);
-
-           return  !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER");
-          }
-        )
-        .filter(new Func1<NotifyMessageModel, Boolean>() {
-          @Override
-          public Boolean call(NotifyMessageModel notifyMessageModel) {
-            if (notifyMessageModel.getInMemoryDocument() != null) {
-              Timber.tag(TAG).e(" notifyMessageModel.getInMemoryDocument().getDocument().getChanged() = " + notifyMessageModel.getInMemoryDocument().getDocument().getChanged() );
-              Timber.tag(TAG).e(" notifyMessageModel.getInMemoryDocument().getDocument().isProcessed() = " + notifyMessageModel.getInMemoryDocument().getDocument().isProcessed() );
-              Timber.tag(TAG).e(" notifyMessageModel.getInMemoryDocument().hasDecision() = " + notifyMessageModel.getInMemoryDocument().hasDecision() );
-              Timber.tag(TAG).e(" notifyMessageModel.getInMemoryDocument().getDocument().isFromProcessedFolder() = " + notifyMessageModel.getInMemoryDocument().getDocument().isFromProcessedFolder() );
-              Timber.tag(TAG).e(" notifyMessageModel.getInMemoryDocument().getDocument().getShortDescription() = " + notifyMessageModel.getInMemoryDocument().getDocument().getShortDescription() );
-            }
-          return true;
-          }
-
-
-        })
-
-        .filter(new Func1<NotifyMessageModel, Boolean>() {
-          @Override
-          public Boolean call(NotifyMessageModel notifyMessageModel) {
-            return Objects.equals(notifyMessageModel.getDocumentType().name(), "DOCUMENT");
-          }
-        })
-//        .filter(new Func1<NotifyMessageModel, Boolean>() {
-//          @Override
-//          public Boolean call(NotifyMessageModel notifyMessageModel) {
-//            return !notifyMessageModel.getDocument().getChanged();
-//          }
-//        })
-
-//        .filter(new Func1<NotifyMessageModel, Boolean>() {
-//          @Override
-//          public Boolean call(NotifyMessageModel notifyMessageModel) {
-//            notifyMessageModel.getDocument().isProcessed();
-//            return !Objects.equals(notifyMessageModel.getDocumentType().name(), "PROCESSED");
-//
-//          }
-//        })
-
-//        .filter(new Func1<NotifyMessageModel, Boolean>() {
-//          @Override
-//          public Boolean call(NotifyMessageModel notifyMessageModel) {
-//            return !Objects.equals(notifyMessageModel.getFilter(), "signing");
-//          }
-//        })
-
-//        .distinct(new Func1<NotifyMessageModel, String>() {
-//          @Override
-//          public String call(NotifyMessageModel notifyMessageModel) {
-//            return notifyMessageModel.getDocument().getMd5();
-//
-//          }
-//        })
-
+        .filter(notifyMessageModel -> !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER"))
+        .filter(notifyMessageModel -> Objects.equals(notifyMessageModel.getDocumentType().name(), "DOCUMENT"))
         .filter(notifyMessageModel -> {
           /*приводим строку index к виду JournalStatus. Проверяем в разрешенных журналах*/
           JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
@@ -131,22 +59,7 @@ public class NotifyManager {
         })
         .buffer(5 ,TimeUnit.SECONDS)
         .filter(notifyMessageModels -> !notifyMessageModels.isEmpty())
-//        .flatMap(new Func1<List<NotifyMessageModel>, Observable<List<NotifyMessageModel>>>() {
-//          @Override
-//          public Observable<List<NotifyMessageModel>> call(List<NotifyMessageModel> notifyMessageModels) {
-//
-//            return null;
-//          }
-//        })
-
-
         .subscribe(notifyMessageModels -> {
-          for (NotifyMessageModel item : notifyMessageModels){
-            Document document = item.getDocument();
-            Timber.tag(TAG).e("document.getMd5(); ="+document.getMd5()+"   document.getUid(); ="+document.getUid());
-          }
-
-
           if(notifyMessageModels.size() > 1) {
             notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
             String contentTitle = "Вам поступило новых документов: " + notifyMessageModels.size();

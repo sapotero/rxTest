@@ -14,18 +14,6 @@ public final class NotifyMessageModel {
   private Document document;
   private DocumentType documentType;
 
-  private InMemoryDocument inMemoryDocument;
-
-  public NotifyMessageModel(InMemoryDocument inMemoryDocument, Document newAddedDocument, String filter, String index, boolean isFirstRunApp, Processor.Source source, DocumentType documentType) {
-    this.document = newAddedDocument;
-    this.inMemoryDocument = inMemoryDocument;
-    this.filter = filter;
-    this.index = index;
-    this.isFirstRunApp = isFirstRunApp;
-    this.source = source;
-    this.documentType = documentType;
-  }
-
   public NotifyMessageModel(Document newAddedDocument, String filter, String index, boolean isFirstRunApp, Processor.Source source, DocumentType documentType) {
     this.document = newAddedDocument;
     this.filter = filter;
@@ -33,12 +21,6 @@ public final class NotifyMessageModel {
     this.isFirstRunApp = isFirstRunApp;
     this.source = source;
     this.documentType = documentType;
-  }
-
-
-
-  public InMemoryDocument getInMemoryDocument() {
-    return inMemoryDocument;
   }
 
   public DocumentType getDocumentType() {

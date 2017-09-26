@@ -221,45 +221,24 @@ public class Processor {
 
       // изменилось MD5
       if ( Filter.isChanged(doc.getMd5(), document.getMd5()) ) {
-        Timber.tag("-TEST").e(" 1 ");
-        Timber.tag("-TEST").e("1 doc.getUpdatedAt()  =" + doc.getUpdatedAt() );
-        Timber.tag("-TEST").e("1 DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) = " + DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) );
-        Timber.tag("-TEST").e("1 doc.isProcessed() = " + doc.isProcessed() );
+
         if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
           Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
-          Timber.tag("-TEST").e(" 2 ");
+
           if ( Filter.isChanged(doc.getFilter(), filter) ){
             updateJob(doc.getUid(), doc.getMd5());
-            Timber.tag("-TEST").e(" 3 ");
-            boolean test = (doc.isProcessed() & store.getDocuments().keySet().contains(document.getUid()) ) ;
-            Timber.tag("-TEST").e("3test ="+ test);
-            NotifyMessageModel notifyMessageModel3 = new NotifyMessageModel(doc, document, filter, index, settings.isFirstRun(), source, documentType);
+
+            NotifyMessageModel notifyMessageModel3 = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
             notifyPubSubject.onNext(notifyMessageModel3);
           } else {
             EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
           }
         } else {
           updateJob(doc.getUid(), doc.getMd5());
-          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(doc, document, filter, index, settings.isFirstRun(), source, documentType);
-          Timber.tag("-TEST").e("4document.getChanged() ="+document.getChanged());
-          Timber.tag("-TEST").e("4doc.getDocument().getChanged() ="+doc.getDocument().getChanged());
-          Timber.tag("-TEST").e("4!!doc .isProcessed()  ="+doc.isProcessed());
-          Timber.tag("-TEST").e("4document.getMd5() ="+document.getMd5());
-          Timber.tag("-TEST").e("4document.getViewed() ="+document.getViewed());
-          Timber.tag("-TEST").e("4documentType =" + documentType);
-          Timber.tag("-TEST").e("4filter ="+filter);
-          Timber.tag("-TEST").e("4index ="+index);
-          Timber.tag("-TEST").e("4source ="+source);
-          Timber.tag("-TEST").e("4document.statusCode =" + document.statusCode);
-          Timber.tag("-TEST").e("4document.isProcessed() =" + document.isProcessed());
-          Timber.tag("-TEST").e("4doc.getDocument().getChanged() =" + doc.getDocument().getChanged());
-          Timber.tag("-TEST").e("4store.getDocuments().keySet().contains(document.getUid()) = " + store.getDocuments().keySet().contains(document.getUid()));
-
-
-          if (!doc.getDocument().getChanged()){
+          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
+          if (!doc.getDocument().getChanged() && Objects.equals(doc.getMd5(), "")){
             notifyPubSubject.onNext(notifyMessageModel);
           }
-
         }
       } else {
         EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
@@ -267,10 +246,7 @@ public class Processor {
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
-      Timber.tag("-TEST").e("5 document.getViewed() =" + document.getViewed());
-      Timber.tag("-TEST").e("5 document.getChanged() =" + document. getChanged());
-      InMemoryDocument doc = store.getDocuments().get(document.getUid());
-      NotifyMessageModel notifyMessageModel = new NotifyMessageModel(doc, document, filter, index, settings.isFirstRun(), source, documentType);
+      NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
       notifyPubSubject.onNext(notifyMessageModel);
     }
   }
@@ -320,11 +296,7 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-
-
         validateDocuments();
-
-
 
         return Collections.singletonList("");
       })
