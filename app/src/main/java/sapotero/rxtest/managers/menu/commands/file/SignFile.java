@@ -8,6 +8,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -15,8 +16,6 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.ImagesService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
-import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
@@ -106,6 +105,7 @@ public class SignFile extends AbstractCommand {
             queueManager.setExecutedRemote(this);
             setSignSuccess( getParams().getImageId() );
             saveImageSign( file_sign );
+            setUpdatedAt();
           },
           error -> onError()
         );
@@ -138,13 +138,6 @@ public class SignFile extends AbstractCommand {
     task.setDocumentId( getParams().getDocument() );
     task.setSign( sign );
 
-    Transaction transaction = new Transaction();
-    transaction
-      .from( store.getDocuments().get(getParams().getDocument()) )
-      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
-      .removeLabel(LabelType.SYNC);
-    store.process( transaction );
-
     dataStore
       .insert(task)
       .toObservable()
@@ -154,6 +147,20 @@ public class SignFile extends AbstractCommand {
         data -> Timber.tag(TAG).v("Saved image sign %s [ %s ]", data.getImageId(), data.getDocumentId() ),
         Timber::e
       );
+  }
+
+  private void setUpdatedAt() {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+    );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp())
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
+      .get()
+      .value();
   }
 
   private void setSignSuccess(String imageId) {
