@@ -207,10 +207,7 @@ public class Processor {
     if (store.getDocuments().keySet().contains(document.getUid())) {
       InMemoryDocument doc = store.getDocuments().get(document.getUid());
       Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index);
-
       Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
-
-      Timber.tag("-TEST").e(" 0 ");
 
       int time = 15;
       try {
