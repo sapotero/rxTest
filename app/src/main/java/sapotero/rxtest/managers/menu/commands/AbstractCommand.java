@@ -254,8 +254,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
-      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
-      .removeLabel(LabelType.SYNC);
+      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp());
+//      .removeLabel(LabelType.SYNC);
     store.process( transaction );
 
   }

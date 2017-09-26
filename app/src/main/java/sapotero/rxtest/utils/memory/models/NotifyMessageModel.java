@@ -1,6 +1,8 @@
 package sapotero.rxtest.utils.memory.models;
 
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.utils.Processor;
 
 public final class NotifyMessageModel {
@@ -10,13 +12,37 @@ public final class NotifyMessageModel {
   private boolean isFirstRunApp;
   private Processor.Source source;
   private Document document;
+  private DocumentType documentType;
 
-  public NotifyMessageModel(Document document, String filter, String index, boolean isFirstRunApp, Processor.Source source) {
-    this.document = document;
+  private InMemoryDocument inMemoryDocument;
+
+  public NotifyMessageModel(InMemoryDocument inMemoryDocument, Document newAddedDocument, String filter, String index, boolean isFirstRunApp, Processor.Source source, DocumentType documentType) {
+    this.document = newAddedDocument;
+    this.inMemoryDocument = inMemoryDocument;
     this.filter = filter;
     this.index = index;
     this.isFirstRunApp = isFirstRunApp;
     this.source = source;
+    this.documentType = documentType;
+  }
+
+  public NotifyMessageModel(Document newAddedDocument, String filter, String index, boolean isFirstRunApp, Processor.Source source, DocumentType documentType) {
+    this.document = newAddedDocument;
+    this.filter = filter;
+    this.index = index;
+    this.isFirstRunApp = isFirstRunApp;
+    this.source = source;
+    this.documentType = documentType;
+  }
+
+
+
+  public InMemoryDocument getInMemoryDocument() {
+    return inMemoryDocument;
+  }
+
+  public DocumentType getDocumentType() {
+    return documentType;
   }
 
   public Document getDocument() {
