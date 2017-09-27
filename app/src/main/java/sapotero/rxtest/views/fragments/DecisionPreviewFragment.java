@@ -51,9 +51,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
@@ -75,6 +80,7 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -92,6 +98,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
+  @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
 
   @BindView(R.id.activity_info_decision_root_layout) LinearLayout rootLayout;
@@ -775,67 +782,88 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void loadDocument() {
     Timber.tag(TAG).v("loadDocument | %s", settings.getUid() );
 
-    doc = store.getDocuments().get( uid == null ? settings.getUid() : uid );
+    String documentUid = uid == null ? settings.getUid() : uid;
+    doc = store.getDocuments().get( documentUid );
 
     if ( doc != null ) {
+      showDocument();
+
+    } else {
+      // If no document in MemoryStore, search in DB
+      // (fragment is used in InfoNoMenuActivity to display document from links)
+      dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq( documentUid ))
+        .get()
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(result -> {
+          doc = InMemoryDocumentMapper.fromDB( result );
+          showDocument();
+        },
+        error -> Timber.tag(TAG).e(error));
+    }
+  }
+
+  private void showDocument() {
+    preview.showEmpty();
+
+    if ( doc.getDecisions().size() > 0 ){
+      bottom_line.setVisibility( View.VISIBLE );
+
+      decision_spinner_adapter.clear();
+
+      List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
+
+      for (Decision decision : doc.getDecisions()) {
+        unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
+      }
+
+      decision_spinner_adapter.addAll( unsorted_decisions );
+
+      // если есть резолюции, то отобразить первую
+      if ( decision_spinner_adapter.size() > 0 ) {
+        current_decision = decision_spinner_adapter.getItem(0).getDecision();
+        Timber.tag(TAG).e("decision_spinner_adapter > 0");
+        displayDecision();
+      }
+
+      if (decision_spinner_adapter.size() == 1){
+        invalidateSpinner(false);
+        decision_count.setVisibility(View.GONE);
+      }
+
+      if (decision_spinner_adapter.size() >= 2){
+        decision_count.setText( String.format(" %s ", unsorted_decisions.size()) );
+        decision_count.setVisibility(View.VISIBLE);
+        invalidateSpinner(true);
+      }
+
+    } else {
+      Timber.e("no decisions");
+
+      if (doc.isProcessed() != null && !doc.isProcessed()){
+        EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
+      }
+
+      decision_spinner_adapter.clear();
+
+      Decision empty = new Decision();
+      empty.setSignerBlankText("Нет резолюций");
+      decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
+
       preview.showEmpty();
 
-      if ( doc.getDecisions().size() > 0 ){
-        bottom_line.setVisibility( View.VISIBLE );
+      comment_button.setVisibility(View.GONE);
+      decision_count.setVisibility(View.GONE);
+      invalidateSpinner(false);
+      showDecisionCardToolbarMenuItems(false);
+      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
 
-        decision_spinner_adapter.clear();
+      bottom_line.setVisibility( View.GONE);
 
-        List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
-
-        for (Decision decision : doc.getDecisions()) {
-          unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
-        }
-
-        decision_spinner_adapter.addAll( unsorted_decisions );
-
-        // если есть резолюции, то отобразить первую
-        if ( decision_spinner_adapter.size() > 0 ) {
-          current_decision = decision_spinner_adapter.getItem(0).getDecision();
-          Timber.tag(TAG).e("decision_spinner_adapter > 0");
-          displayDecision();
-        }
-
-        if (decision_spinner_adapter.size() == 1){
-          invalidateSpinner(false);
-          decision_count.setVisibility(View.GONE);
-        }
-
-        if (decision_spinner_adapter.size() >= 2){
-          decision_count.setText( String.format(" %s ", unsorted_decisions.size()) );
-          decision_count.setVisibility(View.VISIBLE);
-          invalidateSpinner(true);
-        }
-
-      } else {
-        Timber.e("no decisions");
-
-        if (doc.isProcessed() != null && !doc.isProcessed()){
-          EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
-        }
-
-        decision_spinner_adapter.clear();
-
-        Decision empty = new Decision();
-        empty.setSignerBlankText("Нет резолюций");
-        decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
-
-        preview.showEmpty();
-
-        comment_button.setVisibility(View.GONE);
-        decision_count.setVisibility(View.GONE);
-        invalidateSpinner(false);
-        showDecisionCardToolbarMenuItems(false);
-        EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
-
-        bottom_line.setVisibility( View.GONE);
-
-        updateActionText();
-      }
+      updateActionText();
     }
   }
 
