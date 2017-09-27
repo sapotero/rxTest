@@ -138,8 +138,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private Preview preview;
 
   private String uid;
-  private Decision decision; // used in InfoActivity, InfoNoMenuActivity and DecisionConstructorActivity
-  private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
+  private Decision decision;
   private InMemoryDocument doc;
   private SelectTemplateDialog templates;
   private String regNumber = "";
@@ -403,8 +402,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     }
 
     if ( isMagnifier ) {
-      if (decisionSpinnerItem != null && decisionSpinnerItem.getDecision() != null){
-        preview.show( decisionSpinnerItem.getDecision() );
+      if (decision != null ) {
+        preview.show( decision );
       }
 
       seekbar.setVisibility(View.VISIBLE);
@@ -697,7 +696,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     if ( decision_spinner_adapter.size() > 0 ) {
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
-      magnifier.setDecision( decision );
+      magnifier.setDecision( decision.getDecision() );
       magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
     }
 
@@ -1297,10 +1296,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   private void setRegNumber(String regNumber) {
     this.regNumber = regNumber;
-  }
-
-  private void setDecision(DecisionSpinnerItem decision) {
-    this.decisionSpinnerItem = decision;
   }
 
   /* DecisionInterface */
