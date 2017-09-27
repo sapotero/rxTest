@@ -4,6 +4,8 @@ import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -78,9 +80,15 @@ public class OkHttpModule {
 
           } catch (IOException e) {
 
-//            if (e instanceof UnknownHostException) {
+            //если не может отрезолвить домен
+            if (e instanceof UnknownHostException) {
               settings.setOnline(false);
-//            }
+            }
+
+            // или отвалился по таймауту
+            if (e instanceof SocketTimeoutException) {
+              settings.setOnline(false);
+            }
             throw e;
           }
         })
