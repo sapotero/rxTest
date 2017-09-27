@@ -51,14 +51,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
@@ -96,7 +91,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   public static final int SEEK_BAR_INIT_PROGRESS = 12;
 
   @Inject ISettings settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
   @Inject MemoryStore store;
 
@@ -140,8 +134,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private Decision current_decision; // used in InfoActivity and InfoNoMenuActivity
   private Decision decision;  // used in DecisionConstructorActivity
   private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
-  private RDocumentEntity doc;
-  private InMemoryDocument inMemoryDocument;
+  private InMemoryDocument doc;
   private SelectTemplateDialog templates;
   private String regNumber = "";
 
@@ -339,8 +332,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( doc != null && Objects.equals(doc.getAddressedToType(), "") ){
-        if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
+      if ( doc != null && Objects.equals(doc.getDocument().getAddressedToType(), "") ){
+        if ( !doc.getDocument().isFromLinks() && current_decision != null ){
           if ( settings.isOnline() ){
             if ( current_decision.isChanged() ){
               // resolved https://tasks.n-core.ru/browse/MVDESD-13727
@@ -369,9 +362,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           }
         }
 
-        if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
-          current_decision == null ){
-
+        if ( !doc.getDocument().isFromLinks() && current_decision == null ) {
           settings.setDecisionActiveUid("0");
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
@@ -531,7 +522,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     checkActiveDecision();
 
     //FIX не даем выполнять операции для связанных документов
-    if ( doc!=null && doc.isFromLinks()!=null && doc.isFromLinks() ){
+    if ( doc != null && doc.getDocument().isFromLinks() ) {
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );
     }
@@ -600,9 +591,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   // Так нужно отображать, но есть проблемы на стороне СЭДика
   // Поэтому пока не используем честный способ, а просто показываем последнее действие
   private void updateActionText() {
-    if ( inMemoryDocument != null && inMemoryDocument.getActions() != null && inMemoryDocument.getActions().size() > 0 ) {
+    if ( doc != null && doc.getActions() != null && doc.getActions().size() > 0 ) {
       List<DocumentInfoAction> actions = new ArrayList<>();
-      actions.addAll( inMemoryDocument.getActions() );
+      actions.addAll( doc.getActions() );
 
       Collections.sort(actions, (o1, o2) -> o2.getUpdatedAtTimestamp().compareTo( o1.getUpdatedAtTimestamp() ) );
 
@@ -701,7 +692,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     if ( decision_spinner_adapter.size() > 0 ) {
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
       magnifier.setDecision( decision );
-      magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
+      magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
     }
 
     magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
@@ -781,99 +772,71 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     context.startActivity(intent);
   }
 
-  private Boolean documentExist(){
-    Integer count = dataStore
-      .count( RDocumentEntity.class )
-      .where( RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid ) )
-      .get()
-      .value();
-
-    return count > 0;
-  }
-
   private void loadDocument() {
-    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), settings.getUid() );
+    Timber.tag(TAG).v("loadDocument | %s", settings.getUid() );
 
-    if ( documentExist() ) {
-      loadFromDb();
-    }
-  }
+    doc = store.getDocuments().get( uid == null ? settings.getUid() : uid );
 
-  private void loadFromDb() {
-    Timber.tag("loadFromDb").v("star");
+    if ( doc != null ) {
+      preview.showEmpty();
 
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid ))
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(doc -> {
-        this.doc = doc;
+      if ( doc.getDecisions().size() > 0 ){
+        bottom_line.setVisibility( View.VISIBLE );
+
+        decision_spinner_adapter.clear();
+
+        List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
+
+        for (Decision decision : doc.getDecisions()) {
+          unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
+        }
+
+        decision_spinner_adapter.addAll( unsorted_decisions );
+
+        // если есть резолюции, то отобразить первую
+        if ( decision_spinner_adapter.size() > 0 ) {
+          current_decision = decision_spinner_adapter.getItem(0).getDecision();
+          Timber.tag(TAG).e("decision_spinner_adapter > 0");
+          displayDecision();
+        }
+
+        if (decision_spinner_adapter.size() == 1){
+          invalidateSpinner(false);
+          decision_count.setVisibility(View.GONE);
+        }
+
+        if (decision_spinner_adapter.size() >= 2){
+          decision_count.setText( String.format(" %s ", unsorted_decisions.size()) );
+          decision_count.setVisibility(View.VISIBLE);
+          invalidateSpinner(true);
+        }
+
+      } else {
+        Timber.e("no decisions");
+
+        if (doc.isProcessed() != null && !doc.isProcessed()){
+          EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
+        }
+
+        decision_spinner_adapter.clear();
+
+        Decision empty = new Decision();
+        empty.setSignerBlankText("Нет резолюций");
+        decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
 
         preview.showEmpty();
 
-        inMemoryDocument = store.getDocuments().get( doc.getUid() );
+        comment_button.setVisibility(View.GONE);
+        decision_count.setVisibility(View.GONE);
+        invalidateSpinner(false);
+        showDecisionCardToolbarMenuItems(false);
+        EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
 
-        if ( inMemoryDocument.getDecisions().size() > 0 ){
-          bottom_line.setVisibility( View.VISIBLE );
+        bottom_line.setVisibility( View.GONE);
 
-          decision_spinner_adapter.clear();
-
-          List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
-
-          for (Decision decision : inMemoryDocument.getDecisions()) {
-            unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
-          }
-
-          decision_spinner_adapter.addAll( unsorted_decisions );
-
-          // если есть резолюции, то отобразить первую
-          if ( decision_spinner_adapter.size() > 0 ) {
-            current_decision = decision_spinner_adapter.getItem(0).getDecision();
-            Timber.tag(TAG).e("decision_spinner_adapter > 0");
-            displayDecision();
-          }
-
-          if (decision_spinner_adapter.size() == 1){
-            invalidateSpinner(false);
-            decision_count.setVisibility(View.GONE);
-          }
-
-          if (decision_spinner_adapter.size() >= 2){
-            decision_count.setText( String.format(" %s ", unsorted_decisions.size()) );
-            decision_count.setVisibility(View.VISIBLE);
-            invalidateSpinner(true);
-          }
-
-        } else {
-          Timber.e("no decisions");
-
-          if (doc.isProcessed() != null && !doc.isProcessed()){
-            EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
-          }
-
-          decision_spinner_adapter.clear();
-
-          Decision empty = new Decision();
-          empty.setSignerBlankText("Нет резолюций");
-          decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
-
-          preview.showEmpty();
-
-          comment_button.setVisibility(View.GONE);
-          decision_count.setVisibility(View.GONE);
-          invalidateSpinner(false);
-          showDecisionCardToolbarMenuItems(false);
-          EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
-
-          bottom_line.setVisibility( View.GONE);
-
-          updateActionText();
-        }
-      },
-      error -> Timber.tag(TAG).e(error));
+        updateActionText();
+      }
+    }
   }
 
   private void invalidateSpinner(boolean visibility) {
@@ -984,7 +947,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         }
       }
 
-      printSigner( decision, isMagnifier ? regNumber : ( doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() ) );
+      printSigner( decision, isMagnifier ? regNumber : ( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() ) );
 
       sendDecisionVisibilityEvent();
     }

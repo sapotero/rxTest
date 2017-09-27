@@ -58,6 +58,8 @@ public class InMemoryDocumentMapper {
     document.setFromFavoritesFolder( doc.isFromFavoritesFolder() != null ? doc.isFromFavoritesFolder() : false );
     document.setFromProcessedFolder( doc.isFromProcessedFolder() != null ? doc.isFromProcessedFolder() : false );
     document.setFirstLink( doc.getFirstLink() );
+    document.setAddressedToType( doc.getAddressedToType() );
+    document.setFromLinks( doc.isFromLinks() );
 
     RSignerEntity rSigner = (RSignerEntity) doc.getSigner();
     Signer signer = new Signer();

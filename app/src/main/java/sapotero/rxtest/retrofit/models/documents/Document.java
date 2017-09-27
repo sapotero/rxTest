@@ -77,6 +77,8 @@ public class Document implements Serializable {
   private transient boolean rejected = false;
   private transient boolean again = false;
   private transient String firstLink = "";
+  private transient String addressedToType = "";
+  private transient boolean fromLinks = false;
 
   public boolean isProject() {
     return isProject;
@@ -432,5 +434,21 @@ public class Document implements Serializable {
 
   public void setAgain(boolean again) {
     this.again = again;
+  }
+
+  public String getAddressedToType() {
+    return addressedToType;
+  }
+
+  public void setAddressedToType(String addressedToType) {
+    this.addressedToType = addressedToType;
+  }
+
+  public boolean isFromLinks() {
+    return fromLinks;
+  }
+
+  public void setFromLinks(boolean fromLinks) {
+    this.fromLinks = fromLinks;
   }
 }
