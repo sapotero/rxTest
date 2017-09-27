@@ -138,8 +138,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private Preview preview;
 
   private String uid;
-  private Decision current_decision; // used in InfoActivity and InfoNoMenuActivity
-  private Decision decision;  // used in DecisionConstructorActivity
+  private Decision decision; // used in InfoActivity, InfoNoMenuActivity and DecisionConstructorActivity
   private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
   private InMemoryDocument doc;
   private SelectTemplateDialog templates;
@@ -173,8 +172,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
             CommandParams params = new CommandParams();
 
-            params.setDecisionId( current_decision.getId() );
-            params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
+            params.setDecisionId( decision.getId() );
+            params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
 
             operationManager.execute(operation, params);
             updateAfterButtonPressed();
@@ -190,8 +189,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       CommandParams params = new CommandParams();
 
-      params.setDecisionId( current_decision.getId() );
-      params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
+      params.setDecisionId( decision.getId() );
+      params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
 
       operationManager.execute(operation, params);
       updateAfterButtonPressed();
@@ -217,8 +216,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       operation =CommandFactory.Operation.REJECT_DECISION;
 
       CommandParams params = new CommandParams();
-      params.setDecisionId( current_decision.getId() );
-      params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
+      params.setDecisionId( decision.getId() );
+      params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
 
       operationManager.execute(operation, params);
       updateAfterButtonPressed();
@@ -238,8 +237,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         CommandFactory.Operation operation = CommandFactory.Operation.REJECT_DECISION;
 
         CommandParams commandParams = new CommandParams();
-        commandParams.setDecisionId(current_decision.getId());
-        commandParams.setDecisionModel(new DecisionMapper().toFormattedModel(current_decision));
+        commandParams.setDecisionId(decision.getId());
+        commandParams.setDecisionModel(new DecisionMapper().toFormattedModel(decision));
 
         if (settings.isShowCommentPost() && dialog1.getInputEditText() != null) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
@@ -280,7 +279,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void updateAfterButtonPressed() {
     try {
       decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
-      current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
+      decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
       displayDecision();
     } catch (Exception e) {
       e.printStackTrace();
@@ -340,18 +339,18 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
       if ( doc != null && Objects.equals(doc.getDocument().getAddressedToType(), "") ){
-        if ( !doc.getDocument().isFromLinks() && current_decision != null ){
+        if ( !doc.getDocument().isFromLinks() && decision != null ){
           if ( settings.isOnline() ){
-            if ( current_decision.isChanged() ){
+            if ( decision.isChanged() ){
               // resolved https://tasks.n-core.ru/browse/MVDESD-13727
               // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
               // как по кнопке, так и по двойному тапу
               EventBus.getDefault().post( new ShowDecisionConstructor() );
             }
 
-            if ( current_decision.getApproved() != null &&
-              !current_decision.getApproved() &&
-              !current_decision.isTemporary() && !doc.isProcessed() &&  isActiveOrRed()){
+            if ( decision.getApproved() != null &&
+              !decision.getApproved() &&
+              !decision.isTemporary() && !doc.isProcessed() &&  isActiveOrRed()){
               Timber.tag("GestureListener").w("2");
               edit();
             } else {
@@ -360,7 +359,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           } else {
             if (
-              current_decision.isTemporary() && !doc.isProcessed() ){
+              decision.isTemporary() && !doc.isProcessed() ){
               Timber.tag("GestureListener").w("1");
               edit();
             } else {
@@ -369,7 +368,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           }
         }
 
-        if ( !doc.getDocument().isFromLinks() && current_decision == null ) {
+        if ( !doc.getDocument().isFromLinks() && decision == null ) {
           settings.setDecisionActiveUid("0");
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
@@ -474,8 +473,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         decision_spinner_adapter.setSelection(position);
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
-          current_decision = decision_spinner_adapter.getItem(position).getDecision();
-          settings.setDecisionActiveUid( current_decision.getId() );
+          decision = decision_spinner_adapter.getItem(position).getDecision();
+          settings.setDecisionActiveUid( decision.getId() );
           displayDecision();
         } else {
           // resolved https://tasks.n-core.ru/browse/MPSED-2154
@@ -487,7 +486,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       public void onNothingSelected(AdapterView<?> adapterView) {
         decision_spinner_adapter.setSelection(-1);
         if ( decision_spinner_adapter.getCount() > 0 ){
-          current_decision = decision_spinner_adapter.getItem(0).getDecision();
+          decision = decision_spinner_adapter.getItem(0).getDecision();
           Timber.tag(TAG).e("onNothingSelected");
           displayDecision();
         } else {
@@ -501,8 +500,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void  updateTemporary(){
     Timber.tag(TAG).d(" * updateTemporary %s", temporary.getVisibility() );
 
-    if (current_decision != null) {
-      if ( current_decision.isTemporary() ){
+    if (decision != null) {
+      if ( decision.isTemporary() ){
         temporary.setVisibility(View.VISIBLE);
         next_person_button.setVisibility( View.GONE );
         prev_person_button.setVisibility( View.GONE );
@@ -519,7 +518,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     showDecisionCardToolbarMenuItems(true);
 
     // FIX для ссылок
-    if (current_decision == null) {
+    if (decision == null) {
       next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
       prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
     }
@@ -538,9 +537,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
     // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
     if ( doc != null && doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
-      if ( current_decision != null &&
-           current_decision.getSignerId() != null &&
-           current_decision.getSignerId().equals( settings.getCurrentUserId() ) ){
+      if ( decision != null &&
+           decision.getSignerId() != null &&
+           decision.getSignerId().equals( settings.getCurrentUserId() ) ){
         next_person_button.setText( getString(R.string.menu_info_next_person));
         setSignEnabled(true);
       } else {
@@ -556,12 +555,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
     }
 
-    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && !current_decision.getApproved() ){
+    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && !decision.getApproved() ){
       next_person_button.setVisibility( View.INVISIBLE );
       prev_person_button.setVisibility( View.INVISIBLE );
     }
 
-    if ( current_decision != null && current_decision.isTemporary() ){
+    if ( decision != null && decision.isTemporary() ){
       temporary.setVisibility(View.VISIBLE);
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );
@@ -581,10 +580,10 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   private boolean isActiveOrRed() {
-    return current_decision != null && current_decision.getSignerId() != null
-      && current_decision.getSignerId().equals( settings.getCurrentUserId() )
-      || current_decision != null && current_decision.getRed() != null
-      && current_decision.getRed();
+    return decision != null && decision.getSignerId() != null
+      && decision.getSignerId().equals( settings.getCurrentUserId() )
+      || decision != null && decision.getRed() != null
+      && decision.getRed();
   }
 
   private void checkActiveDecision() {
@@ -712,7 +711,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
       .title("Комментарий резолюции")
       .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
-      .input("Комментарий", current_decision.getComment(), (dialog, input) -> {})
+      .input("Комментарий", decision.getComment(), (dialog, input) -> {})
 
       .positiveText(R.string.constructor_save)
       .negativeText(R.string.constructor_close)
@@ -720,15 +719,15 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       
       .onPositive((dialog, which) -> {
 
-        if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), current_decision.getComment()) ) {
+        if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
 
           CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
           CommandParams params = new CommandParams();
 
-          Decision decision = new DecisionMapper().toFormattedModel( current_decision );
+          Decision decision = new DecisionMapper().toFormattedModel(this.decision);
           decision.setComment( dialog.getInputEditText().getText().toString() );
           params.setDecisionModel( decision );
-          params.setDecisionId( current_decision.getId() );
+          params.setDecisionId( this.decision.getId() );
 
           Timber.e("DECISION %s", new Gson().toJson(decision));
 
@@ -746,7 +745,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
       .title("Комментарий резолюции")
-      .content( current_decision.getComment() )
+      .content( decision.getComment() )
       .positiveText(R.string.constructor_close)
       .onPositive((dialog, which) -> dialog.dismiss())
       .autoDismiss(false);
@@ -824,7 +823,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       // если есть резолюции, то отобразить первую
       if ( decision_spinner_adapter.size() > 0 ) {
-        current_decision = decision_spinner_adapter.getItem(0).getDecision();
+        decision = decision_spinner_adapter.getItem(0).getDecision();
         Timber.tag(TAG).e("decision_spinner_adapter > 0");
         displayDecision();
       }
@@ -882,27 +881,27 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
-    if (!isInEditor && current_decision != null && current_decision.getId() != null) {
+    if (!isInEditor && decision != null && decision.getId() != null) {
 
-      if (current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
+      if (decision.getComment() != null && !Objects.equals(decision.getComment(), "")){
         comment_button.setVisibility(View.VISIBLE);
       } else {
         comment_button.setVisibility(View.GONE);
       }
 
-      preview.show( current_decision );
+      preview.show(decision);
 
-      settings.setDecisionActiveUid( current_decision.getId() );
+      settings.setDecisionActiveUid( decision.getId() );
 
-      updateVisibility( current_decision.getApproved() );
+      updateVisibility( decision.getApproved() );
 
       sendDecisionVisibilityEvent();
     }
   }
 
   private void sendDecisionVisibilityEvent() {
-    if (current_decision != null && !isInEditor) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.getApproved() != null && !current_decision.getApproved(), current_decision.getId(), null ) );
+    if (decision != null && !isInEditor) {
+      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && decision.getApproved() != null && !decision.getApproved(), decision.getId(), null ) );
     }
   }
 
@@ -1251,14 +1250,14 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ApproveDecisionEvent event) throws Exception {
     Timber.d("ApproveDecisionEvent");
-    current_decision.setApproved(true);
+    decision.setApproved(true);
     displayDecision();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RejectDecisionEvent event) throws Exception {
     Timber.d("RejectDecisionEvent");
-    current_decision.setApproved(false);
+    decision.setApproved(false);
     displayDecision();
     hideButtons();
   }
@@ -1284,7 +1283,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
-    if (current_decision != null) {
+    if (decision != null) {
       sendDecisionVisibilityEvent();
     } else {
       EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, null ) );
