@@ -29,6 +29,9 @@ public class DocumentInfoAction {
   @Expose
   private String toS;
 
+  // Дополнительные поля, которые не будут сериализованы
+  private transient Integer updatedAtTimestamp = 0;
+
   public String getOfficialId() {
     return officialId;
   }
@@ -75,5 +78,13 @@ public class DocumentInfoAction {
 
   public void setToS(String toS) {
     this.toS = toS;
+  }
+
+  public Integer getUpdatedAtTimestamp() {
+    return updatedAtTimestamp;
+  }
+
+  public void setUpdatedAtTimestamp(Integer updatedAtTimestamp) {
+    this.updatedAtTimestamp = updatedAtTimestamp;
   }
 }

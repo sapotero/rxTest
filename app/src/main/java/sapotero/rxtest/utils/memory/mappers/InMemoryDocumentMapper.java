@@ -6,16 +6,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.models.actions.RAction;
+import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import timber.log.Timber;
 
 public class InMemoryDocumentMapper {
 
@@ -91,6 +96,33 @@ public class InMemoryDocumentMapper {
     return decisions;
   }
 
+  private static List<DocumentInfoAction> convertActions(RDocumentEntity document) {
+    List<DocumentInfoAction> actions = new ArrayList<>();
+
+    if ( document != null && document.getActions() != null ) {
+      ActionMapper actionMapper = new ActionMapper();
+
+      for ( RAction action : document.getActions() ) {
+        RActionEntity actionEntity = (RActionEntity) action;
+        DocumentInfoAction actionModel = actionMapper.toModel( actionEntity );
+
+        if (actionEntity.getUpdatedAt() != null) {
+          try {
+            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            Date date = format.parse( actionEntity.getUpdatedAt() );
+            actionModel.setUpdatedAtTimestamp( (int) (date.getTime()/1000) );
+          } catch (ParseException e) {
+            e.printStackTrace();
+          }
+        }
+
+        actions.add( actionModel );
+      }
+    }
+
+    return actions;
+  }
+
   public static InMemoryDocument fromDB(RDocumentEntity document) {
 
     InMemoryDocument imd = new InMemoryDocument();
@@ -98,6 +130,7 @@ public class InMemoryDocumentMapper {
     doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
 
     List<Decision> decisions = convertDecisions(document);
+    List<DocumentInfoAction> actions = convertActions(document);
 
     imd.setUid( document.getUid() );
     imd.setUpdatedAt( document.getUpdatedAt() );
@@ -106,6 +139,7 @@ public class InMemoryDocumentMapper {
     imd.setIndex(document.getDocumentType());
     imd.setDocument( doc );
     imd.setDecisions( decisions );
+    imd.setActions( actions );
     imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );

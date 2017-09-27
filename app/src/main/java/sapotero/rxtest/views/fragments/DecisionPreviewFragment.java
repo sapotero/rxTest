@@ -59,7 +59,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
@@ -77,6 +76,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -141,6 +141,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private Decision decision;  // used in DecisionConstructorActivity
   private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
   private RDocumentEntity doc;
+  private InMemoryDocument inMemoryDocument;
   private SelectTemplateDialog templates;
   private String regNumber = "";
 
@@ -599,24 +600,18 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   // Так нужно отображать, но есть проблемы на стороне СЭДика
   // Поэтому пока не используем честный способ, а просто показываем последнее действие
   private void updateActionText() {
-    dataStore
-      .select(RActionEntity.class)
-      .where(RActionEntity.DOCUMENT_ID.eq(doc.getId()))
-      .orderBy(RActionEntity.UPDATED_AT.desc())
-      .limit(1)
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.newThread())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).w(" %s | %s", data.getUpdatedAt(), data.getToS() );
-          setActionText( data.getToS() );
-        },
-        error -> Timber.tag(TAG).e(error)
-      );
+    if ( inMemoryDocument != null && inMemoryDocument.getActions() != null && inMemoryDocument.getActions().size() > 0 ) {
+      List<DocumentInfoAction> actions = new ArrayList<>();
+      actions.addAll( inMemoryDocument.getActions() );
 
-    if ( !(doc != null && doc.getActions() != null && doc.getActions().size() > 0) ) {
+      Collections.sort(actions, (o1, o2) -> o2.getUpdatedAtTimestamp().compareTo( o1.getUpdatedAtTimestamp() ) );
+
+      DocumentInfoAction data = actions.get(0);
+
+      Timber.tag(TAG).w(" %s | %s", data.getUpdatedAt(), data.getToS() );
+      setActionText( data.getToS() );
+
+    } else {
       action_wrapper.setVisibility(View.GONE);
     }
   }
@@ -819,7 +814,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
         preview.showEmpty();
 
-        InMemoryDocument inMemoryDocument = store.getDocuments().get( doc.getUid() );
+        inMemoryDocument = store.getDocuments().get( doc.getUid() );
 
         if ( inMemoryDocument.getDecisions().size() > 0 ){
           bottom_line.setVisibility( View.VISIBLE );
@@ -963,7 +958,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           isOnlyOneBlock = true;
         }
 
-        List<Block> blocks = decision.getBlocks();
+        List<Block> blocks = new ArrayList<>();
+        blocks.addAll( decision.getBlocks() );
 
         Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
 
@@ -1205,7 +1201,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       if( block.getPerformers().size() > 0 ){
 
-        List<Performer> users = block.getPerformers();
+        List<Performer> users = new ArrayList<>();
+        users.addAll( block.getPerformers() );
 
         Collections.sort(users, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0 );
 
