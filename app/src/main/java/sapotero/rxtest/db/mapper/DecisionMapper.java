@@ -71,6 +71,10 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     return formattedModel;
   }
 
+  public Decision toFormattedModel(Decision model) {
+    return toFormattedModel( toEntity( model ) );
+  }
+
   private void setBaseFields(Decision model, RDecisionEntity entity) {
     model.setId( entity.getUid() );
     model.setLetterhead( entity.getLetterhead() );

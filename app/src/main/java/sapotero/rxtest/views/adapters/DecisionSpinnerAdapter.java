@@ -19,11 +19,9 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.decisions.RBlock;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformer;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
@@ -78,7 +76,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
         RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity =
         dataStore
           .select(RDisplayFirstDecisionEntity.class)
-          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( item.getDecision().getUid() ))
+          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( item.getDecision().getId() ))
           .and(RDisplayFirstDecisionEntity.USER_ID.eq( current_user ))
           .get().firstOrNull();
 
@@ -103,12 +101,12 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     }
   }
 
-  public ArrayList<String> getPerformerIds(DecisionSpinnerItem decisionSpinnerItem){
-    ArrayList<String> performers = new ArrayList<String>();
+  private ArrayList<String> getPerformerIds(DecisionSpinnerItem decisionSpinnerItem){
+    ArrayList<String> performers = new ArrayList<>();
 
-    for ( RBlock block : decisionSpinnerItem.getDecision().getBlocks()) {
-      for ( RPerformer perf : ((RBlockEntity) block).getPerformers() ) {
-        performers.add( ((RPerformerEntity) perf).getPerformerId() );
+    for ( Block block : decisionSpinnerItem.getDecision().getBlocks()) {
+      for ( Performer perf : block.getPerformers() ) {
+        performers.add( perf.getPerformerId() );
       }
     }
 
@@ -152,7 +150,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     Boolean result = false;
 
     for ( DecisionSpinnerItem decision: decisions ) {
-      if (!decision.getDecision().isApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
+      if (!decision.getDecision().getApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
         result = true;
         break;
       }
@@ -165,9 +163,9 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     for (int i = 0; i < decisions.size(); i++) {
       DecisionSpinnerItem item = decisions.get(i);
 
-      Timber.tag(TAG).e("%s\n%s", item.getDecision().getUid(), uid );
+      Timber.tag(TAG).e("%s\n%s", item.getDecision().getId(), uid );
 
-      if (Objects.equals(item.getDecision().getUid(), uid)){
+      if (Objects.equals(item.getDecision().getId(), uid)){
         item.getDecision().setTemporary(true);
         notifyDataSetChanged();
         break;

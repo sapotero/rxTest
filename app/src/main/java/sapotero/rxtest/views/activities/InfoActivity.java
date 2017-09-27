@@ -419,7 +419,7 @@ public class InfoActivity extends AppCompatActivity {
 
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
-      .where(RDecisionEntity.ID.eq( settings.getDecisionActiveId() ) )
+      .where(RDecisionEntity.UID.eq( settings.getDecisionActiveUid() ) )
       .get().firstOrNull();
 
     if (decision != null) {

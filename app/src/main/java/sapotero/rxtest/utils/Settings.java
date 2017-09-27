@@ -117,7 +117,7 @@ public class Settings implements ISettings {
   private Preference<Boolean> loadFromSearch;
   private Preference<String> lastSeenUid;
   private Preference<Boolean> decisionWithAssignment;
-  private Preference<Integer> decisionActiveId;
+  private Preference<String> decisionActiveId;
   private Preference<Boolean> actionsConfirm;
   private Preference<Boolean> controlConfirm;
   private Preference<Boolean> showCommentPost;
@@ -225,7 +225,7 @@ public class Settings implements ISettings {
     loadFromSearch                 = settings.getBoolean(LOAD_FROM_SEARCH_KEY);
     lastSeenUid                    = settings.getString(LAST_SEEN_UID_KEY);
     decisionWithAssignment         = settings.getBoolean(DECISION_WITH_ASSIGNMENT_KEY);
-    decisionActiveId               = settings.getInteger(DECISION_ACTIVE_ID_KEY);
+    decisionActiveId               = settings.getString(DECISION_ACTIVE_ID_KEY);
     actionsConfirm                 = settings.getBoolean(ACTIONS_CONFIRM_KEY);
     controlConfirm                 = settings.getBoolean(CONTROL_CONFIRM_KEY);
     showCommentPost                = settings.getBoolean(SHOW_COMMENT_POST_KEY);
@@ -622,13 +622,13 @@ public class Settings implements ISettings {
   }
 
   @Override
-  public int getDecisionActiveId() {
-    return getInteger(decisionActiveId);
+  public String getDecisionActiveUid() {
+    return getString(decisionActiveId);
   }
 
   @Override
-  public void setDecisionActiveId(int value) {
-    setInteger(decisionActiveId, value);
+  public void setDecisionActiveUid(String value) {
+    setString(decisionActiveId, value);
   }
 
   @Override

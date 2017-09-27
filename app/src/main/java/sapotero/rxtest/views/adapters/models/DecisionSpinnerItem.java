@@ -1,20 +1,20 @@
 package sapotero.rxtest.views.adapters.models;
 
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.retrofit.models.document.Decision;
 
 public class DecisionSpinnerItem {
 
-  private RDecisionEntity decision;
+  private Decision decision;
 
-  public DecisionSpinnerItem(RDecisionEntity decision) {
+  public DecisionSpinnerItem(Decision decision) {
     this.decision = decision;
   }
 
-  public RDecisionEntity getDecision() {
+  public Decision getDecision() {
     return decision;
   }
 
-  public void setDecision(RDecisionEntity decision) {
+  public void setDecision(Decision decision) {
     this.decision = decision;
   }
 

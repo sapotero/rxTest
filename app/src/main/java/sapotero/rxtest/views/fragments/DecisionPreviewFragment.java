@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,12 +60,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlock;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformer;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
@@ -82,8 +75,12 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
+import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -101,6 +98,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
+  @Inject MemoryStore store;
 
   @BindView(R.id.activity_info_decision_root_layout) LinearLayout rootLayout;
 
@@ -139,7 +137,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private Preview preview;
 
   private String uid;
-  private RDecisionEntity current_decision; // used in InfoActivity and InfoNoMenuActivity
+  private Decision current_decision; // used in InfoActivity and InfoNoMenuActivity
   private Decision decision;  // used in DecisionConstructorActivity
   private DecisionSpinnerItem decisionSpinnerItem;  // used in magnifier
   private RDocumentEntity doc;
@@ -174,7 +172,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
             CommandParams params = new CommandParams();
 
-            params.setDecisionId( current_decision.getUid() );
+            params.setDecisionId( current_decision.getId() );
             params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
             operationManager.execute(operation, params);
@@ -191,7 +189,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       CommandParams params = new CommandParams();
 
-      params.setDecisionId( current_decision.getUid() );
+      params.setDecisionId( current_decision.getId() );
       params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
       operationManager.execute(operation, params);
@@ -218,7 +216,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       operation =CommandFactory.Operation.REJECT_DECISION;
 
       CommandParams params = new CommandParams();
-      params.setDecisionId( current_decision.getUid() );
+      params.setDecisionId( current_decision.getId() );
       params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
       operationManager.execute(operation, params);
@@ -239,7 +237,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         CommandFactory.Operation operation = CommandFactory.Operation.REJECT_DECISION;
 
         CommandParams commandParams = new CommandParams();
-        commandParams.setDecisionId(current_decision.getUid());
+        commandParams.setDecisionId(current_decision.getId());
         commandParams.setDecisionModel(new DecisionMapper().toFormattedModel(current_decision));
 
         if (settings.isShowCommentPost() && dialog1.getInputEditText() != null) {
@@ -343,16 +341,15 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       if ( doc != null && Objects.equals(doc.getAddressedToType(), "") ){
         if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
           if ( settings.isOnline() ){
-            if ( current_decision.isChanged() != null &&  current_decision.isChanged() ){
+            if ( current_decision.isChanged() ){
               // resolved https://tasks.n-core.ru/browse/MVDESD-13727
               // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
               // как по кнопке, так и по двойному тапу
               EventBus.getDefault().post( new ShowDecisionConstructor() );
             }
 
-            if ( current_decision.isApproved() != null &&
-              !current_decision.isApproved() &&
-              current_decision.isTemporary() != null &&
+            if ( current_decision.getApproved() != null &&
+              !current_decision.getApproved() &&
               !current_decision.isTemporary() && !doc.isProcessed() &&  isActiveOrRed()){
               Timber.tag("GestureListener").w("2");
               edit();
@@ -362,7 +359,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           } else {
             if (
-              current_decision.isTemporary() != null &&
               current_decision.isTemporary() && !doc.isProcessed() ){
               Timber.tag("GestureListener").w("1");
               edit();
@@ -375,7 +371,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
           current_decision == null ){
 
-          settings.setDecisionActiveId(0);
+          settings.setDecisionActiveUid("0");
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
           context.startActivity(create_intent);
@@ -446,7 +442,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void invalidate() {
     if ( isInEditor ) {
       if ( decision != null ) {
-        preview.show( new DecisionMapper().toEntity( decision ) );
+        preview.show( decision );
       }
 
     } else if ( !isMagnifier ) {
@@ -480,7 +476,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
           current_decision = decision_spinner_adapter.getItem(position).getDecision();
-          settings.setDecisionActiveId( current_decision.getId() );
+          settings.setDecisionActiveUid( current_decision.getId() );
           displayDecision();
         } else {
           // resolved https://tasks.n-core.ru/browse/MPSED-2154
@@ -507,7 +503,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     Timber.tag(TAG).d(" * updateTemporary %s", temporary.getVisibility() );
 
     if (current_decision != null) {
-      if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){
+      if ( current_decision.isTemporary() ){
         temporary.setVisibility(View.VISIBLE);
         next_person_button.setVisibility( View.GONE );
         prev_person_button.setVisibility( View.GONE );
@@ -561,12 +557,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
     }
 
-    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && !current_decision.isApproved() ){
+    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && !current_decision.getApproved() ){
       next_person_button.setVisibility( View.INVISIBLE );
       prev_person_button.setVisibility( View.INVISIBLE );
     }
 
-    if ( current_decision != null && current_decision.isTemporary() != null && current_decision.isTemporary() ){
+    if ( current_decision != null && current_decision.isTemporary() ){
       temporary.setVisibility(View.VISIBLE);
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );
@@ -588,8 +584,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private boolean isActiveOrRed() {
     return current_decision != null && current_decision.getSignerId() != null
       && current_decision.getSignerId().equals( settings.getCurrentUserId() )
-      || current_decision != null && current_decision.isRed() != null
-      && current_decision.isRed();
+      || current_decision != null && current_decision.getRed() != null
+      && current_decision.getRed();
   }
 
   private void checkActiveDecision() {
@@ -739,7 +735,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           Decision decision = new DecisionMapper().toFormattedModel( current_decision );
           decision.setComment( dialog.getInputEditText().getText().toString() );
           params.setDecisionModel( decision );
-          params.setDecisionId( current_decision.getUid() );
+          params.setDecisionId( current_decision.getId() );
 
           Timber.e("DECISION %s", new Gson().toJson(decision));
 
@@ -778,7 +774,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   public void edit(){
     Timber.tag(TAG).v("edit");
-    RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
+    Decision data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
 
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
@@ -823,15 +819,16 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
         preview.showEmpty();
 
-        if ( doc.getDecisions().size() > 0 ){
+        InMemoryDocument inMemoryDocument = store.getDocuments().get( doc.getUid() );
+
+        if ( inMemoryDocument.getDecisions().size() > 0 ){
           bottom_line.setVisibility( View.VISIBLE );
 
           decision_spinner_adapter.clear();
 
           List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
 
-          for (RDecision rDecision: doc.getDecisions()) {
-            RDecisionEntity decision = (RDecisionEntity) rDecision;
+          for (Decision decision : inMemoryDocument.getDecisions()) {
             unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
           }
 
@@ -864,7 +861,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           decision_spinner_adapter.clear();
 
-          RDecisionEntity empty = new RDecisionEntity();
+          Decision empty = new Decision();
           empty.setSignerBlankText("Нет резолюций");
           decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
 
@@ -899,7 +896,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
-    if (!isInEditor && current_decision != null && current_decision.getUid() != null) {
+    if (!isInEditor && current_decision != null && current_decision.getId() != null) {
 
       if (current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
         comment_button.setVisibility(View.VISIBLE);
@@ -909,9 +906,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       preview.show( current_decision );
 
-      settings.setDecisionActiveId( current_decision.getId() );
+      settings.setDecisionActiveUid( current_decision.getId() );
 
-      updateVisibility( current_decision.isApproved() );
+      updateVisibility( current_decision.getApproved() );
 
       sendDecisionVisibilityEvent();
     }
@@ -919,7 +916,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   private void sendDecisionVisibilityEvent() {
     if (current_decision != null && !isInEditor) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved(), current_decision.getUid(), null ) );
+      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.getApproved() != null && !current_decision.getApproved(), current_decision.getId(), null ) );
     }
   }
 
@@ -942,7 +939,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
     }
 
-    private void show( RDecisionEntity decision ){
+    private void show(Decision decision) {
       clear();
 
       showMagnifer();
@@ -966,31 +963,24 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           isOnlyOneBlock = true;
         }
 
-        Set<RBlock> _blocks = decision.getBlocks();
-
-        ArrayList<RBlockEntity> blocks = new ArrayList<>();
-        for (RBlock b : _blocks){
-          blocks.add( (RBlockEntity) b );
-        }
+        List<Block> blocks = decision.getBlocks();
 
         Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
 
-        for (RBlock b: blocks){
-          RBlockEntity block = (RBlockEntity) b;
-
+        for (Block block : blocks){
           Timber.tag("showPosition").v( "ShowPosition: %s", block.getAppealText() );
 
           printAppealText( block, isOnlyOneBlock );
 
-          if ( block.isTextBefore() ){
+          if ( block.getTextBefore() ){
 
             printBlockText( block, isOnlyOneBlock );
-            if ( block.isHidePerformers() != null && !block.isHidePerformers()){
+            if ( block.getHidePerformers() != null && !block.getHidePerformers()){
               printBlockPerformers( block, isOnlyOneBlock );
             }
 
           } else {
-            if ( block.isHidePerformers() != null && !block.isHidePerformers())
+            if ( block.getHidePerformers() != null && !block.getHidePerformers())
               printBlockPerformers( block, isOnlyOneBlock );
             printBlockText( block, isOnlyOneBlock);
           }
@@ -1023,7 +1013,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       magnifer.setClickable(true);
     }
 
-    private void printSigner(RDecisionEntity decision, String registrationNumber) {
+    private void printSigner(Decision decision, String registrationNumber) {
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
       relativeSigner.setVerticalGravity( Gravity.BOTTOM );
@@ -1037,7 +1027,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       LinearLayout signer_view = new LinearLayout(context);
       signer_view.setOrientation(LinearLayout.VERTICAL);
 
-      if ( decision.isShowPosition() != null && decision.isShowPosition() ){
+      if ( decision.getShowPosition() != null && decision.getShowPosition() ){
         TextView signerPositionView = new TextView(context);
         signerPositionView.setText( decision.getSignerPositionS() );
         signerPositionView.setTextColor( ContextCompat.getColor(context, R.color.md_grey_800) );
@@ -1165,12 +1155,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
     }
 
-    private void printBlockText(RBlockEntity block, Boolean isOnlyOneBlock) {
+    private void printBlockText(Block block, Boolean isOnlyOneBlock) {
       TextView block_view = new TextView(context);
       block_view.setTextColor( Color.BLACK );
       block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
-      if ( !isOnlyOneBlock && block.isHidePerformers() != null && block.isHidePerformers() && ( block.getAppealText() == null || Objects.equals(block.getAppealText(), "") ) ) {
+      if ( !isOnlyOneBlock && block.getHidePerformers() != null && block.getHidePerformers() && ( block.getAppealText() == null || Objects.equals(block.getAppealText(), "") ) ) {
         block_view.setText( String.format( "%s. %s", block.getNumber(), block.getText() ) );
       } else {
         block_view.setText( block.getText() );
@@ -1184,8 +1174,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       textLabels.add( block_view );
     }
 
-    private void printAppealText(RBlock _block, Boolean isOnlyOneBlock) {
-      RBlockEntity block = (RBlockEntity) _block;
+    private void printAppealText(Block block, Boolean isOnlyOneBlock) {
       String text = "";
 
       if (block.getAppealText() != null && !Objects.equals(block.getAppealText(), "")) {
@@ -1207,9 +1196,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       textLabels.add( blockAppealView );
     }
 
-    private void printBlockPerformers(RBlock _block, Boolean isOnlyOneBlock) {
-      RBlockEntity block = (RBlockEntity) _block;
-
+    private void printBlockPerformers(Block block, Boolean isOnlyOneBlock) {
       boolean numberPrinted = false;
 
       LinearLayout users_view = new LinearLayout(context);
@@ -1218,17 +1205,11 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       if( block.getPerformers().size() > 0 ){
 
-        Set<RPerformer> users = block.getPerformers();
-        ArrayList<RPerformerEntity> _users = new ArrayList<>();
+        List<Performer> users = block.getPerformers();
 
-        for (RPerformer _user: users){
-          RPerformerEntity user = (RPerformerEntity) _user;
-          _users.add(user);
-        }
+        Collections.sort(users, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0 );
 
-        Collections.sort(_users, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0 );
-
-        for (RPerformerEntity user: _users){
+        for (Performer user : users) {
 
           String performerName = "";
 
@@ -1245,7 +1226,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           performerName += tempPerformerName;
 
-          if (user.isIsResponsible() != null && user.isIsResponsible()){
+          if (user.getResponsible() != null && user.getResponsible()){
             performerName += " *";
           }
 

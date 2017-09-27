@@ -106,6 +106,10 @@ public class Decision implements Serializable {
   @Expose
   private List<String> errors = null;
 
+  // Дополнительные поля, которые не будут сериализованы
+  private transient boolean temporary = false;
+  private transient boolean changed = false;
+
   public List<String> getErrors() {
     return errors;
   }
@@ -482,5 +486,21 @@ public class Decision implements Serializable {
 
   public void setAssignment(boolean assignment) {
     this.assignment = assignment;
+  }
+
+  public boolean isTemporary() {
+    return temporary;
+  }
+
+  public void setTemporary(boolean temporary) {
+    this.temporary = temporary;
+  }
+
+  public boolean isChanged() {
+    return changed;
+  }
+
+  public void setChanged(boolean changed) {
+    this.changed = changed;
   }
 }

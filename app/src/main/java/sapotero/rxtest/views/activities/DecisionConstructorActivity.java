@@ -782,10 +782,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
     }
 
   private void loadDecision () {
-    Integer decision_id = settings.getDecisionActiveId();
+    String decision_id = settings.getDecisionActiveUid();
     rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
-      .where(RDecisionEntity.ID.eq(decision_id))
+      .where(RDecisionEntity.UID.eq(decision_id))
       .get().firstOrNull();
     if (rDecisionEntity != null) {
       raw_decision = new Decision();

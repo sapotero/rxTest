@@ -82,6 +82,8 @@ public class InMemoryDocumentMapper {
       for ( RDecision decision : document.getDecisions() ) {
         RDecisionEntity decisionEntity = (RDecisionEntity) decision;
         Decision decisionModel = decisionMapper.toModel( decisionEntity );
+        decisionModel.setTemporary( decisionEntity.isTemporary() != null ? decisionEntity.isTemporary() : false );
+        decisionModel.setChanged( decisionEntity.isChanged() != null ? decisionEntity.isChanged() : false );
         decisions.add( decisionModel );
       }
     }
