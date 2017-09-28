@@ -77,6 +77,7 @@ public class Document implements Serializable {
   private transient boolean rejected = false;
   private transient boolean again = false;
   private transient String firstLink = "";
+  public Boolean changed;
 
   public boolean isProject() {
     return isProject;
@@ -110,10 +111,10 @@ public class Document implements Serializable {
   public void setControl(Boolean control) {
       this.control = control;
   }
-
   public Boolean getFavorites() {
       return favorites;
   }
+
   public void setFavorites(Boolean favorites) {
       this.favorites = favorites;
   }
@@ -126,10 +127,8 @@ public class Document implements Serializable {
       this.organization = organization;
   }
 
+
   public String organization;
-
-
-  public Boolean changed;
 
   public Boolean getChanged() {
       return changed;

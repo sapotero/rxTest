@@ -72,7 +72,7 @@ public class AddToFolder extends SharedCommand {
       .setLabel(LabelType.FAVORITES);
     store.process( transaction );
 
-    removeChangedInDb();
+    removeChangedInDb( false );
 
     queueManager.setExecutedRemote(this);
   }

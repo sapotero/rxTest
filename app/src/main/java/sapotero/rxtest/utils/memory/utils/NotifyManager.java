@@ -12,14 +12,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -54,6 +51,7 @@ public class NotifyManager {
       notifyPubSubject
         .filter(notifyMessageModel -> !notifyMessageModel.isFirstRunApp())
         .filter(notifyMessageModel -> !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER"))
+        .filter(notifyMessageModel -> Objects.equals(notifyMessageModel.getDocumentType().name(), "DOCUMENT"))
         .filter(notifyMessageModel -> {
           /*приводим строку index к виду JournalStatus. Проверяем в разрешенных журналах*/
           JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
@@ -95,7 +93,7 @@ public class NotifyManager {
     builder
       .setContentTitle(contentTitle)
       .setContentText(contentText)
-      .setSmallIcon(R.drawable.ic_error)
+      .setSmallIcon(R.drawable.gerb)
       .setDeleteIntent(pendingIntentDismiss)
       .setAutoCancel(true)
       .setDefaults(Notification.DEFAULT_ALL)
@@ -119,7 +117,7 @@ public class NotifyManager {
     builder
       .setContentTitle(contentTitle)
       .setContentText(contentText)
-      .setSmallIcon(R.drawable.ic_error)
+      .setSmallIcon(R.drawable.gerb)
       .setDeleteIntent(pendingIntentDismiss)
       .setAutoCancel(true)
       .setDefaults(Notification.DEFAULT_ALL)
