@@ -31,6 +31,19 @@ public class Assistant implements Serializable, IPerformer {
   @Expose
   private String image;
 
+  @SerializedName("for_information")
+  @Expose
+  private Boolean forInformation;
+
+  public Boolean getForInformation() {
+    return forInformation;
+  }
+
+  public Assistant setForInformation(Boolean forInformation) {
+    this.forInformation = forInformation;
+    return this;
+  }
+
   public String getImage() {
     return image;
   }
@@ -267,5 +280,15 @@ public class Assistant implements Serializable, IPerformer {
   @Override
   public void setIImage(String image) {
     setImage(image);
+  }
+
+  @Override
+  public Boolean getIForInformation() {
+    return getForInformation();
+  }
+
+  @Override
+  public void setIForInformation(Boolean forInformation) {
+    setForInformation(forInformation);
   }
 }
