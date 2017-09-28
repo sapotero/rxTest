@@ -49,7 +49,7 @@ public class Performer implements IPerformer {
 
     @SerializedName("for_information")
     @Expose
-    private Boolean forInformation = false;
+    private Boolean forInformation;
 
     public Boolean getForInformation() {
         return forInformation;
@@ -431,6 +431,6 @@ public class Performer implements IPerformer {
 
   @Override
   public void setIForInformation(Boolean forInformation) {
-    setForInformation(forInformation);
+    setForInformation(forInformation != null ? forInformation : false);
   }
 }

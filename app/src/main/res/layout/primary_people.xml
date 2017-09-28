@@ -47,7 +47,6 @@
         <Switch
             android:id="@+id/for_information"
             android:text="@string/primary_people_info"
-            android:visibility="gone"
             android:checked="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

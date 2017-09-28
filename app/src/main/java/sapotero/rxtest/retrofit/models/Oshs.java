@@ -449,6 +449,6 @@ public class Oshs implements Serializable, IPerformer {
 
   @Override
   public void setIForInformation(Boolean forInformation) {
-    setForInformation(forInformation);
+    setForInformation(forInformation != null ? forInformation : false);
   }
 }
