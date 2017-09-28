@@ -21,8 +21,8 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
-import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
 public class DecisionSpinnerAdapter extends BaseAdapter {
@@ -31,13 +31,13 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   private final String current_user;
   private final Context context;
-  private List<DecisionSpinnerItem> decisions;
+  private List<Decision> decisions;
   private LayoutInflater inflater;
   private int mPos = -1;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public DecisionSpinnerAdapter(Context context, String current_user,  List<DecisionSpinnerItem> decisions) {
+  public DecisionSpinnerAdapter(Context context, String current_user,  List<Decision> decisions) {
     this.context = context;
     this.current_user = current_user;
     this.decisions = decisions;
@@ -52,31 +52,31 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   }
 
   @Override
-  public DecisionSpinnerItem getItem(int position) {
+  public Decision getItem(int position) {
     return position >= 0 && position <= decisions.size() - 1 ? decisions.get(position) : decisions.get(0);
   }
 
-  public void add(DecisionSpinnerItem item) {
+  public void add(Decision item) {
     decisions.add(item);
     notifyDataSetChanged();
   }
 
-  public void addAll(List<DecisionSpinnerItem> items) {
+  public void addAll(List<Decision> items) {
     if (items.size() > 0){
 
-      List<DecisionSpinnerItem> createdAndSigner = new ArrayList<>();
-      List<DecisionSpinnerItem> list = new ArrayList<>();
-      List<DecisionSpinnerItem> signer = new ArrayList<>();
-      List<DecisionSpinnerItem> performer = new ArrayList<>();
+      List<Decision> createdAndSigner = new ArrayList<>();
+      List<Decision> list = new ArrayList<>();
+      List<Decision> signer = new ArrayList<>();
+      List<Decision> performer = new ArrayList<>();
 
       decisions.clear();
 
-      for (DecisionSpinnerItem item: items ) {
+      for (Decision item: items ) {
 
         RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity =
         dataStore
           .select(RDisplayFirstDecisionEntity.class)
-          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( item.getDecision().getId() ))
+          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( item.getId() ))
           .and(RDisplayFirstDecisionEntity.USER_ID.eq( current_user ))
           .get().firstOrNull();
 
@@ -84,7 +84,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
           createdAndSigner.add(item);
         } else if ( getPerformerIds(item).contains( current_user ) ){
           performer.add(item);
-        } else if (Objects.equals(item.getDecision().getSignerId(), current_user)){
+        } else if (Objects.equals(item.getSignerId(), current_user)){
           signer.add(0, item);
         } else {
           list.add(item);
@@ -101,10 +101,10 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     }
   }
 
-  private ArrayList<String> getPerformerIds(DecisionSpinnerItem decisionSpinnerItem){
+  private ArrayList<String> getPerformerIds(Decision item){
     ArrayList<String> performers = new ArrayList<>();
 
-    for ( Block block : decisionSpinnerItem.getDecision().getBlocks()) {
+    for ( Block block : item.getBlocks()) {
       for ( Performer perf : block.getPerformers() ) {
         performers.add( perf.getPerformerId() );
       }
@@ -127,8 +127,8 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     if (view == null) {
       view = inflater.inflate(R.layout.filter_decision_spinner_items, parent, false);
     }
-    DecisionSpinnerItem item = getItem(position);
-    ( (TextView) view.findViewById(R.id.decision_name) ).setText( item.getName() );
+    Decision item = getItem(position);
+    ( (TextView) view.findViewById(R.id.decision_name) ).setText( item.getSignerBlankText() );
 
     return view;
   }
@@ -149,8 +149,8 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   public boolean hasActiveDecision() {
     Boolean result = false;
 
-    for ( DecisionSpinnerItem decision: decisions ) {
-      if (!decision.getDecision().getApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
+    for ( Decision decision: decisions ) {
+      if (!decision.getApproved() && Objects.equals(decision.getSignerId(), current_user)){
         result = true;
         break;
       }
@@ -161,12 +161,12 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   public void invalidate(String uid) {
     for (int i = 0; i < decisions.size(); i++) {
-      DecisionSpinnerItem item = decisions.get(i);
+      Decision item = decisions.get(i);
 
-      Timber.tag(TAG).e("%s\n%s", item.getDecision().getId(), uid );
+      Timber.tag(TAG).e("%s\n%s", item.getId(), uid );
 
-      if (Objects.equals(item.getDecision().getId(), uid)){
-        item.getDecision().setTemporary(true);
+      if (Objects.equals(item.getId(), uid)){
+        item.setTemporary(true);
         notifyDataSetChanged();
         break;
       }
@@ -175,7 +175,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   public void setCurrentAsTemporary(int selectedItemPosition) {
     if (decisions.size() > 0 && selectedItemPosition >= 0 && decisions.size() >= selectedItemPosition){
-      decisions.get(selectedItemPosition).getDecision().setTemporary(true);
+      decisions.get(selectedItemPosition).setTemporary(true);
       notifyDataSetChanged();
     }
   }

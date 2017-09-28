@@ -85,7 +85,6 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
-import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialog;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
@@ -278,7 +277,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void updateAfterButtonPressed() {
     try {
       decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
-      decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
+      decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition());
       displayDecision();
     } catch (Exception e) {
       e.printStackTrace();
@@ -462,7 +461,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   private void setAdapter() {
-    ArrayList<DecisionSpinnerItem> decisionSpinnerItems = new ArrayList<>();
+    ArrayList<Decision> decisionSpinnerItems = new ArrayList<>();
     decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getCurrentUserId(), decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
 
@@ -472,7 +471,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         decision_spinner_adapter.setSelection(position);
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
-          decision = decision_spinner_adapter.getItem(position).getDecision();
+          decision = decision_spinner_adapter.getItem(position);
           settings.setDecisionActiveUid( decision.getId() );
           displayDecision();
         } else {
@@ -485,7 +484,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       public void onNothingSelected(AdapterView<?> adapterView) {
         decision_spinner_adapter.setSelection(-1);
         if ( decision_spinner_adapter.getCount() > 0 ){
-          decision = decision_spinner_adapter.getItem(0).getDecision();
+          decision = decision_spinner_adapter.getItem(0);
           Timber.tag(TAG).e("onNothingSelected");
           displayDecision();
         } else {
@@ -691,12 +690,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @OnClick(R.id.activity_info_decision_preview_magnifer)
   public void magnifier(){
     Timber.tag(TAG).v("magnifier");
-    DecisionSpinnerItem decision;
+    Decision decision;
     DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
 
     if ( decision_spinner_adapter.size() > 0 ) {
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
-      magnifier.setDecision( decision.getDecision() );
+      magnifier.setDecision( decision );
       magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
     }
 
@@ -765,7 +764,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   public void edit(){
     Timber.tag(TAG).v("edit");
-    Decision data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
+    Decision data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
 
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
@@ -811,18 +810,11 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       bottom_line.setVisibility( View.VISIBLE );
 
       decision_spinner_adapter.clear();
-
-      List<DecisionSpinnerItem> unsorted_decisions = new ArrayList<>();
-
-      for (Decision decision : doc.getDecisions()) {
-        unsorted_decisions.add( new DecisionSpinnerItem( decision ) );
-      }
-
-      decision_spinner_adapter.addAll( unsorted_decisions );
+      decision_spinner_adapter.addAll( doc.getDecisions() );
 
       // если есть резолюции, то отобразить первую
       if ( decision_spinner_adapter.size() > 0 ) {
-        decision = decision_spinner_adapter.getItem(0).getDecision();
+        decision = decision_spinner_adapter.getItem(0);
         Timber.tag(TAG).e("decision_spinner_adapter > 0");
         displayDecision();
       }
@@ -833,7 +825,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       if (decision_spinner_adapter.size() >= 2){
-        decision_count.setText( String.format(" %s ", unsorted_decisions.size()) );
+        decision_count.setText( String.format(" %s ", doc.getDecisions().size()) );
         decision_count.setVisibility(View.VISIBLE);
         invalidateSpinner(true);
       }
@@ -849,7 +841,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       Decision empty = new Decision();
       empty.setSignerBlankText("Нет резолюций");
-      decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
+      decision_spinner_adapter.add( empty );
 
       preview.showEmpty();
 
