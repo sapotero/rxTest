@@ -585,6 +585,7 @@
     <string name="zoomTextSize">16</string>
     <string name="zoomText">Размер текста инфокарточки по умолчанию</string>
     <string name="zoomTextSize_key">zoomTextSize</string>
+    <string name="primary_people_info">Для сведения</string>
 
     <string-array name="settings_notificated_journals">
         <item>Входящие документы</item>

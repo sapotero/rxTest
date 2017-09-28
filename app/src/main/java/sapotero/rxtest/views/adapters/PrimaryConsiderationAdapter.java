@@ -90,8 +90,9 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       viewHolder.name   = (TextView) view.findViewById(R.id.primary_name);
       viewHolder.remove = (Button)   view.findViewById(R.id.remove_user);
 
-      viewHolder.is_responsible = (Switch) view.findViewById(R.id.is_responsible);
-      viewHolder.is_original    = (Switch) view.findViewById(R.id.is_original);
+      viewHolder.is_responsible  = (Switch) view.findViewById(R.id.is_responsible);
+      viewHolder.is_original     = (Switch) view.findViewById(R.id.is_original);
+      viewHolder.for_information = (Switch) view.findViewById(R.id.for_information);
 
       // настройка
       // Отображать настройки подлинника
@@ -118,6 +119,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
     viewHolder.is_responsible.setChecked( user.isResponsible() );
     viewHolder.is_original.setChecked( user.isOriginal() );
+    viewHolder.for_information.setChecked( user.getIForInformation() );
 
     viewHolder.remove.setOnClickListener(v -> {
 
@@ -197,6 +199,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
     public Button remove;
     public Switch is_responsible;
     public Switch is_original;
+    public Switch for_information;
   }
 
   @Override

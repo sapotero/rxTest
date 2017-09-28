@@ -38,4 +38,8 @@ public interface IPerformer {
   void setIsIPerformerOrganization(Boolean isOrganization);
   String getIImage();
   void setIImage(String image);
+
+  Boolean getIForInformation();
+  void setIForInformation(Boolean forInformation);
+
 }

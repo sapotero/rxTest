@@ -428,4 +428,14 @@ public class Oshs implements Serializable, IPerformer {
   public void setIImage(String image) {
     setImage(image);
   }
+
+  @Override
+  public Boolean getIForInformation() {
+    return null;
+  }
+
+  @Override
+  public void setIForInformation(Boolean forInformation) {
+
+  }
 }

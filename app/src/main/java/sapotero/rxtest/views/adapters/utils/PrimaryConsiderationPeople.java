@@ -19,6 +19,7 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private boolean isOrganization = false;
 
   private boolean isDelimiter = false;
+  private boolean forInformation = false;
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13414
   // Отображать порядок ДЛ в МП, также как в группах СЭД
@@ -26,6 +27,15 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private Integer sortIndex;
 
   public PrimaryConsiderationPeople() {
+  }
+
+  public boolean isForInformation() {
+    return forInformation;
+  }
+
+  public PrimaryConsiderationPeople setForInformation(boolean forInformation) {
+    this.forInformation = forInformation;
+    return this;
   }
 
   private boolean getBooleanValue(Boolean value) {
@@ -313,5 +323,15 @@ public class PrimaryConsiderationPeople implements IPerformer {
   @Override
   public void setIImage(String image) {
     setImage(image);
+  }
+
+  @Override
+  public Boolean getIForInformation() {
+    return isForInformation();
+  }
+
+  @Override
+  public void setIForInformation(Boolean forInformation) {
+    setForInformation(forInformation);
   }
 }
