@@ -767,7 +767,7 @@ public class MainService extends Service {
     }
 
     if ( settings.isStartRegularRefresh() && isStart ) {
-//      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(), 5*60, 5*60, TimeUnit.SECONDS );
+      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(), 5*60, 5*60, TimeUnit.SECONDS );
 //      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 10, 10, TimeUnit.SECONDS );
     }
   }
