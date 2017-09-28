@@ -6,6 +6,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -20,6 +21,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class SaveDecision extends DecisionCommand {
@@ -58,6 +60,8 @@ public class SaveDecision extends DecisionCommand {
   private void update() {
     Decision dec = getParams().getDecisionModel();
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
+
+    updateInMemory( dec );
 
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
@@ -110,6 +114,25 @@ public class SaveDecision extends DecisionCommand {
       );
 
     Timber.tag(TAG).e("1 updateFromJob params%s", new Gson().toJson( params ));
+  }
+
+  private void updateInMemory(Decision dec) {
+    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+
+    if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
+      List<Decision> inMemoryDecisions = inMemoryDocument.getDecisions();
+
+      for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
+        Decision inMemoryDecision = inMemoryDecisions.get(i);
+
+        if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
+          dec.setChanged( true );
+          dec.setTemporary( true );
+          inMemoryDecisions.set(i, dec);
+          break;
+        }
+      }
+    }
   }
 
   @Override

@@ -20,7 +20,6 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import timber.log.Timber;
 
 public class InMemoryDocumentMapper {
 
