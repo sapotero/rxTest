@@ -150,6 +150,9 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       }
       user.setResponsible( viewHolder.is_responsible.isChecked() );
 
+      if (user.isForInformation()){
+        user.setIForInformation( false );
+      }
       if (callback != null) {
         callback.onChange();
       }
@@ -172,6 +175,23 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       updateView();
     });
 
+    viewHolder.for_information.setOnClickListener(v -> {
+
+
+      user.setIForInformation( viewHolder.for_information.isChecked() );
+
+      if (user.isResponsible()){
+        user.setResponsible( false );
+      }
+
+
+      if (callback != null) {
+        callback.onChange();
+      }
+
+      updateView();
+    });
+
     return view;
 
 
@@ -183,6 +203,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       ViewHolder viewholder = check.getViewholder();
       viewholder.is_responsible.setChecked( check.getUser().isResponsible() );
       viewholder.is_original.setChecked( check.getUser().isOriginal() );
+      viewholder.for_information.setChecked( check.getUser().isForInformation() );
     }
 
   }

@@ -56,6 +56,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
 
     setBaseFields( formattedModel, entity );
     formattedModel.setGroup( false );
+    formattedModel.setIForInformation(entity.isForInformation());
 
     return formattedModel;
   }

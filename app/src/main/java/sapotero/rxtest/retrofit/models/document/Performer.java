@@ -55,9 +55,8 @@ public class Performer implements IPerformer {
         return forInformation;
     }
 
-    public Performer setForInformation(Boolean forInformation) {
+    public void setForInformation(Boolean forInformation) {
         this.forInformation = forInformation;
-        return this;
     }
 
     public String getId() {

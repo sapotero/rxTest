@@ -123,6 +123,9 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
         if ( performer.getIsResponsible() == null ) {
           performer.setIsResponsible( false );
         }
+        if ( performer.getIForInformation() == null ) {
+          performer.setForInformation( false );
+        }
 
         performer.setPerformerType( null );
         performer.setNumber( null );
