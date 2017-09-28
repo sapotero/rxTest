@@ -27,6 +27,8 @@ public class InMemoryDocument implements Serializable {
 
   public String user;
 
+  public boolean updatedFromDB = false;
+
   public InMemoryDocument() {
   }
 
@@ -156,6 +158,14 @@ public class InMemoryDocument implements Serializable {
 
   public void setActions(List<DocumentInfoAction> actions) {
     this.actions = actions;
+  }
+
+  public boolean isUpdatedFromDB() {
+    return updatedFromDB;
+  }
+
+  public void setUpdatedFromDB(boolean updatedFromDB) {
+    this.updatedFromDB = updatedFromDB;
   }
 
   @Override

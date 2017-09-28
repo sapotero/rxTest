@@ -159,6 +159,7 @@ public class InMemoryDocumentMapper {
       }
     }
 
+    imd.setUpdatedFromDB( true );
 
     return imd;
   }
