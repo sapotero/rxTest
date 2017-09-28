@@ -206,8 +206,8 @@ public class Processor {
 
     // new upsert job
     if (store.getDocuments().keySet().contains(document.getUid())) {
-       InMemoryDocument doc = store.getDocuments().get(document.getUid());
-
+      InMemoryDocument doc = store.getDocuments().get(document.getUid());
+      Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index);
       Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
 
       int time = 15;
@@ -226,26 +226,26 @@ public class Processor {
 
           if ( Filter.isChanged(doc.getFilter(), filter) ){
             updateJob(doc.getUid(), doc.getMd5());
-            NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source);
-            notifyPubSubject.onNext(notifyMessageModel);
+
+            NotifyMessageModel notifyMessageModel3 = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
+            notifyPubSubject.onNext(notifyMessageModel3);
           } else {
             EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
           }
-
         } else {
           updateJob(doc.getUid(), doc.getMd5());
-          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source);
-          notifyPubSubject.onNext(notifyMessageModel);
+          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
+          if (!doc.getDocument().getChanged() && Objects.equals(doc.getMd5(), "")){
+            notifyPubSubject.onNext(notifyMessageModel);
+          }
         }
-
       } else {
         EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
       }
-
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
-      NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source);
+      NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
       notifyPubSubject.onNext(notifyMessageModel);
     }
   }

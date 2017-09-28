@@ -91,12 +91,11 @@ public class RemoveFromFolder extends SharedCommand {
       Transaction transaction = new Transaction();
       transaction
         .from( store.getDocuments().get(getParams().getDocument()) )
-        .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.FAVORITES);
       store.process( transaction );
 
-      removeChangedInDb();
+      removeChangedInDb( false );
     }
 
     queueManager.setExecutedRemote(this);
