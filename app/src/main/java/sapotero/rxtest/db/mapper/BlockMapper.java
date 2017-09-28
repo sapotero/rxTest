@@ -1,5 +1,7 @@
 package sapotero.rxtest.db.mapper;
 
+import com.google.gson.Gson;
+
 import java.util.Collections;
 
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -7,6 +9,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import timber.log.Timber;
 
 // Maps between Block and RBlockEntity
 public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
@@ -29,6 +32,9 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
       PerformerMapper performerMapper = new PerformerMapper();
 
       for (Performer performerModel : model.getPerformers()) {
+
+        Timber.e("USER: %s", new Gson().toJson(performerModel) );
+
         RPerformerEntity performerEntity = performerMapper.toEntity(performerModel);
         performerEntity.setBlock(entity);
         entity.getPerformers().add(performerEntity);

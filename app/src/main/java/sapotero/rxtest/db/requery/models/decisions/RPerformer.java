@@ -23,6 +23,7 @@ public abstract class RPerformer {
   Boolean isOriginal;
   Boolean isResponsible;
   Boolean isOrganization;
+  Boolean forInformation;
 
   @ManyToOne
   RBlock block;

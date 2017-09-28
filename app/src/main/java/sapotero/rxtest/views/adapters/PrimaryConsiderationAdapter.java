@@ -90,8 +90,9 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       viewHolder.name   = (TextView) view.findViewById(R.id.primary_name);
       viewHolder.remove = (Button)   view.findViewById(R.id.remove_user);
 
-      viewHolder.is_responsible = (Switch) view.findViewById(R.id.is_responsible);
-      viewHolder.is_original    = (Switch) view.findViewById(R.id.is_original);
+      viewHolder.is_responsible  = (Switch) view.findViewById(R.id.is_responsible);
+      viewHolder.is_original     = (Switch) view.findViewById(R.id.is_original);
+      viewHolder.for_information = (Switch) view.findViewById(R.id.for_information);
 
       // настройка
       // Отображать настройки подлинника
@@ -118,6 +119,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
     viewHolder.is_responsible.setChecked( user.isResponsible() );
     viewHolder.is_original.setChecked( user.isOriginal() );
+    viewHolder.for_information.setChecked( user.getIForInformation() );
 
     viewHolder.remove.setOnClickListener(v -> {
 
@@ -148,6 +150,9 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       }
       user.setResponsible( viewHolder.is_responsible.isChecked() );
 
+      if (user.isForInformation()){
+        user.setIForInformation( false );
+      }
       if (callback != null) {
         callback.onChange();
       }
@@ -170,6 +175,23 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       updateView();
     });
 
+    viewHolder.for_information.setOnClickListener(v -> {
+
+
+      user.setIForInformation( viewHolder.for_information.isChecked() );
+
+      if (user.isResponsible()){
+        user.setResponsible( false );
+      }
+
+
+      if (callback != null) {
+        callback.onChange();
+      }
+
+      updateView();
+    });
+
     return view;
 
 
@@ -181,6 +203,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       ViewHolder viewholder = check.getViewholder();
       viewholder.is_responsible.setChecked( check.getUser().isResponsible() );
       viewholder.is_original.setChecked( check.getUser().isOriginal() );
+      viewholder.for_information.setChecked( check.getUser().isForInformation() );
     }
 
   }
@@ -197,6 +220,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
     public Button remove;
     public Switch is_responsible;
     public Switch is_original;
+    public Switch for_information;
   }
 
   @Override
