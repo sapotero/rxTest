@@ -41,8 +41,6 @@ public abstract class RDecision {
   Boolean red;
   String status;
 
-  Boolean temporary;
-
   String signBase64;
 
   @Index("decision_changed_index")

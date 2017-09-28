@@ -187,8 +187,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
                 if (save_decision != null && operation == CommandFactory.Operation.SAVE_DECISION) {
                   params.setDecisionModel(save_decision);
-
-                  rDecisionEntity.setTemporary(true);
                 }
 
                 if ( settings.isDecisionWithAssignment() ){

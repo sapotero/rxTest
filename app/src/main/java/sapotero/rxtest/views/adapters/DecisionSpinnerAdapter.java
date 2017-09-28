@@ -166,7 +166,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
       Timber.tag(TAG).e("%s\n%s", item.getId(), uid );
 
       if (Objects.equals(item.getId(), uid)){
-        item.setTemporary(true);
+        item.setChanged(true);
         notifyDataSetChanged();
         break;
       }
@@ -175,7 +175,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   public void setCurrentAsTemporary(int selectedItemPosition) {
     if (decisions.size() > 0 && selectedItemPosition >= 0 && decisions.size() >= selectedItemPosition){
-      decisions.get(selectedItemPosition).setTemporary(true);
+      decisions.get(selectedItemPosition).setChanged(true);
       notifyDataSetChanged();
     }
   }

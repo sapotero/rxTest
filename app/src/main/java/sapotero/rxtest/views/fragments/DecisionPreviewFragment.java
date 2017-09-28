@@ -348,7 +348,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
             if ( decision.getApproved() != null &&
               !decision.getApproved() &&
-              !decision.isTemporary() && !doc.isProcessed() &&  isActiveOrRed()){
+              !decision.isChanged() && !doc.isProcessed() &&  isActiveOrRed()){
               Timber.tag("GestureListener").w("2");
               edit();
             } else {
@@ -357,7 +357,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           } else {
             if (
-              decision.isTemporary() && !doc.isProcessed() ){
+              decision.isChanged() && !doc.isProcessed() ){
               Timber.tag("GestureListener").w("1");
               edit();
             } else {
@@ -499,7 +499,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     Timber.tag(TAG).d(" * updateTemporary %s", temporary.getVisibility() );
 
     if (decision != null) {
-      if ( decision.isTemporary() ){
+      if ( decision.isChanged() ){
         temporary.setVisibility(View.VISIBLE);
         next_person_button.setVisibility( View.GONE );
         prev_person_button.setVisibility( View.GONE );
@@ -558,7 +558,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       prev_person_button.setVisibility( View.INVISIBLE );
     }
 
-    if ( decision != null && decision.isTemporary() ){
+    if ( decision != null && decision.isChanged() ){
       temporary.setVisibility(View.VISIBLE);
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );

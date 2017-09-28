@@ -110,10 +110,10 @@ public abstract class DecisionCommand extends AbstractCommand {
     return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );
   }
 
-  protected void setDecisionTemporary() {
+  protected void setDecisionChanged() {
     Integer count = dataStore
       .update(RDecisionEntity.class)
-      .set(RDecisionEntity.TEMPORARY, true)
+      .set(RDecisionEntity.CHANGED, true)
       .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
       .get().value();
 

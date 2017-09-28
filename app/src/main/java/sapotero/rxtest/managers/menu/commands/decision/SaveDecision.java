@@ -68,8 +68,6 @@ public class SaveDecision extends DecisionCommand {
       .where(RDecisionEntity.UID.eq(dec.getId()))
       .get().firstOrNull();
 
-    decision.setTemporary(true);
-
     if (dec.getUrgencyText() != null) {
       decision.setUrgencyText(dec.getUrgencyText());
     }
@@ -80,7 +78,6 @@ public class SaveDecision extends DecisionCommand {
     decision.setSignerBlankText(dec.getSignerBlankText());
     decision.setSignerId(dec.getSignerId());
     decision.setSignerPositionS(dec.getSignerPositionS());
-    decision.setTemporary(true);
     decision.setApproved(dec.getApproved());
     decision.setChanged(true);
     decision.setRed(dec.getRed());
@@ -127,7 +124,6 @@ public class SaveDecision extends DecisionCommand {
 
         if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
           dec.setChanged( true );
-          dec.setTemporary( true );
           inMemoryDecisions.set(i, dec);
           break;
         }

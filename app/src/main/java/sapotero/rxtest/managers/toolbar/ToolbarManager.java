@@ -628,14 +628,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     return result;
   }
 
-  private boolean hasTemporaryDecision() {
+  private boolean hasChangedDecision() {
     Boolean result = false;
 
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
       for ( RDecision _decision: doc.getDecisions() ) {
         RDecisionEntity decision = (RDecisionEntity) _decision;
 
-        if ( decision.isTemporary() != null && decision.isTemporary()){
+        if ( decision.isChanged() != null && decision.isChanged() ) {
           result = true;
           break;
         }
@@ -925,7 +925,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         setEditDecisionMenuItemVisible(false);
       }
 
-      if ( hasTemporaryDecision() ){
+      if ( hasChangedDecision() ){
         safeSetVisibility(R.id.menu_info_decision_edit, false);
         safeSetVisibility(R.id.menu_info_decision_create, false);
       }

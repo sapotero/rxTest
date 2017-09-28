@@ -51,7 +51,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
-    setDecisionTemporary();
+    setDecisionChanged();
 
     setChangedInDb();
     InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());

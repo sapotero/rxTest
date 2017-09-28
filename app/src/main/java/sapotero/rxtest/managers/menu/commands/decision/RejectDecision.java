@@ -43,14 +43,7 @@ public class RejectDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson(getParams()));
 
-    setDecisionChangedTemporary();
-
-    dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.CHANGED, true)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(getParams().getDecisionId()))
-      .get().value();
+    setDecisionChanged();
 
     InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
 
@@ -96,15 +89,6 @@ public class RejectDecision extends DecisionCommand {
 
     Observable<DecisionError> info = getDecisionUpdateOperationObservable(formated_decision);
     sendDecisionOperationRequest( info );
-  }
-
-  private void setDecisionChangedTemporary() {
-    dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.CHANGED, true)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq( getParams().getDecisionId() ))
-      .get().value();
   }
 
   @Override

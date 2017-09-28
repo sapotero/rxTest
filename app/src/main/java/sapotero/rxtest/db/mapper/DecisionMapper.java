@@ -18,7 +18,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     entity.setUid( model.getId() );
     entity.setLetterhead(model.getLetterhead());
     entity.setApproved(model.getApproved());
-    entity.setTemporary(false);
+    entity.setChanged(false);
     entity.setSigner(model.getSigner());
     entity.setSignerId(model.getSignerId());
     entity.setSignerBlankText(model.getSignerBlankText());

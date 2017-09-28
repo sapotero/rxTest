@@ -38,7 +38,7 @@ public class AddAndApproveDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
-    setDecisionTemporary();
+    setDecisionChanged();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда

@@ -107,12 +107,10 @@ public class AddTemporaryDecision extends DecisionCommand {
       }
 
 
-      decision.setTemporary( true );
       decision.setApproved( false );
-      decision.setChanged( false );
+      decision.setChanged( true );
       decision.setRed( false );
       decision.setAssistantId( null );
-      decision.setChanged( false );
 
       decision.setDate( dec.getDate() );
 
