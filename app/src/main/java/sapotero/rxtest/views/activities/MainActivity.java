@@ -761,7 +761,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             }
             return false;
           })
-          .withIcon( R.drawable.gerb );
+          .withIcon( R.drawable.user );
 
         i++;
       }
@@ -792,7 +792,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       if ( userImage != null ) {
         profileDrawerItem.withIcon( userImage );
       } else {
-        profileDrawerItem.withIcon( R.drawable.gerb );
+        profileDrawerItem.withIcon( R.drawable.user );
       }
 
       profiles[1] = profileDrawerItem;
@@ -831,7 +831,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( userImage != null ) {
       profileDrawerItem.withIcon( userImage );
     } else {
-      profileDrawerItem.withIcon( R.drawable.gerb );
+      profileDrawerItem.withIcon( R.drawable.user );
     }
 
     profiles[0] = profileDrawerItem;
