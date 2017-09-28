@@ -93,7 +93,7 @@ public class NotifyManager {
     builder
       .setContentTitle(contentTitle)
       .setContentText(contentText)
-      .setSmallIcon(R.drawable.ic_error)
+      .setSmallIcon(R.drawable.gerb)
       .setDeleteIntent(pendingIntentDismiss)
       .setAutoCancel(true)
       .setDefaults(Notification.DEFAULT_ALL)
@@ -117,7 +117,7 @@ public class NotifyManager {
     builder
       .setContentTitle(contentTitle)
       .setContentText(contentText)
-      .setSmallIcon(R.drawable.ic_error)
+      .setSmallIcon(R.drawable.gerb)
       .setDeleteIntent(pendingIntentDismiss)
       .setAutoCancel(true)
       .setDefaults(Notification.DEFAULT_ALL)
