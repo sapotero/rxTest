@@ -129,6 +129,12 @@ public class InMemoryDocumentMapper {
     Document doc = convert(document);
     doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
 
+    if ( doc.getChanged() != null && doc.getChanged() ) {
+      imd.setAsLoading();
+    } else {
+      imd.setAsReady();
+    }
+
     List<Decision> decisions = convertDecisions(document);
     List<DocumentInfoAction> actions = convertActions(document);
 
@@ -144,9 +150,7 @@ public class InMemoryDocumentMapper {
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
     imd.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
-    imd.setAsReady();
     imd.setUser( document.getUser() );
-
 
     if (document.getRegistrationDate() != null) {
       try {
