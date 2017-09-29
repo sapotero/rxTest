@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,8 @@ public class CreateManagerJob extends BaseJob {
 
     for (Oshs user : users) {
       RManagerEntity managerEntity = mapper.toEntity(user);
+
+      Timber.e("Manager\nOshs %s\nEntity: %s\n", new Gson().toJson(user), new Gson().toJson(managerEntity) );
       managerEntityList.add(managerEntity);
     }
 
