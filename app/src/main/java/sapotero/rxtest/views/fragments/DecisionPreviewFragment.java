@@ -839,6 +839,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Decision empty = new Decision();
       empty.setSignerBlankText(NO_DECISIONS);
       decision_spinner_adapter.add( empty );
+      decision = empty;
 
       preview.showEmpty();
 
@@ -888,7 +889,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   private void sendDecisionVisibilityEvent() {
-    if (decision != null && !isInEditor) {
+    if (decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) && !isInEditor) {
       EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && decision.getApproved() != null && !decision.getApproved(), decision.getId(), null ) );
     }
   }
