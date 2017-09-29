@@ -52,6 +52,7 @@ public class AddTemporaryDecision extends DecisionCommand {
 
   private void addDecision() {
     getParams().getDecisionModel().setId( UUID.randomUUID().toString() );
+    getParams().getDecisionModel().setTemporary( true );
     updateInMemory();
 
     String uid = getParams().getDocument();

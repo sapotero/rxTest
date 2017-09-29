@@ -337,7 +337,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
       if ( doc != null && Objects.equals(doc.getDocument().getAddressedToType(), "") ){
-        if ( !doc.getDocument().isFromLinks() && decision != null ){
+        if ( !doc.getDocument().isFromLinks() && decision != null && !decision.isTemporary() ) {
           if ( settings.isOnline() ){
             if ( decision.isChanged() ){
               // resolved https://tasks.n-core.ru/browse/MVDESD-13727
