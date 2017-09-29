@@ -2,6 +2,7 @@ package sapotero.rxtest.managers.menu.commands;
 
 import com.google.gson.Gson;
 
+import java.util.List;
 import java.util.Objects;
 
 import io.requery.query.Tuple;
@@ -14,6 +15,8 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RManagerEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -22,6 +25,7 @@ import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
@@ -162,6 +166,39 @@ public abstract class DecisionCommand extends AbstractCommand {
             result -> Timber.tag(TAG).v("Added decision to display first decision table"),
             error -> Timber.tag(TAG).e(error)
           );
+      }
+    }
+  }
+
+  protected void createTemporaryDecision() {
+    CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
+    CommandParams _params = new CommandParams();
+    _params.setDecisionId( getParams().getDecisionModel().getId() );
+    _params.setDecisionModel( getParams().getDecisionModel() );
+    _params.setDocument( getParams().getDocument() );
+    _params.setAssignment( getParams().isAssignment() );
+    Command command = operation.getCommand(null, _params);
+    command.execute();
+  }
+
+  protected void updateInMemory() {
+    Decision dec = getParams().getDecisionModel();
+
+    if ( dec != null ) {
+      InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+
+      if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
+        List<Decision> inMemoryDecisions = inMemoryDocument.getDecisions();
+
+        for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
+          Decision inMemoryDecision = inMemoryDecisions.get(i);
+
+          if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
+            dec.setChanged( true );
+            inMemoryDecisions.set(i, dec);
+            break;
+          }
+        }
       }
     }
   }

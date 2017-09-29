@@ -150,7 +150,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     Boolean result = false;
 
     for ( Decision decision: decisions ) {
-      if (!decision.getApproved() && Objects.equals(decision.getSignerId(), current_user)){
+      if (decision.getApproved() != null && !decision.getApproved() && Objects.equals(decision.getSignerId(), current_user)){
         result = true;
         break;
       }

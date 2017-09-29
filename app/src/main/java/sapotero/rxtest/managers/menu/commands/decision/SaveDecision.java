@@ -61,7 +61,7 @@ public class SaveDecision extends DecisionCommand {
     Decision dec = getParams().getDecisionModel();
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
 
-    updateInMemory( dec );
+    updateInMemory();
 
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
@@ -111,24 +111,6 @@ public class SaveDecision extends DecisionCommand {
       );
 
     Timber.tag(TAG).e("1 updateFromJob params%s", new Gson().toJson( params ));
-  }
-
-  private void updateInMemory(Decision dec) {
-    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
-
-    if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
-      List<Decision> inMemoryDecisions = inMemoryDocument.getDecisions();
-
-      for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
-        Decision inMemoryDecision = inMemoryDecisions.get(i);
-
-        if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
-          dec.setChanged( true );
-          inMemoryDecisions.set(i, dec);
-          break;
-        }
-      }
-    }
   }
 
   @Override

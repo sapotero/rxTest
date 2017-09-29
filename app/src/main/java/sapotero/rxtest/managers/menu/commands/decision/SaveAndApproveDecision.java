@@ -51,6 +51,9 @@ public class SaveAndApproveDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
+    getParams().getDecisionModel().setApproved( true );
+    updateInMemory();
+
     setDecisionChanged();
 
     setChangedInDb();
@@ -60,7 +63,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
       Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
     }
 
-    
     if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();

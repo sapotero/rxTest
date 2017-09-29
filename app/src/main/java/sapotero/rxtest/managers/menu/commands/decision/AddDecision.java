@@ -7,8 +7,6 @@ import java.util.List;
 import rx.Observable;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
@@ -26,14 +24,8 @@ public class AddDecision extends DecisionCommand {
 
   @Override
   public void execute() {
-    CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
-    CommandParams _params = new CommandParams();
-    _params.setDecisionId( getParams().getDecisionModel().getId() );
-    _params.setDecisionModel( getParams().getDecisionModel() );
-    _params.setDocument( getParams().getDocument() );
-    _params.setAssignment( getParams().isAssignment() );
-    Command command = operation.getCommand(null, _params);
-    command.execute();
+    getParams().getDecisionModel().setApproved( false );
+    createTemporaryDecision();
 
     setSyncLabelInMemory();
 

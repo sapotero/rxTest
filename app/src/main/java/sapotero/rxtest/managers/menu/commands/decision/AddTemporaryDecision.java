@@ -51,6 +51,7 @@ public class AddTemporaryDecision extends DecisionCommand {
   }
 
   private void addDecision() {
+    updateInMemory();
 
     String uid = getParams().getDocument();
 
@@ -106,8 +107,7 @@ public class AddTemporaryDecision extends DecisionCommand {
         decision.setSignerBlankText( dec.getSignerText() );
       }
 
-
-      decision.setApproved( false );
+      decision.setApproved( dec.getApproved() );
       decision.setChanged( true );
       decision.setRed( false );
       decision.setAssistantId( null );

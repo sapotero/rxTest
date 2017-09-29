@@ -43,6 +43,10 @@ public class RejectDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson(getParams()));
 
+    getParams().getDecisionModel().setApproved( false );
+    getParams().getDecisionModel().setCanceled( true );
+    updateInMemory();
+
     setDecisionChanged();
 
     InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());

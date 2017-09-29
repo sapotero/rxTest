@@ -27,6 +27,9 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    getParams().getDecisionModel().setApproved( true );
+    createTemporaryDecision();
+
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     updateLocal();

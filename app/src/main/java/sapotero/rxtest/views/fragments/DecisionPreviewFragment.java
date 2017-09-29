@@ -553,7 +553,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
     }
 
-    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && !decision.getApproved() ){
+    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && decision.getApproved() != null && !decision.getApproved() ){
       next_person_button.setVisibility( View.INVISIBLE );
       prev_person_button.setVisibility( View.INVISIBLE );
     }
@@ -884,7 +884,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       settings.setDecisionActiveUid( decision.getId() );
 
-      updateVisibility( decision.getApproved() );
+      updateVisibility( decision.getApproved() != null ? decision.getApproved() : false );
 
       sendDecisionVisibilityEvent();
     }
