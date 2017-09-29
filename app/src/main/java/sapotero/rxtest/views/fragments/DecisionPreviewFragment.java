@@ -560,6 +560,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     if ( decision != null && decision.isChanged() ){
       temporary.setVisibility(View.VISIBLE);
+      approved_text.setVisibility( View.GONE );
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );
     } else {
