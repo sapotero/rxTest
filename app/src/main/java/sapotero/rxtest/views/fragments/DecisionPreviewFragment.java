@@ -355,14 +355,11 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
               Timber.tag("GestureListener").w("-2");
             }
 
+          } else if ( !doc.isProcessed() ) {
+            Timber.tag("GestureListener").w("1");
+            edit();
           } else {
-            if (
-              decision.isChanged() && !doc.isProcessed() ){
-              Timber.tag("GestureListener").w("1");
-              edit();
-            } else {
-              Timber.tag("GestureListener").w("-1");
-            }
+            Timber.tag("GestureListener").w("-1");
           }
         }
 
