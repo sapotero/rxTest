@@ -20,6 +20,7 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
@@ -50,7 +51,19 @@ public class ApproveDecision extends DecisionCommand {
     // ставим плашку всегда
     setChangedInDb();
 
-    if ( isActiveOrRed() ) {
+    InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
+
+    if (doc != null) {
+      Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
+    }
+
+    if (
+      // resolved https://tasks.n-core.ru/browse/MPSED-2207
+      // Новое подписание резолюций и переход документов в обработанные
+      signerIsCurrentUser() && (doc != null && Objects.equals(doc.getFilter(), JournalStatus.FOR_REPORT.getName()))
+      || isActiveOrRed() && (doc != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()))
+
+      ){
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
 

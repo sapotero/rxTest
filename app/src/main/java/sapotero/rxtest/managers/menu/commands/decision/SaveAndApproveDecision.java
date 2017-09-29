@@ -60,8 +60,15 @@ public class SaveAndApproveDecision extends DecisionCommand {
       Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
     }
 
-    
-    if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) ) {
+
+    if (
+      // resolved https://tasks.n-core.ru/browse/MPSED-2207
+      // Новое подписание резолюций и переход документов в обработанные
+      signerIsCurrentUser() && (doc != null && Objects.equals(doc.getFilter(), JournalStatus.FOR_REPORT.getName()))
+      || isActiveOrRed() && (doc != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()))
+
+      ){
+
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
       EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
