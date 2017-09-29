@@ -428,7 +428,7 @@ public class InfoActivity extends AppCompatActivity {
 
         if ( settings.isOnline() ){
           if ( decision.isChanged() != null && decision.isChanged() ){
-            Toast.makeText( this, "3апрещено редактировать резолюцию. Дождитесь выполнения операции.", Toast.LENGTH_SHORT).show();
+            Toast.makeText( this, R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT).show();
           } else {
             showDecisionEditor();
           }

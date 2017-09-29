@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
@@ -94,6 +95,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   public static final int MIN_FONT_SIZE = 12;
   public static final int SEEK_BAR_INIT_PROGRESS = 12;
+  public static final String NO_DECISIONS = "Нет резолюций";
 
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
@@ -336,34 +338,33 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( doc != null && Objects.equals(doc.getDocument().getAddressedToType(), "") ){
-        if ( !doc.getDocument().isFromLinks() && decision != null && !decision.isTemporary() ) {
-          if ( settings.isOnline() ){
-            if ( decision.isChanged() ){
-              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
-              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
-              // как по кнопке, так и по двойному тапу
-              EventBus.getDefault().post( new ShowDecisionConstructor() );
-            }
+      if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
+        if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
+          if ( !decision.isTemporary() ) {
+            if ( settings.isOnline() ) {
+              if ( decision.isChanged() ) {
+                // resolved https://tasks.n-core.ru/browse/MVDESD-13727
+                // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
+                // как по кнопке, так и по двойному тапу
+                Toast.makeText( getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT ).show();
 
-            if ( decision.getApproved() != null &&
-              !decision.getApproved() &&
-              !decision.isChanged() && !doc.isProcessed() &&  isActiveOrRed()){
-              Timber.tag("GestureListener").w("2");
+              } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
+                Timber.tag("GestureListener").w("2");
+                edit();
+
+              } else {
+                Timber.tag("GestureListener").w("-2");
+              }
+
+            } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
+              Timber.tag("GestureListener").w("1");
               edit();
             } else {
-              Timber.tag("GestureListener").w("-2");
+              Timber.tag("GestureListener").w("-1");
             }
-
-          } else if ( !doc.isProcessed() ) {
-            Timber.tag("GestureListener").w("1");
-            edit();
-          } else {
-            Timber.tag("GestureListener").w("-1");
           }
-        }
 
-        if ( !doc.getDocument().isFromLinks() && decision == null ) {
+        } else {
           settings.setDecisionActiveUid("0");
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
@@ -767,10 +768,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
 
-
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
-
     context.startActivity(intent);
   }
 
@@ -838,7 +837,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       decision_spinner_adapter.clear();
 
       Decision empty = new Decision();
-      empty.setSignerBlankText("Нет резолюций");
+      empty.setSignerBlankText(NO_DECISIONS);
       decision_spinner_adapter.add( empty );
 
       preview.showEmpty();

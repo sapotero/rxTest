@@ -631,7 +631,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private boolean hasChangedDecision() {
     Boolean result = false;
 
-    if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
+    if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
       for ( RDecision _decision: doc.getDecisions() ) {
         RDecisionEntity decision = (RDecisionEntity) _decision;
 
