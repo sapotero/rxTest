@@ -294,7 +294,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_decision_create:
             operation = CommandFactory.Operation.INCORRECT;
 
-            settings.setDecisionActiveId(0);
+            settings.setDecisionActiveUid("0");
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_intent);
@@ -351,7 +351,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
             operation = CommandFactory.Operation.INCORRECT;
             settings.setDecisionWithAssignment(true);
-            settings.setDecisionActiveId(0);
+            settings.setDecisionActiveUid("0");
             Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_assigment_intent);
             break;
@@ -618,7 +618,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
       for ( RDecision _decision: doc.getDecisions() ) {
         RDecisionEntity decision = (RDecisionEntity) _decision;
-        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
+        if (decision.isApproved() != null && decision.isRed() != null && !decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
           result = true;
           break;
         }
@@ -628,14 +628,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     return result;
   }
 
-  private boolean hasTemporaryDecision() {
+  private boolean hasChangedDecision() {
     Boolean result = false;
 
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
       for ( RDecision _decision: doc.getDecisions() ) {
         RDecisionEntity decision = (RDecisionEntity) _decision;
 
-        if ( decision.isTemporary() != null && decision.isTemporary()){
+        if ( decision.isChanged() != null && decision.isChanged() ) {
           result = true;
           break;
         }
@@ -925,7 +925,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         setEditDecisionMenuItemVisible(false);
       }
 
-      if ( hasTemporaryDecision() ){
+      if ( hasChangedDecision() ){
         safeSetVisibility(R.id.menu_info_decision_edit, false);
         safeSetVisibility(R.id.menu_info_decision_create, false);
       }

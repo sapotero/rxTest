@@ -4,7 +4,6 @@ package sapotero.rxtest.utils.memory;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -22,12 +21,12 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.utils.LoadedFromDbEvent;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.interfaces.Processable;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
-import sapotero.rxtest.utils.memory.models.Counter;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
 import sapotero.rxtest.utils.memory.utils.Processor;
@@ -47,7 +46,6 @@ public class MemoryStore implements Processable{
   private PublishSubject<InMemoryDocument> pub;
   private PublishSubject<InMemoryDocument> sub;
   private PublishSubject<NotifyMessageModel> notifyPubSubject;
-  private Counter counter;
   private boolean withDB = true;
 
   public MemoryStore() {
@@ -62,7 +60,6 @@ public class MemoryStore implements Processable{
     this.pub = PublishSubject.create();
     this.sub = PublishSubject.create();
     this.notifyPubSubject = PublishSubject.create();
-    this.counter = new Counter();
     this.documents  = new ConcurrentHashMap<>();
 
     this.subscription = new CompositeSubscription();
@@ -81,7 +78,7 @@ public class MemoryStore implements Processable{
     return this;
   }
 
-  public void startSub() {
+  private void startSub() {
     Timber.w("startSub");
 
     sub
@@ -101,6 +98,10 @@ public class MemoryStore implements Processable{
               Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext() for %s", doc.getUid());
               pub.onNext( doc );
               count++;
+
+              if ( doc.isUpdatedFromDB() ) {
+                EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
+              }
             }
           }
 
@@ -144,7 +145,7 @@ public class MemoryStore implements Processable{
     loadFromDB();
   }
 
-  public void loadFromDB() {
+  private void loadFromDB() {
     EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
 
     dataStore

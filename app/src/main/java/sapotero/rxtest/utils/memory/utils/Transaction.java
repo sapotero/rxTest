@@ -134,4 +134,8 @@ public class Transaction {
   public InMemoryDocument commit(){
     return document;
   }
+
+  public InMemoryDocument getDocument() {
+    return document;
+  }
 }

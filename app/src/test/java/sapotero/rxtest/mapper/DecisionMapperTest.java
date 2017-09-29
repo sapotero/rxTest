@@ -66,7 +66,6 @@ public class DecisionMapperTest {
   public static void verifyDecision(Decision expected, RDecisionEntity actual) {
     assertNotNull( actual );
     assertEquals( 0, actual.getId() );
-    assertEquals( false, actual.isTemporary() );
     assertEquals( expected.getId(), actual.getUid() );
     assertEquals( expected.getLetterhead(), actual.getLetterhead() );
     assertEquals( expected.getApproved(), actual.isApproved() );

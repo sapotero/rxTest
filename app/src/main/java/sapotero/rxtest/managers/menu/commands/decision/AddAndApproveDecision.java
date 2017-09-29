@@ -27,6 +27,9 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    getParams().getDecisionModel().setApproved( true );
+    createTemporaryDecision();
+
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     updateLocal();
@@ -38,7 +41,7 @@ public class AddAndApproveDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
-    setDecisionTemporary();
+    setDecisionChanged();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда

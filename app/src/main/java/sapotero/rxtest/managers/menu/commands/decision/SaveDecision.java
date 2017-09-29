@@ -6,6 +6,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -20,6 +21,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class SaveDecision extends DecisionCommand {
@@ -59,12 +61,12 @@ public class SaveDecision extends DecisionCommand {
     Decision dec = getParams().getDecisionModel();
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
 
+    updateInMemory();
+
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
       .where(RDecisionEntity.UID.eq(dec.getId()))
       .get().firstOrNull();
-
-    decision.setTemporary(true);
 
     if (dec.getUrgencyText() != null) {
       decision.setUrgencyText(dec.getUrgencyText());
@@ -76,7 +78,6 @@ public class SaveDecision extends DecisionCommand {
     decision.setSignerBlankText(dec.getSignerBlankText());
     decision.setSignerId(dec.getSignerId());
     decision.setSignerPositionS(dec.getSignerPositionS());
-    decision.setTemporary(true);
     decision.setApproved(dec.getApproved());
     decision.setChanged(true);
     decision.setRed(dec.getRed());

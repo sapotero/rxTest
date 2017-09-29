@@ -122,9 +122,9 @@ public interface ISettings {
 
   void setDecisionWithAssignment(boolean value);
 
-  int getDecisionActiveId();
+  String getDecisionActiveUid();
 
-  void setDecisionActiveId(int value);
+  void setDecisionActiveUid(String value);
 
   boolean isActionsConfirm();
 

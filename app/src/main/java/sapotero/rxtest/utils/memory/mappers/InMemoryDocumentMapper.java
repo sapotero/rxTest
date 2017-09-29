@@ -2,11 +2,21 @@ package sapotero.rxtest.utils.memory.mappers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import sapotero.rxtest.db.mapper.ActionMapper;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.models.actions.RAction;
+import sapotero.rxtest.db.requery.models.actions.RActionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -24,7 +34,7 @@ public class InMemoryDocumentMapper {
     return imd;
   }
 
-  public static Document convert(RDocumentEntity doc) {
+  private static Document convert(RDocumentEntity doc) {
 
     Document document = new Document();
     document.setUid( doc.getUid() );
@@ -47,6 +57,8 @@ public class InMemoryDocumentMapper {
     document.setFromFavoritesFolder( doc.isFromFavoritesFolder() != null ? doc.isFromFavoritesFolder() : false );
     document.setFromProcessedFolder( doc.isFromProcessedFolder() != null ? doc.isFromProcessedFolder() : false );
     document.setFirstLink( doc.getFirstLink() );
+    document.setAddressedToType( doc.getAddressedToType() );
+    document.setFromLinks( doc.isFromLinks() );
 
     RSignerEntity rSigner = (RSignerEntity) doc.getSigner();
     Signer signer = new Signer();
@@ -67,11 +79,65 @@ public class InMemoryDocumentMapper {
     return document;
   }
 
+  private static List<Decision> convertDecisions(RDocumentEntity document) {
+    List<Decision> decisions = new ArrayList<>();
+
+    if ( document != null && document.getDecisions() != null ) {
+      DecisionMapper decisionMapper = new DecisionMapper();
+
+      for ( RDecision decision : document.getDecisions() ) {
+        RDecisionEntity decisionEntity = (RDecisionEntity) decision;
+        Decision decisionModel = decisionMapper.toModel( decisionEntity );
+        decisionModel.setChanged( decisionEntity.isChanged() != null ? decisionEntity.isChanged() : false );
+        decisionModel.setTemporary( decisionEntity.isTemporary() != null ? decisionEntity.isTemporary() : false );
+        decisions.add( decisionModel );
+      }
+    }
+
+    return decisions;
+  }
+
+  private static List<DocumentInfoAction> convertActions(RDocumentEntity document) {
+    List<DocumentInfoAction> actions = new ArrayList<>();
+
+    if ( document != null && document.getActions() != null ) {
+      ActionMapper actionMapper = new ActionMapper();
+
+      for ( RAction action : document.getActions() ) {
+        RActionEntity actionEntity = (RActionEntity) action;
+        DocumentInfoAction actionModel = actionMapper.toModel( actionEntity );
+
+        if (actionEntity.getUpdatedAt() != null) {
+          try {
+            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            Date date = format.parse( actionEntity.getUpdatedAt() );
+            actionModel.setUpdatedAtTimestamp( (int) (date.getTime()/1000) );
+          } catch (ParseException e) {
+            e.printStackTrace();
+          }
+        }
+
+        actions.add( actionModel );
+      }
+    }
+
+    return actions;
+  }
+
   public static InMemoryDocument fromDB(RDocumentEntity document) {
 
     InMemoryDocument imd = new InMemoryDocument();
     Document doc = convert(document);
     doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
+
+    if ( doc.getChanged() != null && doc.getChanged() ) {
+      imd.setAsLoading();
+    } else {
+      imd.setAsReady();
+    }
+
+    List<Decision> decisions = convertDecisions(document);
+    List<DocumentInfoAction> actions = convertActions(document);
 
     imd.setUid( document.getUid() );
     imd.setUpdatedAt( document.getUpdatedAt() );
@@ -79,13 +145,13 @@ public class InMemoryDocumentMapper {
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
     imd.setDocument( doc );
+    imd.setDecisions( decisions );
+    imd.setActions( actions );
     imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
     imd.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
-    imd.setAsReady();
     imd.setUser( document.getUser() );
-
 
     if (document.getRegistrationDate() != null) {
       try {
@@ -97,6 +163,7 @@ public class InMemoryDocumentMapper {
       }
     }
 
+    imd.setUpdatedFromDB( true );
 
     return imd;
   }

@@ -419,12 +419,12 @@ public class InfoActivity extends AppCompatActivity {
 
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
-      .where(RDecisionEntity.ID.eq( settings.getDecisionActiveId() ) )
+      .where(RDecisionEntity.UID.eq( settings.getDecisionActiveUid() ) )
       .get().firstOrNull();
 
     if (decision != null) {
 
-      Timber.tag(TAG).i("[%s] %s : %s|%s", decision.getId(), decision.getUid(), decision.isChanged(), decision.isTemporary() );
+      Timber.tag(TAG).i("[%s] %s : %s", decision.getId(), decision.getUid(), decision.isChanged() );
 
         if ( settings.isOnline() ){
           if ( decision.isChanged() != null && decision.isChanged() ){

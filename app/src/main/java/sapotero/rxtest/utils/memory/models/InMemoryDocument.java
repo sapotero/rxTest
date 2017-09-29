@@ -1,7 +1,10 @@
 package sapotero.rxtest.utils.memory.models;
 
 import java.io.Serializable;
+import java.util.List;
 
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 
@@ -18,9 +21,13 @@ public class InMemoryDocument implements Serializable {
   public Boolean project     = false;
 
   public Document document;
+  public List<Decision> decisions;
+  public List<DocumentInfoAction> actions;
   public InMemoryState state = InMemoryState.LOADING;
 
   public String user;
+
+  public boolean updatedFromDB = false;
 
   public InMemoryDocument() {
   }
@@ -135,6 +142,30 @@ public class InMemoryDocument implements Serializable {
 
   public void setUser(String user) {
     this.user = user;
+  }
+
+  public List<Decision> getDecisions() {
+    return decisions;
+  }
+
+  public void setDecisions(List<Decision> decisions) {
+    this.decisions = decisions;
+  }
+
+  public List<DocumentInfoAction> getActions() {
+    return actions;
+  }
+
+  public void setActions(List<DocumentInfoAction> actions) {
+    this.actions = actions;
+  }
+
+  public boolean isUpdatedFromDB() {
+    return updatedFromDB;
+  }
+
+  public void setUpdatedFromDB(boolean updatedFromDB) {
+    this.updatedFromDB = updatedFromDB;
   }
 
   @Override

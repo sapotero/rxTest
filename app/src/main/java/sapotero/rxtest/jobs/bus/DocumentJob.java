@@ -169,7 +169,6 @@ abstract class DocumentJob extends BaseJob {
           Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
           doAfterUpdate(result);
           loadLinkedData( documentReceived, result, false );
-          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( result.getUid() ) );
         },
         error -> Timber.tag(TAG).e(error)
       );

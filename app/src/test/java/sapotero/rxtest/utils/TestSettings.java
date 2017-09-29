@@ -32,7 +32,7 @@ public class TestSettings implements ISettings {
   public boolean loadFromSearch;
   public String lastSeenUid;
   public boolean decisionWithAssignment;
-  public int decisionActiveId;
+  public String decisionActiveId;
   public boolean actionsConfirm;
   public boolean controlConfirm;
   public boolean showCommentPost;
@@ -357,12 +357,12 @@ public class TestSettings implements ISettings {
   }
 
   @Override
-  public int getDecisionActiveId() {
+  public String getDecisionActiveUid() {
     return decisionActiveId;
   }
 
   @Override
-  public void setDecisionActiveId(int value) {
+  public void setDecisionActiveUid(String value) {
     decisionActiveId = value;
   }
 
