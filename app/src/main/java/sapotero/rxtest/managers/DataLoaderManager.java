@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -196,9 +197,8 @@ public class DataLoaderManager {
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe(
                     users -> {
-                      if ( Objects.equals( login, settings.getLogin() ) ) {
-                        jobManager.addJobInBackground(new CreateManagerJob(users, login));
-                      }
+                      Timber.e("getManager %s", new Gson().toJson(users) );
+                      jobManager.addJobInBackground(new CreateManagerJob(users, login));
                     },
                     error -> Timber.tag(TAG).e(error)
                   )

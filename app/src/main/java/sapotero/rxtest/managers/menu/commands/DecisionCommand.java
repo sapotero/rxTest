@@ -128,7 +128,10 @@ public abstract class DecisionCommand extends AbstractCommand {
 
     Tuple manager = dataStore
       .select(RManagerEntity.UID)
+      .where(RManagerEntity.USER.eq(settings.getLogin()))
       .get().firstOrNull();
+
+
 
     return
       // если активная резолюция
