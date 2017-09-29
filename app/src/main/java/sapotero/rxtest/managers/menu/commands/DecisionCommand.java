@@ -185,19 +185,23 @@ public abstract class DecisionCommand extends AbstractCommand {
     Decision dec = getParams().getDecisionModel();
 
     if ( dec != null ) {
+      dec.setChanged( true );
       InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
 
       if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
         List<Decision> inMemoryDecisions = inMemoryDocument.getDecisions();
 
-        for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
-          Decision inMemoryDecision = inMemoryDecisions.get(i);
+        if ( inMemoryDecisions.size() > 0 ) {
+          for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
+            Decision inMemoryDecision = inMemoryDecisions.get(i);
 
-          if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
-            dec.setChanged( true );
-            inMemoryDecisions.set(i, dec);
-            break;
+            if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
+              inMemoryDecisions.set(i, dec);
+              break;
+            }
           }
+        } else {
+          inMemoryDecisions.add( dec );
         }
       }
     }

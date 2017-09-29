@@ -51,6 +51,7 @@ public class AddTemporaryDecision extends DecisionCommand {
   }
 
   private void addDecision() {
+    getParams().getDecisionModel().setId( UUID.randomUUID().toString() );
     updateInMemory();
 
     String uid = getParams().getDocument();
@@ -75,7 +76,7 @@ public class AddTemporaryDecision extends DecisionCommand {
     if (dec != null && doc != null) {
 
       RDecisionEntity decision = new RDecisionEntity();
-      decision.setUid(UUID.randomUUID().toString() );
+      decision.setUid( dec.getId() );
       decision.setUrgencyText( dec.getUrgencyText() );
 
       if (dec.getComment() != null & !Objects.equals(dec.getComment(), "")){
