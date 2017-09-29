@@ -44,6 +44,17 @@
             android:layout_width="5dp"
             android:layout_height="match_parent"
             />
+        <Switch
+            android:id="@+id/for_information"
+            android:text="@string/primary_people_info"
+            android:checked="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="match_parent"
+            />
 
         <Button
             android:id="@+id/remove_user"

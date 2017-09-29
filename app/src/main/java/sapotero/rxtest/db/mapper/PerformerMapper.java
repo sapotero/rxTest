@@ -30,6 +30,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
     entity.setIsResponsible(model.getIsResponsible());
     entity.setIsOrganization(model.getOrganization());
     entity.setImage(model.getIImage());
+    entity.setForInformation(model.getIForInformation());
 
     return entity;
   }
@@ -45,6 +46,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
     model.setPerformerGender(entity.getPerformerGender());
     model.setOrganizationText(entity.getOrganizationText());
     model.setIImage(entity.getImage());
+    model.setIForInformation(entity.isForInformation());
 
     return model;
   }
@@ -54,6 +56,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
 
     setBaseFields( formattedModel, entity );
     formattedModel.setGroup( false );
+    formattedModel.setIForInformation(entity.isForInformation());
 
     return formattedModel;
   }
@@ -65,6 +68,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
     model.setIsResponsible( entity.isIsResponsible() );
     model.setOrganization( entity.isIsOrganization() );
     model.setIImage(entity.getImage());
+    model.setIForInformation(entity.isForInformation());
   }
 
   // Returns IPerformer of destinationType, converted from IPerformer source
@@ -105,6 +109,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
     destination.setIsIPerformerGroup( source.isIPerformerGroup() );
     destination.setIsIPerformerOrganization( source.isIPerformerOrganization() );
     destination.setIImage( source.getIImage() );
+    destination.setIForInformation( source.getIForInformation() );
 
     return destination;
   }

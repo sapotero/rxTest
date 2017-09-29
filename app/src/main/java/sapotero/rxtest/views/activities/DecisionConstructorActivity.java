@@ -828,6 +828,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
               performer.setIsOriginal(p.isIsOriginal());
               performer.setIsResponsible(p.isIsResponsible());
               performer.setOrganization(p.isIsOrganization());
+              performer.setForInformation(p.isForInformation());
               block.getPerformers().add(performer);
             }
           }

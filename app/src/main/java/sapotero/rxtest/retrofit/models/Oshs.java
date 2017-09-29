@@ -48,6 +48,19 @@ public class Oshs implements Serializable, IPerformer {
   @Expose
   private String image;
 
+  @SerializedName("for_information")
+  @Expose
+  private Boolean forInformation;
+
+  public Boolean getForInformation() {
+    return forInformation;
+  }
+
+  public Oshs setForInformation(Boolean forInformation) {
+    this.forInformation = forInformation;
+    return this;
+  }
+
   public String getAssistantId() {
     return assistantId;
   }
@@ -427,5 +440,15 @@ public class Oshs implements Serializable, IPerformer {
   @Override
   public void setIImage(String image) {
     setImage(image);
+  }
+
+  @Override
+  public Boolean getIForInformation() {
+    return getForInformation();
+  }
+
+  @Override
+  public void setIForInformation(Boolean forInformation) {
+    setForInformation(forInformation != null ? forInformation : false);
   }
 }

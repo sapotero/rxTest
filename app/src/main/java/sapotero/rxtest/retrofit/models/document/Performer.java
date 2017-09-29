@@ -47,6 +47,18 @@ public class Performer implements IPerformer {
     @Expose
     private Boolean isOrganisation = false;
 
+    @SerializedName("for_information")
+    @Expose
+    private Boolean forInformation;
+
+    public Boolean getForInformation() {
+        return forInformation;
+    }
+
+    public void setForInformation(Boolean forInformation) {
+        this.forInformation = forInformation;
+    }
+
     public String getId() {
         return id;
     }
@@ -410,4 +422,14 @@ public class Performer implements IPerformer {
     public void setIImage(String image) {
 
     }
+
+  @Override
+  public Boolean getIForInformation() {
+    return getForInformation();
+  }
+
+  @Override
+  public void setIForInformation(Boolean forInformation) {
+    setForInformation(forInformation != null ? forInformation : false);
+  }
 }
