@@ -192,18 +192,22 @@ public abstract class DecisionCommand extends AbstractCommand {
       InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
 
       if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
+        boolean decisionAdded = false;
         List<Decision> inMemoryDecisions = inMemoryDocument.getDecisions();
 
-        if ( inMemoryDecisions.size() > 0 ) {
-          for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
-            Decision inMemoryDecision = inMemoryDecisions.get(i);
+        // If decision already exists, replace it
+        for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
+          Decision inMemoryDecision = inMemoryDecisions.get(i);
 
-            if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
-              inMemoryDecisions.set(i, dec);
-              break;
-            }
+          if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
+            inMemoryDecisions.set(i, dec);
+            decisionAdded = true;
+            break;
           }
-        } else {
+        }
+
+        // If decision doesn't exist, add it
+        if ( !decisionAdded ) {
           inMemoryDecisions.add( dec );
         }
       }
