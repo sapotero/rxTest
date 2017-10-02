@@ -65,6 +65,7 @@ public class NotifyManager {
             String contentTitle = "Вам поступило новых документов: " + notifyMessageModels.size();
             String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
             generateSummaryNotifyMsg(contentTitle, contentText, 1);
+            Timber.tag(TAG).e("-> SummaryNotifyMsg");
           } else {
             for (NotifyMessageModel item : notifyMessageModels){
               Document document = item.getDocument();
@@ -73,6 +74,7 @@ public class NotifyManager {
               String contentTitle = getTitle(getJournal(item)) + item.getDocument().getTitle();
               String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
               generateSingleNotifyMsg(contentTitle, contentText, document, filter, 1);
+              Timber.tag(TAG).e("-> SingleNotifyMsg. getChanged() = %s | Md5 = %s | Uid() = %s",item.getDocument().getChanged(),item.getDocument().getMd5(),item.getDocument().getUid());
             }
           }
         }, throwable -> Timber.tag(TAG).e("throwable = " + throwable));
