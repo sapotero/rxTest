@@ -61,12 +61,10 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.HideTemporaryEvent;
-import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -1206,21 +1204,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(ApproveDecisionEvent event) throws Exception {
-    Timber.d("ApproveDecisionEvent");
-    decision.setApproved(true);
-    displayDecision();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(RejectDecisionEvent event) throws Exception {
-    Timber.d("RejectDecisionEvent");
-    decision.setApproved(false);
-    displayDecision();
-    hideButtons();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
