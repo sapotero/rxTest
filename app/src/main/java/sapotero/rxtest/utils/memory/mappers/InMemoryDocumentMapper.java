@@ -8,6 +8,7 @@ import java.util.List;
 
 import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -15,8 +16,11 @@ import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
+import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -124,6 +128,22 @@ public class InMemoryDocumentMapper {
     return actions;
   }
 
+  private static List<Image> convertImages(RDocumentEntity document) {
+    List<Image> images = new ArrayList<>();
+
+    if ( document != null && document.getImages() != null ) {
+      ImageMapper imageMapper = new ImageMapper();
+
+      for ( RImage image : document.getImages() ) {
+        RImageEntity imageEntity = (RImageEntity) image;
+        Image imageModel = imageMapper.toModel( imageEntity );
+        images.add( imageModel );
+      }
+    }
+
+    return images;
+  }
+
   public static InMemoryDocument fromDB(RDocumentEntity document) {
 
     InMemoryDocument imd = new InMemoryDocument();
@@ -138,6 +158,7 @@ public class InMemoryDocumentMapper {
 
     List<Decision> decisions = convertDecisions(document);
     List<DocumentInfoAction> actions = convertActions(document);
+    List<Image> images = convertImages(document);
 
     imd.setUid( document.getUid() );
     imd.setUpdatedAt( document.getUpdatedAt() );
@@ -147,6 +168,7 @@ public class InMemoryDocumentMapper {
     imd.setDocument( doc );
     imd.setDecisions( decisions );
     imd.setActions( actions );
+    imd.setImages( images );
     imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
