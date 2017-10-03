@@ -31,6 +31,8 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    setRedLabel();
+
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     updateLocal();
@@ -53,8 +55,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
     getParams().getDecisionModel().setApproved( true );
     updateInMemory();
-
-    setDecisionChanged();
+    updateInDb();
 
     setChangedInDb();
     InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
@@ -78,8 +79,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
     } else {
       setSyncLabelInMemory();
     }
-
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
 
   @Override
