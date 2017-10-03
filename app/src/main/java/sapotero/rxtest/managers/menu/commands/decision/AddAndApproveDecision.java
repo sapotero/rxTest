@@ -27,7 +27,7 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
-    setRedLabel();
+    setRemoveRedLabel();
 
     getParams().getDecisionModel().setApproved( true );
     createTemporaryDecision();

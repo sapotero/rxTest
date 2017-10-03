@@ -140,10 +140,8 @@ public abstract class DecisionCommand extends AbstractCommand {
 
     Tuple manager = dataStore
       .select(RManagerEntity.UID)
-      .where(RManagerEntity.USER.eq(settings.getLogin()))
+      .where(RManagerEntity.USER.eq(getParams().getLogin()))
       .get().firstOrNull();
-
-
 
     return
       // если активная резолюция
@@ -275,27 +273,51 @@ public abstract class DecisionCommand extends AbstractCommand {
 
   // resolved https://tasks.n-core.ru/browse/MPSED-2206
   // Проставлять признак red у документа, при создании/подписании резолюции
-  protected void setRedLabel() {
+  protected void setRemoveRedLabel() {
     int count = dataStore
       .count( RManagerEntity.class )
       .where( RManagerEntity.USER.eq( getParams().getLogin() ) )
       .and( RManagerEntity.UID.eq( getParams().getDecisionModel().getSignerId() ) )
       .get().value();
 
-    // Если подписант министр и подписант не равен текущему пользователю (т.е. текущий пользователь не министр)
+    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+
     if ( count > 0 && !Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() ) ) {
-      getParams().getDecisionModel().setRed( true );
+      // Если подписант министр и подписант не равен текущему пользователю (т.е. текущий пользователь не министр),
+      // то ставим red у документа и резолюции
+      setRed( inMemoryDocument, true );
 
-      InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
-      if ( inMemoryDocument != null ) {
-        inMemoryDocument.getDocument().setRed( true );
+    } else {
+      // Иначе просматриваем все резолюции документа, кроме текущей и, если ни одна из них не red,
+      // то снимаем red у документа и резолюции
+      if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
+        boolean red = false;
+
+        for ( Decision decision : inMemoryDocument.getDecisions() ) {
+          if ( decision.getRed() != null && decision.getRed() && !Objects.equals( decision.getId(), getParams().getDecisionModel().getId() ) ) {
+            red = true;
+            break;
+          }
+        }
+
+        if ( !red ) {
+          setRed( inMemoryDocument, false );
+        }
       }
-
-      dataStore
-        .update( RDocumentEntity.class )
-        .set( RDocumentEntity.RED, true )
-        .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
-        .get().value();
     }
+  }
+
+  private void setRed(InMemoryDocument inMemoryDocument, boolean value) {
+    getParams().getDecisionModel().setRed( value );
+
+    if ( inMemoryDocument != null ) {
+      inMemoryDocument.getDocument().setRed( value );
+    }
+
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.RED, value )
+      .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
+      .get().value();
   }
 }

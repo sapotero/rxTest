@@ -24,7 +24,7 @@ public class SaveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
-    setRedLabel();
+    setRemoveRedLabel();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
