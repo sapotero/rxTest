@@ -59,6 +59,7 @@ public class DocumentStateSaver {
         .set( RStateEntity.REJECTED, doc.isRejected() )
         .set( RStateEntity.AGAIN, doc.isAgain() )
         .set( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
+        .set( RStateEntity.RED, doc.isRed() )
         .where( RStateEntity.UID.eq( doc.getUid() ))
         .and( RStateEntity.USER.eq( login ))
         .get()
@@ -83,6 +84,7 @@ public class DocumentStateSaver {
         .value( RStateEntity.REJECTED, doc.isRejected() )
         .value( RStateEntity.AGAIN, doc.isAgain() )
         .value( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
+        .value( RStateEntity.RED, doc.isRed() )
         .get()
         .firstOrNull();
 
@@ -107,6 +109,7 @@ public class DocumentStateSaver {
       .set( RDocumentEntity.REJECTED, false )
       .set( RDocumentEntity.AGAIN, false )
       .set( RDocumentEntity.UPDATED_AT, null )
+      .set( RDocumentEntity.RED, false )
       .where(RDocumentEntity.UID.eq( doc.getUid() ))
       .get()
       .value();
@@ -170,6 +173,7 @@ public class DocumentStateSaver {
       .set( RDocumentEntity.REJECTED, stateEntity.isRejected() )
       .set( RDocumentEntity.AGAIN, stateEntity.isAgain() )
       .set( RDocumentEntity.UPDATED_AT, stateEntity.getUpdatedAt() )
+      .set( RDocumentEntity.RED, stateEntity.isRed() )
       .where( RDocumentEntity.UID.eq( stateEntity.getUid() ) )
       .get()
       .value();

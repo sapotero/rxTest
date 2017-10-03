@@ -28,4 +28,5 @@ public abstract class RState {
   Boolean rejected;
   Boolean again;
   String updatedAt;
+  Boolean red;
 }
