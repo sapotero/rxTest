@@ -12,6 +12,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RManagerEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
@@ -212,5 +213,37 @@ public abstract class DecisionCommand extends AbstractCommand {
         }
       }
     }
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2206
+  // Проставлять признак red у документа, при создании/подписании резолюции
+  protected boolean setRedLabel() {
+    boolean result = false;
+
+    int count = dataStore
+      .count( RManagerEntity.class )
+      .where( RManagerEntity.USER.eq( getParams().getLogin() ) )
+      .and( RManagerEntity.UID.eq( getParams().getDecisionModel().getSignerId() ) )
+      .get().value();
+
+    // Если подписант министр и подписант не равен текущему пользователю (т.е. текущий пользователь не министр)
+    if ( count > 0 && !Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() ) ) {
+      getParams().getDecisionModel().setRed( true );
+
+      InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+      if ( inMemoryDocument != null ) {
+        inMemoryDocument.getDocument().setRed( true );
+      }
+
+      dataStore
+        .update( RDocumentEntity.class )
+        .set( RDocumentEntity.RED, true )
+        .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
+        .get().value();
+
+      result = true;
+    }
+
+    return result;
   }
 }
