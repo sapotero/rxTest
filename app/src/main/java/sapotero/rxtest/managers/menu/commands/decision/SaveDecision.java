@@ -6,7 +6,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -21,7 +20,6 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class SaveDecision extends DecisionCommand {
@@ -36,6 +34,8 @@ public class SaveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    setRedLabel();
+
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
     setChangedInDb();
