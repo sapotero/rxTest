@@ -182,6 +182,8 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setSigner(RDocumentEntity entity, Signer signerModel) {
+    entity.setSigner( null );
+
     if ( exist( signerModel ) ) {
       RSignerEntity signerEntity = new SignerMapper().toEntity( signerModel );
       entity.setSigner( signerEntity );
@@ -189,9 +191,8 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setSigner(DocumentInfo model, RSigner signer) {
-    RSignerEntity signerEntity = (RSignerEntity) signer;
-
-    if ( exist( signerEntity ) ) {
+    if ( exist( signer ) ) {
+      RSignerEntity signerEntity = (RSignerEntity) signer;
       Signer signerModel = new SignerMapper().toModel( signerEntity );
       model.setSigner( signerModel );
     }

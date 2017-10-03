@@ -17,8 +17,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,8 +43,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.ApproveDecisionEvent;
-import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -64,7 +60,7 @@ import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements OperationManager.Callback, SelectOshsDialogFragment.Callback {
+public class DecisionConstructorActivity extends AppCompatActivity implements SelectOshsDialogFragment.Callback {
 
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
@@ -771,14 +767,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
       return showSaveDialog;
     }
 
-    @Override
-    protected void onResume () {
-      super.onPostResume();
-
-
-      operationManager.registerCallBack(this);
-    }
-
   private void loadDecision () {
     String decision_id = settings.getDecisionActiveUid();
     rDecisionEntity = dataStore
@@ -924,28 +912,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
         .autoDismiss(true);
 
       prev_dialog.build().show();
-    }
-
-    @Override
-    public void onExecuteSuccess (String command){
-      if (Objects.equals(command, "approve_decision")) {
-        finish();
-//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        EventBus.getDefault().post(new ApproveDecisionEvent());
-      }
-
-      if (Objects.equals(command, "reject_decision")) {
-        finish();
-//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-
-        EventBus.getDefault().post(new RejectDecisionEvent());
-      }
-    }
-
-
-    @Override
-    public void onExecuteError () {
-
     }
 
     @Override
