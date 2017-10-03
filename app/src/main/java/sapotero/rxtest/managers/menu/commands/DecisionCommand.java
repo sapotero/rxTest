@@ -275,9 +275,7 @@ public abstract class DecisionCommand extends AbstractCommand {
 
   // resolved https://tasks.n-core.ru/browse/MPSED-2206
   // Проставлять признак red у документа, при создании/подписании резолюции
-  protected boolean setRedLabel() {
-    boolean result = false;
-
+  protected void setRedLabel() {
     int count = dataStore
       .count( RManagerEntity.class )
       .where( RManagerEntity.USER.eq( getParams().getLogin() ) )
@@ -298,10 +296,6 @@ public abstract class DecisionCommand extends AbstractCommand {
         .set( RDocumentEntity.RED, true )
         .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
         .get().value();
-
-      result = true;
     }
-
-    return result;
   }
 }
