@@ -254,8 +254,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   private void setPdfPreview() throws FileNotFoundException {
     if (getContext() != null && getContext().getFilesDir() != null ){
       Image image = adapter.getItem(index);
-      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
-
+      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getImageId(), image.getTitle() ));
 
       Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
       Timber.tag(TAG).e("file: %s", file.toString() );

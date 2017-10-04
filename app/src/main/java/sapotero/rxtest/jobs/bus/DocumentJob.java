@@ -189,7 +189,7 @@ abstract class DocumentJob extends BaseJob {
       for (RImage _image : images) {
         settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId(), login ) );
+        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getImageId() + "_" + image.getTitle(), image.getId(), login ) );
       }
     }
   }
