@@ -910,7 +910,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         List<Block> blocks = new ArrayList<>();
         blocks.addAll( decision.getBlocks() );
 
-        Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+        Collections.sort(blocks, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0);
 
         for (Block block : blocks){
           Timber.tag("showPosition").v( "ShowPosition: %s", block.getAppealText() );
