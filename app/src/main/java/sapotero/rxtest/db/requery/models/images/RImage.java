@@ -24,6 +24,7 @@ public abstract class RImage {
   String contentType;
   String createdAt;
   Boolean signed;
+  String fileName;
 
   @Column(value="false")
   Boolean deleted;

@@ -34,7 +34,7 @@ public class Image implements Serializable {
     private Boolean signed;
 
     private transient boolean deleted = false;
-    private transient String imageId = "";
+    private transient String fileName = "";
 
     public boolean isDeleted() {
         return deleted;
@@ -188,11 +188,11 @@ public class Image implements Serializable {
         this.signed = signed;
     }
 
-    public String getImageId() {
-        return imageId;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

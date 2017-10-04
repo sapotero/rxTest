@@ -1,5 +1,8 @@
 package sapotero.rxtest.db.requery.utils;
 
+import android.content.Context;
+
+import java.io.File;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -20,11 +23,13 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import timber.log.Timber;
 
 public class Deleter {
 
+  @Inject Context context;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   public Deleter() {
@@ -122,6 +127,11 @@ public class Deleter {
 
   public void deleteImages(RDocumentEntity document, String TAG) {
     if ( notEmpty( document.getImages() ) ) {
+      for ( RImage _image : document.getImages() ) {
+        RImageEntity imageEntity = (RImageEntity) _image;
+        File file = new File(context.getApplicationContext().getFilesDir(), imageEntity.getFileName() );
+      }
+
       int count = dataStore
         .delete( RImageEntity.class )
         .where( RImageEntity.DOCUMENT_ID.eq( document.getId() ) )
