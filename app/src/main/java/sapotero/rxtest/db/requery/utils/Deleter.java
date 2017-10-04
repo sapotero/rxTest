@@ -127,17 +127,28 @@ public class Deleter {
 
   public void deleteImages(RDocumentEntity document, String TAG) {
     if ( notEmpty( document.getImages() ) ) {
+      int deletedFilesCounter = 0;
+      File file;
+      boolean result;
+
+      // Удаляем файлы образов
       for ( RImage _image : document.getImages() ) {
         RImageEntity imageEntity = (RImageEntity) _image;
-        File file = new File(context.getApplicationContext().getFilesDir(), imageEntity.getFileName() );
+        file = new File(context.getApplicationContext().getFilesDir(), imageEntity.getFileName() );
+        result = file.delete();
+        if ( result ) {
+          deletedFilesCounter++;
+        }
       }
 
+      // Удаляем сведения об образах из базы
       int count = dataStore
         .delete( RImageEntity.class )
         .where( RImageEntity.DOCUMENT_ID.eq( document.getId() ) )
         .get().value();
 
-      Timber.tag(TAG).d("Deleted " + count + " images from document with ID " + document.getId());
+      Timber.tag(TAG).d("Deleted " + deletedFilesCounter + " image files from document with ID " + document.getId());
+      Timber.tag(TAG).d("Deleted " + count + " images in DB from document with ID " + document.getId());
     }
   }
 
