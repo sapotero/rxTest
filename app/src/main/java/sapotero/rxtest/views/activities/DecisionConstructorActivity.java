@@ -629,31 +629,30 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
 
     if (rDecisionEntity != null) {
-
       RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-      Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
 
-      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) {
-        if (
-          manager.getDecision() != null &&
-            manager.getDecision().getSignerId() != null &&
-            Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())) {
-          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+      if ( doc != null ) {
+        Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
+
+        if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) {
+          if (
+              manager.getDecision() != null &&
+              manager.getDecision().getSignerId() != null &&
+              Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())) {
+            toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+          } else {
+            toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+          }
+        }
+
+        if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
+          if (rDecisionEntity != null){
+            toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
+          }
         } else {
-          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+          toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(false);
         }
       }
-
-
-
-      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
-        if (rDecisionEntity != null){
-          toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
-        }
-      } else {
-        toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(false);
-      }
-
 
     } else {
       // если новая резолюция
