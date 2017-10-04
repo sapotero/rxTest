@@ -259,18 +259,18 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
       Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
       Timber.tag(TAG).e("file: %s", file.toString() );
 
-      // Проверяем что файл загружен полность,
-      // иначе рисуем крутилку с окошком
-      if (image.getSize() != null && file.length() == image.getSize()){
-        Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
-        showFileLoading(false);
+      // Проверяем, существует ли ЭО
+      // ЭО автоматически удаляются через период времени
+      // заданный в настройках
+      if ( image.isDeleted() ) {
+        showDownloadButton();
 
-        // Проверяем, существует ли ЭО
-        // ЭО автоматически удаляются через период времени
-        // заданный в настройках
-        if ( image.isDeleted() ){
-          showDownloadButton();
-        } else {
+      } else {
+        // Проверяем что файл загружен полность,
+        // иначе рисуем крутилку с окошком
+        if (image.getSize() != null && file.length() == image.getSize()) {
+          Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
+          showFileLoading(false);
 
           contentType = image.getContentType();
           document_title.setText( image.getTitle() );
@@ -284,7 +284,6 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
               pdfView
                 .fromStream(targetStream)
-                //         .fromFile( file )
                 .enableSwipe(true)
                 .enableDoubletap(true)
                 .defaultPage(0)
@@ -302,7 +301,6 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
               pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
               pdfView.setDrawingCacheEnabled(true);
               pdfView.enableRenderDuringScale(false);
-
             }
 
             pdfView.setVisibility(View.VISIBLE);
@@ -319,9 +317,9 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
           updatePageCount();
           updateVisibility();
 
+        } else {
+          showFileLoading(true);
         }
-      } else {
-        showFileLoading(true);
       }
 
       hideZoom();
