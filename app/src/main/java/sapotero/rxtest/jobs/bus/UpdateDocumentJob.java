@@ -234,7 +234,7 @@ public class UpdateDocumentJob extends DocumentJob {
         // Insert new entity and linked data into DB if existing entity has been properly deleted
         if ( getDocumentExisting() == null ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
-          updateDocument( documentReceived, documentNew, TAG );
+          insert( documentReceived, documentNew, false, true, TAG );
         }
 
       } else {
