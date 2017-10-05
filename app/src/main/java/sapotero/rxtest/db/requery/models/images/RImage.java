@@ -37,8 +37,8 @@ public abstract class RImage {
   @Column(value="false")
   Boolean error;
 
+  Boolean noFreeSpace;
+
   @ManyToOne
   RDocument document;
-
-
 }

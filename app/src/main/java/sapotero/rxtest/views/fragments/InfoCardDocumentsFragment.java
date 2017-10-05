@@ -265,6 +265,10 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
       if ( image.isDeleted() ) {
         showDownloadButton();
 
+      } else if ( image.isNoFreeSpace() ) {
+        // TODO: change to special message
+        showDownloadButton();
+
       } else {
         // Проверяем что файл загружен полность,
         // иначе рисуем крутилку с окошком
