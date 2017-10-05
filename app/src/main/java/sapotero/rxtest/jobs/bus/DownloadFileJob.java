@@ -49,7 +49,6 @@ public class DownloadFileJob  extends BaseJob {
     this.login = login;
   }
 
-
   @Override
   public void onAdded() {
     Timber.tag(TAG).v( "onAdded"  );
@@ -96,17 +95,7 @@ public class DownloadFileJob  extends BaseJob {
     if ( sendEvent ) {
       EventBus.getDefault().post( new StepperLoadDocumentEvent(fileName) );
     }
-
   }
-
-//  if ( fileExist() ){
-//    File file = new File(getApplicationContext().getFilesDir(), fileName);
-//    Timber.tag(TAG).v( "file exists: %s", file.getAbsolutePath() );
-//    EventBus.getDefault().post( new StepperLoadDocumentEvent(file.getAbsolutePath()) );
-//  } else {
-//    Timber.tag(TAG).v( "file not exists" );
-//    loadFile();
-//  }
 
   private RImageEntity getImage(){
     image = dataStore
@@ -137,11 +126,6 @@ public class DownloadFileJob  extends BaseJob {
       .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
-  private Boolean fileExist(){
-    File file = new File(getApplicationContext().getFilesDir(), fileName);
-    return file.exists();
-  }
-
   private void loadFile(){
     String admin = login;
     String token = settings.getToken();
@@ -169,7 +153,6 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private void downloadFile(DownloadLink link) {
-
     setLoading(true);
 
     Timber.tag(TAG).v( "downloadFile ..." );
@@ -214,8 +197,8 @@ public class DownloadFileJob  extends BaseJob {
             setError(false);
           }
         },
-        error -> {
 
+        error -> {
           setLoading(false);
           setComplete(false);
           setError(true);
@@ -227,7 +210,7 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private boolean writeResponseBodyToDisk(ResponseBody body) {
-    File futureStudioIconFile = new File(getApplicationContext().getFilesDir(), fileName);
+    File imageFile = new File(getApplicationContext().getFilesDir(), fileName);
 
     InputStream inputStream;
     OutputStream outputStream;
@@ -235,12 +218,8 @@ public class DownloadFileJob  extends BaseJob {
     byte[] fileReader = new byte[1024*64];
 
     try {
-
-      long fileSize = body.contentLength();
-      long fileSizeDownloaded = 0;
-
       inputStream = body.byteStream();
-      outputStream = new FileOutputStream(futureStudioIconFile);
+      outputStream = new FileOutputStream(imageFile);
 
       while (true) {
         int read = inputStream.read(fileReader);
@@ -250,10 +229,6 @@ public class DownloadFileJob  extends BaseJob {
         }
 
         outputStream.write(fileReader, 0, read);
-
-        fileSizeDownloaded += read;
-
-//        Timber.tag(TAG).d("file download: %s of %s", fileSizeDownloaded, fileSize);
       }
 
       outputStream.flush();
@@ -262,20 +237,21 @@ public class DownloadFileJob  extends BaseJob {
       outputStream.close();
 
       return true;
+
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return false;
+
     } catch (IOException e) {
       return false;
     }
-
-
   }
 
   @Override
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1);
   }
+
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.

@@ -23,7 +23,6 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Action;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -127,23 +126,23 @@ abstract class DocumentJob extends BaseJob {
     if ( isLink ) {
       // If link, insert only if doesn't exist
       if ( !exist( existingDoc ) ) {
-        insert(documentReceived, documentToSave, isLink, TAG);
+        insert(documentReceived, documentToSave, isLink, false, TAG);
       }
     } else {
       // If not link and doesn't exist, insert
       if ( !exist( existingDoc ) ) {
-        insert(documentReceived, documentToSave, isLink, TAG);
+        insert(documentReceived, documentToSave, isLink, false, TAG);
       } else {
         // If not link and exists and is from links, delete existing and insert new instead
         if ( existingDoc.isFromLinks() ) {
           new Deleter().deleteDocument(existingDoc, TAG);
-          insert(documentReceived, documentToSave, isLink, TAG);
+          insert(documentReceived, documentToSave, isLink, false, TAG);
         }
       }
     }
   }
 
-  private void insert(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
+  protected void insert(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, boolean update, String TAG) {
     dataStore
       .insert( documentToSave )
       .toObservable()
@@ -151,24 +150,13 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( Schedulers.computation() )
       .subscribe(
         result -> {
-          Timber.tag(TAG).d("Created " + result.getUid());
+          if ( update ) {
+            Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
+          } else {
+            Timber.tag(TAG).d("Created " + result.getUid());
+          }
           doAfterUpdate(result);
           loadLinkedData( documentReceived, result, isLink );
-        },
-        error -> Timber.tag(TAG).e(error)
-      );
-  }
-
-  void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
-    dataStore
-      .update( documentToUpdate )
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( Schedulers.computation() )
-      .subscribe(
-        result -> {
-          Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
-          doAfterUpdate(result);
-          loadLinkedData( documentReceived, result, false );
         },
         error -> Timber.tag(TAG).e(error)
       );
@@ -189,7 +177,7 @@ abstract class DocumentJob extends BaseJob {
       for (RImage _image : images) {
         settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId(), login ) );
+        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
       }
     }
   }
