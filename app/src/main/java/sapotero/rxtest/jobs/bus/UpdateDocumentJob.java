@@ -132,6 +132,7 @@ public class UpdateDocumentJob extends DocumentJob {
       loadDocument(uid, TAG);
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
+      Timber.tag(TAG).d("documentExisting == null ? %s", documentExisting == null);
       EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
     }
   }
@@ -250,6 +251,7 @@ public class UpdateDocumentJob extends DocumentJob {
       }
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
+      Timber.tag(TAG).d("documentExisting == null ? %s", documentExisting == null);
     }
   }
 
@@ -282,7 +284,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
-    deleteLinkedDataPartTwo();
+    deleteLinkedDataPartTwo( document );
 
     if (document != null && !fromLinks) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterUpdate");
@@ -292,24 +294,18 @@ public class UpdateDocumentJob extends DocumentJob {
   }
 
   private void saveIdsToDelete(RDocumentEntity document) {
-    oldSignerId = getOldSignerId( document );
-    oldRouteId = getOldRouteId( document );
+    oldSignerId = getSignerId( document );
+    oldRouteId = getRouteId( document );
+
+    Timber.tag(TAG).d( "oldSignerId = %s, oldRouteId = %s", oldSignerId, oldRouteId );
   }
 
-  private int getOldSignerId(RDocumentEntity document) {
-    if ( exist( document.getSigner() ) ) {
-      return ((RSignerEntity) document.getSigner()).getId();
-    } else {
-      return 0;
-    }
+  private int getSignerId(RDocumentEntity document) {
+    return document.getSigner() != null ? ((RSignerEntity) document.getSigner()).getId() : 0;
   }
 
-  private int getOldRouteId(RDocumentEntity document) {
-    if ( exist( document.getRoute() ) ) {
-      return ((RRouteEntity) document.getRoute()).getId();
-    } else {
-      return 0;
-    }
+  private int getRouteId(RDocumentEntity document) {
+    return document.getRoute() != null ? ((RRouteEntity) document.getRoute()).getId() : 0;
   }
 
   private void deleteLinkedDataPartOne(RDocumentEntity document) {
@@ -323,11 +319,36 @@ public class UpdateDocumentJob extends DocumentJob {
     deleter.deleteLinks( document, TAG );
   }
 
-  private void deleteLinkedDataPartTwo() {
+  private void deleteLinkedDataPartTwo(RDocumentEntity document) {
     Deleter deleter = new Deleter();
 
-    deleter.deleteSigner( oldSignerId, TAG );
-    deleter.deleteRoute( oldRouteId, TAG );
+    // resolved https://tasks.n-core.ru/browse/MPSED-2176
+    // При обновлении, документ удаляется из базы и не обновляется, помогает перезапуск МП.
+    // Проблема с пустым тулбаром и ик документа при обновлении.
+
+    int currentSignerId = getSignerId( document );
+    int currentRouteId = getRouteId( document );
+
+    Timber.tag(TAG).d( "currentSignerId = %s, oldSignerId = %s", currentSignerId, oldSignerId );
+    Timber.tag(TAG).d( "currentRouteId = %s, oldRouteId = %s", currentRouteId, oldRouteId );
+
+    // Delete signer and route only if they are not used in just updated document
+    // (deleting signer or route, which are currently in use by the document, will lead to the removal of this document from DB)
+    if ( oldSignerId > 0 ) {
+      if ( currentSignerId != oldSignerId ) {
+        deleter.deleteSigner( oldSignerId, TAG );
+      } else {
+        Timber.tag(TAG).d( "Signer with id %s is used in the document, quit deleting", oldSignerId);
+      }
+    }
+
+    if ( oldRouteId > 0 ) {
+      if ( currentRouteId != oldRouteId ) {
+        deleter.deleteRoute( oldRouteId, TAG );
+      } else {
+        Timber.tag(TAG).d( "Route with id %s is used in the document, quit deleting", oldRouteId);
+      }
+    }
   }
 
   @Override

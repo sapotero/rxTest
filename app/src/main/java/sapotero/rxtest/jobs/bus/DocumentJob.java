@@ -23,7 +23,6 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Action;
 import sapotero.rxtest.retrofit.models.document.Card;
