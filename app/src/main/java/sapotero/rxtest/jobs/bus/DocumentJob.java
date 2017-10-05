@@ -160,7 +160,7 @@ abstract class DocumentJob extends BaseJob {
 
   void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
     dataStore
-      .update( documentToUpdate )
+      .insert( documentToUpdate )
       .subscribeOn( Schedulers.computation() )
       .observeOn( Schedulers.computation() )
       .subscribe(
