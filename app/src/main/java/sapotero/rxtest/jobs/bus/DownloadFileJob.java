@@ -142,7 +142,6 @@ public class DownloadFileJob  extends BaseJob {
       .subscribe(
         this::downloadFile,
         error -> {
-
           setLoading(false);
           setComplete(false);
           setError(true);
