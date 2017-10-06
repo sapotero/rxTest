@@ -83,6 +83,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
+  @BindView(R.id.no_free_space) FrameLayout noFreeSpace;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
@@ -266,8 +267,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         showDownloadButton();
 
       } else if ( image.isNoFreeSpace() ) {
-        // TODO: change to special message
-        showDownloadButton();
+        showNoFreeSpace();
 
       } else {
         // Проверяем что файл загружен полность,
@@ -358,6 +358,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         }
       }, Timber::e );
   }
+
   private void stopReloadSubscription() {
     if (reload != null) {
       reload.unsubscribe();
@@ -414,9 +415,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     deletedImage.setVisibility(View.VISIBLE);
   }
 
+  private void showNoFreeSpace() {
+    noFreeSpace.setVisibility(View.VISIBLE);
+  }
+
   private void updateVisibility() {
     hideZoom();
     deletedImage.setVisibility(View.GONE);
+    noFreeSpace.setVisibility(View.GONE);
   }
 
   private void hideZoom() {
@@ -460,6 +466,11 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     jobManager.addJobInBackground( new ReloadProcessedImageJob( settings.getUid() ) );
 
     getActivity().finish();
+  }
+
+  @OnClick(R.id.info_card_pdf_reload_no_free_space)
+  public void reloadImageNoFreeSpace() {
+    reloadImage();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)

@@ -176,9 +176,6 @@ abstract class DocumentJob extends BaseJob {
       long totalSize = getTotalImagesSize( images );
       long usableSpace = getUsableSpace();
 
-      // TODO: remove this line
-//      usableSpace = 1000;
-
       Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * totalSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * totalSize);
 
       for (RImage _image : images) {
