@@ -69,8 +69,6 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     viewHolder.name.setText( user.getName() );
     viewHolder.title.setText( user.getOrganization() );
 
-    Timber.e( "getIImage %s", user.getIImage() );
-
     if (user.getIImage() != null){
       try {
         String str = user.getIImage().replaceAll("(\\n)", "");
