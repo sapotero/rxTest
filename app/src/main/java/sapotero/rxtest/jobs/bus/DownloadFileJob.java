@@ -31,8 +31,6 @@ import timber.log.Timber;
 
 public class DownloadFileJob  extends BaseJob {
 
-  public static final int IMAGE_SIZE_MULTIPLIER = 5;
-
   private final int rImageId;
   private String TAG = this.getClass().getSimpleName();
   public static final int PRIORITY = 10;
@@ -41,7 +39,6 @@ public class DownloadFileJob  extends BaseJob {
   private String strUrl;
   private String fileName;
   private RImageEntity image;
-  private long imageSize = 0;
 
   DownloadFileJob(String host, String strUrl, String fileName, int id, String login) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
@@ -71,8 +68,6 @@ public class DownloadFileJob  extends BaseJob {
     boolean sendEvent = true;
 
     if (image != null) {
-
-      imageSize = image.getSize() != null ? image.getSize() : 0;
 
       if ( !image.isLoading() && image.isComplete() ){
         Timber.tag(TAG).e("File exists!");
@@ -131,58 +126,29 @@ public class DownloadFileJob  extends BaseJob {
       .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
-  private void setNoFreeSpace() {
-    dataStore
-      .update(RImageEntity.class)
-      .set(RImageEntity.ERROR, true)
-      .set(RImageEntity.NO_FREE_SPACE, true)
-      .where(RImageEntity.ID.eq( image.getId() )).get().value();
-  }
-
   private void loadFile(){
     String admin = login;
     String token = settings.getToken();
 
-    long usableSpace = getUsableSpace();
+    Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
+    DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
-    // TODO: remove this line
-    usableSpace = 1000;
+    strUrl = strUrl.replace("?expired_link=1", "");
+    Observable<DownloadLink> file = documentLinkService.getByLink(strUrl, admin, token, "1");
 
-    Timber.tag(TAG).d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * imageSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * imageSize);
+    file
+      .subscribeOn(Schedulers.io())
+      .observeOn(Schedulers.io())
+      .subscribe(
+        this::downloadFile,
+        error -> {
+          setLoading(false);
+          setComplete(false);
+          setError(true);
 
-    // resolved https://tasks.n-core.ru/browse/MPSED-2205
-    // Работа МП при нехватке места на планшете
-    // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х размер_образа
-    if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * imageSize ) {
-      Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
-      DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
-
-      strUrl = strUrl.replace("?expired_link=1", "");
-      Observable<DownloadLink> file = documentLinkService.getByLink(strUrl, admin, token, "1");
-
-      file
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribe(
-          this::downloadFile,
-          error -> {
-            setLoading(false);
-            setComplete(false);
-            setError(true);
-
-            EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading file") );
-          }
-        );
-
-    } else {
-      setNoFreeSpace();
-      EventBus.getDefault().post( new StepperLoadDocumentEvent("No available usable space") );
-    }
-  }
-
-  private long getUsableSpace() {
-    File fileDir = new File(getApplicationContext().getFilesDir().getAbsolutePath());
-    return fileDir.getUsableSpace();
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading file") );
+        }
+      );
   }
 
   private void downloadFile(DownloadLink link) {

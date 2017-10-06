@@ -4,6 +4,7 @@ import com.birbit.android.jobqueue.Params;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,8 @@ import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
 abstract class DocumentJob extends BaseJob {
+
+  private static final int IMAGE_SIZE_MULTIPLIER = 5;
 
   public String currentUserId;
 
@@ -150,13 +153,9 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( Schedulers.computation() )
       .subscribe(
         result -> {
-          if ( update ) {
-            Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
-          } else {
-            Timber.tag(TAG).d("Created " + result.getUid());
-          }
-          doAfterUpdate(result);
+          Timber.tag(TAG).d( update ? "Updated MD5 " + result.getMd5() : "Created " + result.getUid() );
           loadLinkedData( documentReceived, result, isLink );
+          doAfterUpdate(result);
         },
         error -> Timber.tag(TAG).e(error)
       );
@@ -175,11 +174,40 @@ abstract class DocumentJob extends BaseJob {
   private void loadImages(Set<RImage> images) {
     if ( notEmpty( images ) ) {
       for (RImage _image : images) {
-        settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+
+        long imageSize = image.getSize() != null ? image.getSize() : 0;
+        long usableSpace = getUsableSpace();
+
+        // TODO: remove this line
+        usableSpace = 1000;
+
+        Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * imageSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * imageSize);
+
+        // resolved https://tasks.n-core.ru/browse/MPSED-2205
+        // Работа МП при нехватке места на планшете
+        // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х размер_образа
+        if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * imageSize ) {
+          settings.addTotalDocCount(1);
+          jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+        } else {
+          setNoFreeSpace( image );
+        }
       }
     }
+  }
+
+  private void setNoFreeSpace(RImageEntity image) {
+    // Set no free space flag in RImageEntity to update document in MemoryStore (in doAfterUpdate)
+    image.setNoFreeSpace( true );
+    image.setError( true );
+
+    // Set no free space flag in DB
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.ERROR, true)
+      .set(RImageEntity.NO_FREE_SPACE, true)
+      .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
   private void loadLinks(List<String> links, String parentUid) {
@@ -201,6 +229,11 @@ abstract class DocumentJob extends BaseJob {
         }
       }
     }
+  }
+
+  private long getUsableSpace() {
+    File fileDir = new File(getApplicationContext().getFilesDir().getAbsolutePath());
+    return fileDir.getUsableSpace();
   }
 
   // Return empty list if input list is null
