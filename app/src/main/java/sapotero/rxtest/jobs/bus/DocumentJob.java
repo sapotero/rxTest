@@ -173,21 +173,21 @@ abstract class DocumentJob extends BaseJob {
 
   private void loadImages(Set<RImage> images) {
     if ( notEmpty( images ) ) {
+      long totalSize = getTotalImagesSize( images );
+      long usableSpace = getUsableSpace();
+
+      // TODO: remove this line
+//      usableSpace = 1000;
+
+      Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * totalSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * totalSize);
+
       for (RImage _image : images) {
         RImageEntity image = (RImageEntity) _image;
 
-        long imageSize = image.getSize() != null ? image.getSize() : 0;
-        long usableSpace = getUsableSpace();
-
-        // TODO: remove this line
-        usableSpace = 1000;
-
-        Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * imageSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * imageSize);
-
         // resolved https://tasks.n-core.ru/browse/MPSED-2205
         // Работа МП при нехватке места на планшете
-        // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х размер_образа
-        if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * imageSize ) {
+        // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х суммарный_размер_образов_в_документе
+        if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * totalSize ) {
           settings.addTotalDocCount(1);
           jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
         } else {
@@ -195,6 +195,23 @@ abstract class DocumentJob extends BaseJob {
         }
       }
     }
+  }
+
+  private long getTotalImagesSize(Set<RImage> images) {
+    long totalSize = 0;
+
+    for (RImage _image : images) {
+      RImageEntity image = (RImageEntity) _image;
+      long imageSize = image.getSize() != null ? image.getSize() : 0;
+      totalSize += imageSize;
+    }
+
+    return totalSize;
+  }
+
+  private long getUsableSpace() {
+    File fileDir = new File(getApplicationContext().getFilesDir().getAbsolutePath());
+    return fileDir.getUsableSpace();
   }
 
   private void setNoFreeSpace(RImageEntity image) {
@@ -229,11 +246,6 @@ abstract class DocumentJob extends BaseJob {
         }
       }
     }
-  }
-
-  private long getUsableSpace() {
-    File fileDir = new File(getApplicationContext().getFilesDir().getAbsolutePath());
-    return fileDir.getUsableSpace();
   }
 
   // Return empty list if input list is null
