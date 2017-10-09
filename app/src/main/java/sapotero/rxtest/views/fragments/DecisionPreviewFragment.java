@@ -1227,6 +1227,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
+    Timber.tag(TAG).e("CheckDecisionVisibilityEvent");
+
     if (decision != null) {
       sendDecisionVisibilityEvent();
     } else {
