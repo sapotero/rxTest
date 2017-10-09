@@ -402,8 +402,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           processEmptyDecisions();
           break;
         default:
-          safeSetVisibility(R.id.menu_info_decision_create, false);
-          safeSetVisibility(R.id.menu_info_decision_edit,   false);
+          setCreateDecisionMenuItemVisible( false );
+          setEditDecisionMenuItemVisible( false );
 
           break;
       }
@@ -413,16 +413,16 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       if (isFromProject() || isFromFavoritesFolder() ) {
         // resolved https://tasks.n-core.ru/browse/MVDESD-12765
         // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
-        safeSetVisibility(R.id.menu_info_shared_to_control, false);
+        setControlMenuItemVisible( false );
       }
 
       // Если документ обработан - то изменяем резолюции на поручения
-      if ( isProcessed() ){
-        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
-        safeSetVisibility(R.id.menu_info_decision_create, settings.isShowCreateDecisionPost());
+      if ( isProcessed() ) {
+        setCreateWithAssignmentDecisionMenuItemVisible( settings.isShowCreateDecisionPost() );
+        setCreateDecisionMenuItemVisible( settings.isShowCreateDecisionPost() );
 
-        if (isFromProject()){
-          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
+        if ( isFromProject() ) {
+          setCreateWithAssignmentDecisionMenuItemVisible( false );
         }
       }
 
@@ -431,20 +431,20 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13330
       // Или если нет активной резолюции
-      if ( hasActiveDecision() ){
+      if ( hasActiveDecision() ) {
         safeSetVisibility(R.id.menu_info_to_the_approval_performance, false);
-        safeSetVisibility(R.id.menu_info_decision_create, false);
+        setCreateDecisionMenuItemVisible( false );
       } else {
-        safeSetVisibility(R.id.menu_info_decision_create, true);
+        setCreateDecisionMenuItemVisible( true );
       }
 
-      if (isFromFavoritesFolder()){
-        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
+      if ( isFromFavoritesFolder() ) {
+        setCreateWithAssignmentDecisionMenuItemVisible( settings.isShowCreateDecisionPost() );
 
         if ( settings.isProject() ){
-          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
-          safeSetVisibility(R.id.menu_info_decision_edit, false);
-          safeSetVisibility(R.id.menu_info_decision_create, false);
+          setCreateWithAssignmentDecisionMenuItemVisible( false );
+          setCreateDecisionMenuItemVisible( false );
+          setEditDecisionMenuItemVisible( false );
         }
       }
 
@@ -535,9 +535,9 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     toolbar.getMenu().clear();
     toolbar.inflateMenu(R.menu.info_menu);
 
-    safeSetVisibility(R.id.menu_info_decision_create, showCreateButton);
-    safeSetVisibility(R.id.menu_info_decision_edit, false);
-    safeSetVisibility(R.id.menu_info_shared_to_control, true);
+    setCreateDecisionMenuItemVisible( showCreateButton );
+    setEditDecisionMenuItemVisible( false );
+    setControlMenuItemVisible( true );
     safeSetVisibility(R.id.menu_info_shared_to_favorites, true);
   }
 
@@ -550,7 +550,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
       for ( Decision decision: doc.getDecisions() ) {
-        if (decision.getApproved() != null && decision.getRed() != null && !decision.getApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.getRed() && !decision.getApproved() ) {
+        if ( decision.getApproved() != null && !decision.getApproved() && ( Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.getRed() != null && decision.getRed() ) ) {
           result = true;
           break;
         }
@@ -594,12 +594,24 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   //REFACTOR переделать это
   private void processEmptyDecisions() {
     Timber.tag(TAG).e("processEmptyDecisions");
-    safeSetVisibility( R.id.menu_info_decision_edit  , false);
+    setEditDecisionMenuItemVisible( false );
     showCreateDecisionButton();
   }
 
+  private void setCreateDecisionMenuItemVisible(boolean visible) {
+    safeSetVisibility(R.id.menu_info_decision_create, visible);
+  }
+
   private void setEditDecisionMenuItemVisible(boolean visible){
-    safeSetVisibility( R.id.menu_info_decision_edit, visible);
+    safeSetVisibility(R.id.menu_info_decision_edit, visible);
+  }
+
+  private void setCreateWithAssignmentDecisionMenuItemVisible(boolean visible) {
+    safeSetVisibility(R.id.menu_info_decision_create_with_assignment, visible);
+  }
+
+  private void setControlMenuItemVisible(boolean visible) {
+    safeSetVisibility(R.id.menu_info_shared_to_control, visible);
   }
 
   public void init() {
@@ -625,8 +637,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   private void showCreateDecisionButton() {
-    if (!isFromProject()){
-      safeSetVisibility( R.id.menu_info_decision_create, true);
+    if ( !isFromProject() ) {
+      setCreateDecisionMenuItemVisible( true );
     }
   }
 
@@ -835,8 +847,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       }
 
       if ( hasChangedDecision() ){
-        safeSetVisibility(R.id.menu_info_decision_edit, false);
-        safeSetVisibility(R.id.menu_info_decision_create, false);
+        setEditDecisionMenuItemVisible(false);
+        setCreateDecisionMenuItemVisible(false);
       }
 
     } else if ( event.hideEditDecision != null && event.hideEditDecision ) {
