@@ -24,12 +24,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.images.RImage;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
@@ -39,6 +34,8 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -46,7 +43,7 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
-public class ToolbarManager  implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
+public class ToolbarManager implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;
@@ -58,7 +55,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private Toolbar toolbar;
   private Context context;
 
-  private RDocumentEntity doc;
+  private InMemoryDocument doc;
 
   public ToolbarManager(Toolbar toolbar, Context context) {
     this.toolbar = toolbar;
@@ -69,13 +66,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     setListener();
 
     operationManager.registerCallBack(this);
-
-    // FIX починить и убрать из релиза
-    getFirstForLenovo();
-
-    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-
-    init();
   }
 
   private void registerEvents() {
@@ -83,10 +73,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     EventBus.getDefault().register(this);
   }
 
-  private void getFirstForLenovo() {
-    doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings.getUid())).get().firstOrNull();
+  private void getDocument() {
+    doc = store.getDocuments().get( settings.getUid() );
+
     registerEvents();
   }
 
@@ -288,7 +277,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             boolean isCitizenRequest = false;
 
-            InMemoryDocument doc = store.getDocuments().get( settings.getUid() );
             if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
               isCitizenRequest = true;
             }
@@ -337,8 +325,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         return false;
       }
     );
-
-    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
   }
 
   public void showPrimaryConsiderationDialog(Activity activity) {
@@ -369,9 +355,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     Boolean result = true;
 
     if ( doc.getImages() != null && doc.getImages().size() > 0 ){
-      for (RImage _image: doc.getImages()) {
-        RImageEntity image = (RImageEntity) _image;
-
+      for (Image image: doc.getImages()) {
         int max_size = parseIntOrDefault( settings.getMaxImageSize(), 20 )*1024*1024;
 
         if (max_size > 20*1024*1024){
@@ -394,7 +378,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   public void invalidate() {
-    getFirstForLenovo();
+    getDocument();
 
     if (doc != null){
 
@@ -411,7 +395,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if (isFromFavoritesFolder() ){
         showAsProcessed(false);
       }
-
 
       int decision_count = doc.getDecisions().size();
       switch (decision_count) {
@@ -472,7 +455,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
 
       EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-
     }
   }
 
@@ -560,16 +542,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private boolean isShared() {
-    return doc != null && doc.getAddressedToType() != null && Objects.equals(doc.getAddressedToType(), "group");
+    return doc != null && doc.getDocument() != null && Objects.equals(doc.getDocument().getAddressedToType(), "group");
   }
 
   private boolean hasActiveDecision() {
     Boolean result = false;
 
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
-      for ( RDecision _decision: doc.getDecisions() ) {
-        RDecisionEntity decision = (RDecisionEntity) _decision;
-        if (decision.isApproved() != null && decision.isRed() != null && !decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
+      for ( Decision decision: doc.getDecisions() ) {
+        if (decision.getApproved() != null && decision.getRed() != null && !decision.getApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.getRed() && !decision.getApproved() ) {
           result = true;
           break;
         }
@@ -583,10 +564,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     Boolean result = false;
 
     if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
-      for ( RDecision _decision: doc.getDecisions() ) {
-        RDecisionEntity decision = (RDecisionEntity) _decision;
-
-        if ( decision.isChanged() != null && decision.isChanged() ) {
+      for ( Decision decision: doc.getDecisions() ) {
+        if ( decision.isChanged() ) {
           result = true;
           break;
         }
@@ -597,19 +576,19 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private boolean isProcessed() {
-    return doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder();
+    return doc != null && doc.isProcessed() != null && doc.isProcessed() || doc != null && doc.getDocument().isFromProcessedFolder();
   }
 
   private boolean isFromControl() {
-    return doc.isControl() != null && doc.isControl();
+    return doc != null && doc.getDocument().getControl() != null && doc.getDocument().getControl();
   }
 
   private boolean isFromFavorites() {
-    return doc.isFavorites() != null && doc.isFavorites();
+    return doc != null && doc.getDocument().getFavorites() != null && doc.getDocument().getFavorites();
   }
 
   private boolean isFromFavoritesFolder() {
-    return doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
+    return doc != null && doc.getDocument().isFromFavoritesFolder();
   }
 
   //REFACTOR переделать это
@@ -623,7 +602,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     safeSetVisibility( R.id.menu_info_decision_edit, visible);
   }
 
-  private void init() {
+  public void init() {
     toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_300 ) );
 
@@ -640,8 +619,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     invalidate();
 
     toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
-    if (doc!=null && doc.getDocumentType() != null){
-      toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getDocumentType() ) ) );
+    if ( doc != null && doc.getIndex() != null) {
+      toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
     }
   }
 
@@ -851,7 +830,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // resolved https://tasks.n-core.ru/browse/MPSED-2154
       setEditDecisionMenuItemVisible(event.approved);
 
-      if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
+      if ( doc != null && doc.isProcessed() != null && doc.isProcessed() ) {
         setEditDecisionMenuItemVisible(false);
       }
 

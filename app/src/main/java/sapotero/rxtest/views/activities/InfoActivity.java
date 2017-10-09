@@ -170,6 +170,7 @@ public class InfoActivity extends AppCompatActivity {
     if ( toolbarManager == null ) {
       toolbarManager = new ToolbarManager(toolbar, this);
     }
+    toolbarManager.init();
 
     setLastSeen();
 
