@@ -167,14 +167,9 @@ public class InfoActivity extends AppCompatActivity {
     }
     EventBus.getDefault().register(this);
 
-
-//    toolbarManager = new ToolbarManager( this, toolbar);
-//    toolbarManager.init();
-    toolbarManager = ToolbarManager.getInstance();
-    toolbarManager.withToolbar(toolbar);
-    toolbarManager.withContext(this);
-    toolbarManager.build();
-    toolbarManager.init();
+    if ( toolbarManager == null ) {
+      toolbarManager = new ToolbarManager(toolbar, this);
+    }
 
     setLastSeen();
 
