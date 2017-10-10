@@ -61,7 +61,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.HideTemporaryEvent;
@@ -800,10 +799,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     } else {
       Timber.e("no decisions");
 
-      if (doc.isProcessed() != null && !doc.isProcessed()){
-        EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
-      }
-
       decision_spinner_adapter.clear();
 
       Decision empty = new Decision();
@@ -1223,17 +1218,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(HideTemporaryEvent event) throws Exception {
     temporary.setVisibility(View.GONE);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
-    Timber.tag(TAG).e("CheckDecisionVisibilityEvent");
-
-    if (decision != null) {
-      sendDecisionVisibilityEvent();
-    } else {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, null ) );
-    }
   }
 
   private void hideButtons() {

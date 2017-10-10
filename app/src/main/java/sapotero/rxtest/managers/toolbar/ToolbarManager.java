@@ -26,7 +26,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
@@ -427,8 +426,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       if ( isShared() ) {
         clearToolbar();
       }
-
-      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
     }
   }
 
@@ -786,25 +783,17 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(DecisionVisibilityEvent event){
+  public void onMessageEvent(DecisionVisibilityEvent event) {
     Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.toString() );
 
-    if (event.approved != null) {
-
+    if ( event.approved != null ) {
       // resolved https://tasks.n-core.ru/browse/MPSED-2154
-      setEditDecisionMenuItemVisible(event.approved);
+      setEditDecisionMenuItemVisible( !isProcessed() && event.approved );
 
-      if ( doc != null && doc.isProcessed() != null && doc.isProcessed() ) {
-        setEditDecisionMenuItemVisible(false);
-      }
-
-      if ( hasChangedDecision() ){
+      if ( hasChangedDecision() ) {
         setEditDecisionMenuItemVisible(false);
         setCreateDecisionMenuItemVisible(false);
       }
-
-    } else if ( event.hideEditDecision != null && event.hideEditDecision ) {
-      setEditDecisionMenuItemVisible(false);
     }
   }
 }
