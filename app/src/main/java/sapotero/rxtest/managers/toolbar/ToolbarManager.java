@@ -365,6 +365,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   public void invalidate() {
+    Timber.tag(TAG).i("invalidate");
+
     getDocument();
 
     if ( doc != null ) {
@@ -554,6 +556,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   public void init(Toolbar toolbar, Context context) {
+    Timber.tag(TAG).i("init");
+
     this.toolbar = toolbar;
     this.context = context;
 
@@ -571,8 +575,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     );
 
     Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
-
-    invalidate();
 
     this.toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
     if ( doc != null && doc.getIndex() != null) {
@@ -779,7 +781,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         .asObservable()
         .subscribe(
           decisionActiveUid -> {
-            Timber.tag(TAG).i("DecisionActiveUidSubscription: decision uid = ", decisionActiveUid);
+            Timber.tag(TAG).d("DecisionActiveUidSubscription: decision uid = %s", decisionActiveUid);
 
             if ( !Objects.equals( decisionActiveUid, "0" ) ) {
               Decision decision = getDecision( decisionActiveUid );

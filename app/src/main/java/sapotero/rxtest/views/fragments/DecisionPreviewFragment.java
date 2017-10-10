@@ -461,7 +461,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
           decision = decision_spinner_adapter.getItem(position);
-          settings.setDecisionActiveUid( decision.getId() );
           displayDecision();
         } else {
           // resolved https://tasks.n-core.ru/browse/MPSED-2154
