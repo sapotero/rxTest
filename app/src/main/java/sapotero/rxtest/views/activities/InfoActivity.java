@@ -44,8 +44,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
-import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
@@ -439,14 +437,6 @@ public class InfoActivity extends AppCompatActivity {
     Intent intent = new Intent( this, DecisionConstructorActivity.class);
     InfoActivity activity = (InfoActivity) this;
     activity.startActivity(intent);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(HasNoActiveDecisionConstructor event) throws Exception {
-//    toolbarManager.showCreateDecisionButton();
-//    setPreview();
-    EventBus.getDefault().post( new HideTemporaryEvent() );
-
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

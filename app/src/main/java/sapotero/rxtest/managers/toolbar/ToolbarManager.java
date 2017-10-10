@@ -382,14 +382,9 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     if ( doc != null ) {
       inflateMenu();
 
-      int decision_count = doc.getDecisions().size();
-
-      if ( decision_count == 0 ) {
+      if ( doc.getDecisions().size() == 0 ) {
         setEditDecisionMenuItemVisible( false );
         setCreateDecisionMenuItemVisible( true );
-      } else {
-        setCreateDecisionMenuItemVisible( false );
-        setEditDecisionMenuItemVisible( false );
       }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13259

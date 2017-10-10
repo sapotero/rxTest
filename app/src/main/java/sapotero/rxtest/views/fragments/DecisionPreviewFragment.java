@@ -62,8 +62,6 @@ import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
-import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
-import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -567,7 +565,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void checkActiveDecision() {
     if ( !decision_spinner_adapter.hasActiveDecision() && !isInEditor ){
       Timber.tag(TAG).e("NO ACTIVE DECISION");
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+      temporary.setVisibility(View.GONE);
     }
   }
 
@@ -812,7 +810,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       decision_count.setVisibility(View.GONE);
       invalidateSpinner(false);
       hideButtons();
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+      temporary.setVisibility(View.GONE);
 
       bottom_line.setVisibility( View.GONE);
 
@@ -1213,11 +1211,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   public void onMessageEvent(InvalidateDecisionSpinnerEvent event) throws Exception {
     Timber.tag(TAG).w("InvalidateDecisionSpinnerEvent %s", event.uid);
     decision_spinner_adapter.invalidate(event.uid);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(HideTemporaryEvent event) throws Exception {
-    temporary.setVisibility(View.GONE);
   }
 
   private void hideButtons() {
