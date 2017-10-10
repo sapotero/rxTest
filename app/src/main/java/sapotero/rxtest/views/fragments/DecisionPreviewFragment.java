@@ -61,7 +61,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -447,8 +446,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       initEvents();
-
-      sendDecisionVisibilityEvent();
     }
   }
 
@@ -846,14 +843,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       settings.setDecisionActiveUid( decision.getId() );
 
       updateVisibility( decision.getApproved() != null ? decision.getApproved() : false );
-
-      sendDecisionVisibilityEvent();
-    }
-  }
-
-  private void sendDecisionVisibilityEvent() {
-    if (decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) && !isInEditor) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && decision.getApproved() != null && !decision.getApproved(), decision.getId(), null ) );
     }
   }
 
@@ -927,8 +916,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       printSigner( decision, isMagnifier ? regNumber : ( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() ) );
-
-      sendDecisionVisibilityEvent();
     }
 
     private void showEmpty(){

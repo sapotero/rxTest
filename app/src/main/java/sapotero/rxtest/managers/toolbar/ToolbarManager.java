@@ -12,8 +12,6 @@ import android.view.MenuItem;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -22,11 +20,11 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -56,6 +54,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   private InMemoryDocument doc;
 
+  private CompositeSubscription subscription;
+
   public ToolbarManager(Toolbar toolbar, Context context) {
     this.toolbar = toolbar;
     this.context = context;
@@ -65,17 +65,12 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     setListener();
 
     operationManager.registerCallBack(this);
-  }
 
-  private void registerEvents() {
-    EventBus.getDefault().unregister(this);
-    EventBus.getDefault().register(this);
+    subscribeToNetworkCheckResults();
   }
 
   private void getDocument() {
     doc = store.getDocuments().get( settings.getUid() );
-
-    registerEvents();
   }
 
   private void setListener() {
@@ -521,8 +516,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private boolean hasChangedDecision() {
     Boolean result = false;
 
-    if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
-      for ( Decision decision: doc.getDecisions() ) {
+    if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0) {
+      for ( Decision decision : doc.getDecisions() ) {
         if ( decision.isChanged() ) {
           result = true;
           break;
@@ -777,18 +772,62 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   public void onExecuteError() {
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(DecisionVisibilityEvent event) {
-    Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.toString() );
+  private void subscribeToNetworkCheckResults() {
+    unsubscribe();
+    subscription = new CompositeSubscription();
 
-    if ( event.approved != null ) {
-      // resolved https://tasks.n-core.ru/browse/MPSED-2154
-      setEditDecisionMenuItemVisible( !isProcessed() && event.approved );
+    subscription.add(
+      settings.getDecisionActiveUidPreference()
+        .asObservable()
+        .subscribe(
+          decisionActiveUid -> {
+            Timber.tag(TAG).i("DecisionActiveUidSubscription: decision uid = ", decisionActiveUid);
 
-      if ( hasChangedDecision() ) {
-        setEditDecisionMenuItemVisible(false);
-        setCreateDecisionMenuItemVisible(false);
+            if ( !Objects.equals( decisionActiveUid, "0" ) ) {
+              Decision decision = getDecision( decisionActiveUid );
+
+              // resolved https://tasks.n-core.ru/browse/MPSED-2154
+              if ( decision != null && isActiveOrRed( decision ) && decision.getApproved() != null && !decision.getApproved() && !isProcessed() ) {
+                setEditDecisionMenuItemVisible( true );
+              }
+
+              if ( hasChangedDecision() ) {
+                setCreateDecisionMenuItemVisible(false);
+                setEditDecisionMenuItemVisible(false);
+              }
+            }
+          },
+
+          Timber::e
+        )
+    );
+  }
+
+  public void unsubscribe() {
+    if ( subscription != null && subscription.hasSubscriptions() ) {
+      subscription.unsubscribe();
+    }
+  }
+
+  private Decision getDecision(String decisionUid) {
+    Decision result = null;
+
+    if ( doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0 ) {
+      for ( Decision decision : doc.getDecisions() ) {
+        if ( Objects.equals( decision.getId(), decisionUid ) ) {
+          result = decision;
+          break;
+        }
       }
     }
+
+    return result;
+  }
+
+  private boolean isActiveOrRed(Decision decision) {
+    return decision != null && decision.getSignerId() != null
+      && decision.getSignerId().equals( settings.getCurrentUserId() )
+      || decision != null && decision.getRed() != null
+      && decision.getRed();
   }
 }

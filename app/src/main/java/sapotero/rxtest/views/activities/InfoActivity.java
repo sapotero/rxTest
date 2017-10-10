@@ -368,10 +368,10 @@ public class InfoActivity extends AppCompatActivity {
 
     invalidateArrows();
 
-    chechPrimaryConsiderationDialog();
+    checkPrimaryConsiderationDialog();
   }
 
-  private void chechPrimaryConsiderationDialog() {
+  private void checkPrimaryConsiderationDialog() {
     if (settings.isShowPrimaryConsideration()){
       settings.setShowPrimaryConsideration(false);
       toolbarManager.showPrimaryConsiderationDialog(this);

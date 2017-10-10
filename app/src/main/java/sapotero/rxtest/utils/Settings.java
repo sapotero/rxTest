@@ -632,6 +632,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<String> getDecisionActiveUidPreference() {
+   return decisionActiveId;
+  }
+
+  @Override
   public boolean isActionsConfirm() {
     return getBoolean(actionsConfirm);
   }
