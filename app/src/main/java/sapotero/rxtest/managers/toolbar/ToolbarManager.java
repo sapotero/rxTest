@@ -56,17 +56,10 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   private CompositeSubscription subscription;
 
-  public ToolbarManager(Toolbar toolbar, Context context) {
-    this.toolbar = toolbar;
-    this.context = context;
-
+  ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
-
-    setListener();
-
     operationManager.registerCallBack(this);
-
-    subscribeToNetworkCheckResults();
+    subscribeToDecisionActiveUid();
   }
 
   private void getDocument() {
@@ -560,13 +553,18 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     safeSetVisibility(R.id.menu_info_shared_to_control, visible);
   }
 
-  public void init() {
-    toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
-    toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_300 ) );
+  public void init(Toolbar toolbar, Context context) {
+    this.toolbar = toolbar;
+    this.context = context;
 
-    toolbar.setContentInsetStartWithNavigation(250);
+    setListener();
 
-    toolbar.setNavigationOnClickListener(v ->{
+    this.toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
+    this.toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_300 ) );
+
+    this.toolbar.setContentInsetStartWithNavigation(250);
+
+    this.toolbar.setNavigationOnClickListener(v ->{
       Activity activity = (Activity) context;
       activity.finish();
       }
@@ -576,9 +574,9 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
     invalidate();
 
-    toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
+    this.toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
     if ( doc != null && doc.getIndex() != null) {
-      toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
+      this.toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
     }
   }
 
@@ -772,7 +770,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   public void onExecuteError() {
   }
 
-  private void subscribeToNetworkCheckResults() {
+  private void subscribeToDecisionActiveUid() {
     unsubscribe();
     subscription = new CompositeSubscription();
 

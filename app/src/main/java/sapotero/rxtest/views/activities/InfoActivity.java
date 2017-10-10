@@ -78,8 +78,8 @@ public class InfoActivity extends AppCompatActivity {
   @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject MemoryStore store;
-
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject ToolbarManager toolbarManager;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -87,7 +87,6 @@ public class InfoActivity extends AppCompatActivity {
 
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
-  private ToolbarManager toolbarManager;
   private JournalStatus status;
 
   private List<String> documentUids;
@@ -165,10 +164,7 @@ public class InfoActivity extends AppCompatActivity {
     }
     EventBus.getDefault().register(this);
 
-    if ( toolbarManager == null ) {
-      toolbarManager = new ToolbarManager(toolbar, this);
-    }
-    toolbarManager.init();
+    toolbarManager.init(toolbar, this);
 
     setLastSeen();
 
