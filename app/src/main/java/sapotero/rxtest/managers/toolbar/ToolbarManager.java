@@ -380,50 +380,17 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   public void invalidate() {
     getDocument();
 
-    if (doc != null){
-
+    if ( doc != null ) {
       inflateMenu();
 
-      // Из папки обработанное
-      if (isProcessed()){
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
-        showAsProcessed(true);
-      }
-
-      // Из папки избранное
-      if (isFromFavoritesFolder() ){
-        showAsProcessed(false);
-      }
-
       int decision_count = doc.getDecisions().size();
-      switch (decision_count) {
-        case 0:
-          processEmptyDecisions();
-          break;
-        default:
-          setCreateDecisionMenuItemVisible( false );
-          setEditDecisionMenuItemVisible( false );
 
-          break;
-      }
-
-      processFavoritesAndControlIcons();
-
-      if (isFromProject() || isFromFavoritesFolder() ) {
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-        // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
-        setControlMenuItemVisible( false );
-      }
-
-      // Если документ обработан - то изменяем резолюции на поручения
-      if ( isProcessed() ) {
-        setCreateWithAssignmentDecisionMenuItemVisible( settings.isShowCreateDecisionPost() );
-        setCreateDecisionMenuItemVisible( settings.isShowCreateDecisionPost() );
-
-        if ( isFromProject() ) {
-          setCreateWithAssignmentDecisionMenuItemVisible( false );
-        }
+      if ( decision_count == 0 ) {
+        setEditDecisionMenuItemVisible( false );
+        setCreateDecisionMenuItemVisible( true );
+      } else {
+        setCreateDecisionMenuItemVisible( false );
+        setEditDecisionMenuItemVisible( false );
       }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13259
@@ -438,19 +405,26 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         setCreateDecisionMenuItemVisible( true );
       }
 
-      if ( isFromFavoritesFolder() ) {
-        setCreateWithAssignmentDecisionMenuItemVisible( settings.isShowCreateDecisionPost() );
+      processFavoritesAndControlIcons();
 
-        if ( settings.isProject() ){
-          setCreateWithAssignmentDecisionMenuItemVisible( false );
-          setCreateDecisionMenuItemVisible( false );
-          setEditDecisionMenuItemVisible( false );
-        }
+      // Из папки обработанное или папки избранное или проект
+      if ( isProcessed() || isFromFavoritesFolder() || isFromProject() ) {
+        // Если документ обработан и не проект, то изменяем резолюции на поручения
+        // У проектов скрываем все пункты меню, связанные с созданием/редактированием резолюций/поручений
+        setCreateDecisionMenuItemVisible( false );
+        setCreateWithAssignmentDecisionMenuItemVisible( !isFromProject() && settings.isShowCreateDecisionPost() );
+        setEditDecisionMenuItemVisible( false );
+      }
+
+      if ( isFromProject() || isFromFavoritesFolder() ) {
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+        // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
+        setControlMenuItemVisible( false );
       }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
-      // Или если нет активной резолюции
-      if ( isShared() ){
+      // Если общие документы
+      if ( isShared() ) {
         clearToolbar();
       }
 
@@ -483,7 +457,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   private void inflateMenu() {
-    toolbar.getMenu().clear();
+    clearToolbar();
     int menu = R.menu.info_menu;
 
     if (settings.getStatusCode() != null) {
@@ -510,6 +484,10 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       }
     }
 
+    if ( isProcessed() || isFromFavoritesFolder() ) {
+      menu = R.menu.info_menu;
+    }
+
     toolbar.inflateMenu(menu);
   }
 
@@ -522,23 +500,11 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   private boolean isFromProject() {
-    return doc != null && doc.getFilter() != null && Arrays.asList( JournalStatus.APPROVAL.getName(), JournalStatus.SIGNING.getName() ).contains(doc.getFilter());
+    return settings.isProject() || ( doc != null && doc.getFilter() != null && Arrays.asList( JournalStatus.APPROVAL.getName(), JournalStatus.SIGNING.getName() ).contains(doc.getFilter()) );
   }
 
   private void clearToolbar() {
     toolbar.getMenu().clear();
-  }
-
-  private void showAsProcessed(Boolean showCreateButton) {
-    Timber.tag(TAG).e("showAsProcessed");
-
-    toolbar.getMenu().clear();
-    toolbar.inflateMenu(R.menu.info_menu);
-
-    setCreateDecisionMenuItemVisible( showCreateButton );
-    setEditDecisionMenuItemVisible( false );
-    setControlMenuItemVisible( true );
-    safeSetVisibility(R.id.menu_info_shared_to_favorites, true);
   }
 
   private boolean isShared() {
@@ -576,7 +542,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   private boolean isProcessed() {
-    return doc != null && doc.isProcessed() != null && doc.isProcessed() || doc != null && doc.getDocument().isFromProcessedFolder();
+    return doc != null && ( doc.isProcessed() != null && doc.isProcessed() || doc.getDocument().isFromProcessedFolder() );
   }
 
   private boolean isFromControl() {
@@ -589,13 +555,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   private boolean isFromFavoritesFolder() {
     return doc != null && doc.getDocument().isFromFavoritesFolder();
-  }
-
-  //REFACTOR переделать это
-  private void processEmptyDecisions() {
-    Timber.tag(TAG).e("processEmptyDecisions");
-    setEditDecisionMenuItemVisible( false );
-    showCreateDecisionButton();
   }
 
   private void setCreateDecisionMenuItemVisible(boolean visible) {
@@ -633,12 +592,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
     if ( doc != null && doc.getIndex() != null) {
       toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
-    }
-  }
-
-  private void showCreateDecisionButton() {
-    if ( !isFromProject() ) {
-      setCreateDecisionMenuItemVisible( true );
     }
   }
 
@@ -728,7 +681,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   private void showFromTheReportDialog() {
-
     CommandParams params = new CommandParams();
 
     MaterialDialog.Builder fromTheReportDialog = new MaterialDialog.Builder(context)
