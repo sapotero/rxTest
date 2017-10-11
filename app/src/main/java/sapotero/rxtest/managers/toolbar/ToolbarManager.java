@@ -791,13 +791,15 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
               Decision decision = getDecision( decisionActiveUid );
 
               // resolved https://tasks.n-core.ru/browse/MPSED-2154
-              if ( decision != null && isActiveOrRed( decision ) && decision.getApproved() != null && !decision.getApproved() && !isProcessed() ) {
+              if ( decision != null && isActiveOrRed( decision ) && decision.getApproved() != null && !decision.getApproved() && !isProcessed() && !decision.isTemporary() ) {
                 setEditDecisionMenuItemVisible( true );
               } else {
                 setEditDecisionMenuItemVisible( false );
               }
 
-              if ( hasChangedDecision() ) {
+              // resolved https://tasks.n-core.ru/browse/MPSED-2212
+              // в оффлайне на резолюциях, которые находятся на синхронизации, добавить кнопку редактировать. Сейчас доступен только дабл клик по предпросмотру
+              if ( settings.isOnline() && hasChangedDecision() ) {
                 setCreateDecisionMenuItemVisible( false );
                 setEditDecisionMenuItemVisible( false );
               }
