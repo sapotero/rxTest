@@ -41,6 +41,7 @@ import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
@@ -63,7 +64,7 @@ public class RoutePreviewFragment extends PreviewFragment {
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  @BindView(R.id.fragment_route_wrapper) LinearLayout wrapper;
+  @BindView(R.id.fragment_route_wrapper) LinearLayout linearLayoutWrapper;
 
   private String TAG = this.getClass().getSimpleName();
   private String uid;
@@ -86,7 +87,7 @@ public class RoutePreviewFragment extends PreviewFragment {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_route_preview, container, false);
-    wrapper   = (LinearLayout) view.findViewById(R.id.fragment_route_wrapper);
+    linearLayoutWrapper = (LinearLayout) view.findViewById(R.id.fragment_route_wrapper);
     button    = (ImageButton)  view.findViewById(R.id.route_preview_fragment_change_state);
     frame     = (FrameLayout)  view.findViewById(R.id.route_preview_fragment_frame_view);
     card      = (FrameLayout)  view.findViewById(R.id.route_preview_fragment_card_view);
@@ -99,6 +100,11 @@ public class RoutePreviewFragment extends PreviewFragment {
 
     initEvents();
 
+    //https://tasks.n-core.ru/browse/MPSED-2248
+    //вызов loadRoute() не должен вызываться из onResume() текущего класса,
+    //поскольку его вызывают в update() из InfoActivity.onResume()
+    loadRoute();
+
     return view;
   }
 
@@ -107,7 +113,6 @@ public class RoutePreviewFragment extends PreviewFragment {
     super.onResume();
 
     showPreview(true);
-    loadRoute();
     updateButtonView();
 
   }
@@ -160,7 +165,7 @@ public class RoutePreviewFragment extends PreviewFragment {
       animation.addAnimation(fadeOut);
 
       frame.setAnimation(animation);
-      wrapper.setAnimation(wrapperAnimation);
+      linearLayoutWrapper.setAnimation(wrapperAnimation);
 
       Observable.just("")
         .delay(durationMillis, TimeUnit.MILLISECONDS)
@@ -237,9 +242,8 @@ public class RoutePreviewFragment extends PreviewFragment {
       .firstOrNull();
 
     if (doc != null) {
-
-      if (wrapper != null) {
-        wrapper.removeAllViews();
+      if (linearLayoutWrapper != null) {
+        linearLayoutWrapper.removeAllViews();
       }
 
       if ( doc.getRoute() != null && ((RRouteEntity) doc.getRoute()).getSteps() != null ) {
@@ -254,9 +258,8 @@ public class RoutePreviewFragment extends PreviewFragment {
           .subscribe(
             panel -> {
               LinearLayout build = panel.build();
-
               if (build != null) {
-                wrapper.addView(build);
+                linearLayoutWrapper.addView(build);
               }
             },
             error -> {
