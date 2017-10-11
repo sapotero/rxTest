@@ -159,22 +159,49 @@ public abstract class DecisionCommand extends AbstractCommand {
   protected void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
     String decisionUid = data.getDecisionUid();
 
-    // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
     if ( decisionUid != null && !decisionUid.equals("") ) {
-      if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
-        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
-        rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+      boolean signerIsCurrentUser = Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() );
 
-        dataStore
-          .insert( rDisplayFirstDecisionEntity )
-          .toObservable()
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            result -> Timber.tag(TAG).v("Added decision to display first decision table"),
-            error -> Timber.tag(TAG).e(error)
-          );
+      RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = dataStore
+        .select(RDisplayFirstDecisionEntity.class)
+        .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( decisionUid ))
+        .and(RDisplayFirstDecisionEntity.USER_ID.eq( getParams().getCurrentUserId() ))
+        .get().firstOrNull();
+
+      // resolved https://tasks.n-core.ru/browse/MPSED-1995
+      // Если Изменить подписанта на любого кроме текущего(не активная резолюция), тогда не считать такую резолюцию "созданной мной".
+      if ( rDisplayFirstDecisionEntity != null ) {
+        // Если UID резолюции есть в таблице резолюций, отображаемых первыми,
+        // и подписант отличается от текущего пользователя (пользователь поменял подписанта в резолюции),
+        // то удалить эту резолюцию из таблицы (то есть больше не отображать данную резолюцию первой)
+        if ( !signerIsCurrentUser ) {
+          int count = dataStore
+            .delete( RDisplayFirstDecisionEntity.class )
+            .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( decisionUid ))
+            .and(RDisplayFirstDecisionEntity.USER_ID.eq( getParams().getCurrentUserId() ))
+            .get().value();
+
+          Timber.tag(TAG).d("Deleted %s rows from display first decision table for decision %s", count, decisionUid);
+        }
+
+      } else {
+        // Если UID резолюции нет в таблице резолюций, отображаемых первыми,
+        // и создал резолюцию я и подписант я, то сохранить UID этой резолюции в таблицу
+        if ( signerIsCurrentUser ) {
+          rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
+          rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
+          rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+
+          dataStore
+            .insert( rDisplayFirstDecisionEntity )
+            .toObservable()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+              result -> Timber.tag(TAG).v("Added decision %s to display first decision table", decisionUid),
+              error -> Timber.tag(TAG).e(error)
+            );
+        }
       }
     }
   }
