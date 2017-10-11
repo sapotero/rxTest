@@ -3,13 +3,13 @@ package sapotero.rxtest.views.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
@@ -73,7 +73,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
   @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
   @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
-  @BindView(R.id.select_oshs_wrapper) LinearLayout select_oshs_wrapper;
+  @BindView(R.id.select_signer_cardview) CardView selectSignerCardView;
   @BindView(R.id.activity_decision_constructor_scroll_wrapper) ScrollView scroll;
   @BindView(R.id.decision_constructor_decision_comment) EditText decision_comment;
   @BindView(R.id.decision_constructor_decision_date)    EditText decision_date;
@@ -532,13 +532,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       manager.setDate( date );
     }
 
-
-
-
     if ( status == JournalStatus.FOR_REPORT ){
       // настройка
-      if ( !settings.isShowChangeSigner() ){
-        select_oshs_wrapper.setVisibility(View.GONE);
+      if ( !settings.isShowChangeSigner() ) {
+        // resolved https://tasks.n-core.ru/browse/MPSED-2250
+        // Убрать блок "подписал" в резолюциях на рассмотрение(по настройке)
+        selectSignerCardView.setVisibility(View.GONE);
       }
     }
 
