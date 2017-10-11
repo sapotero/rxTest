@@ -59,7 +59,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
     operationManager.registerCallBack(this);
-    subscribeToDecisionActiveUid();
   }
 
   private void getDocument() {
@@ -411,6 +410,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       if ( isShared() ) {
         clearToolbar();
       }
+
+      subscribeToDecisionActiveUid();
     }
   }
 
@@ -560,6 +561,9 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
     this.toolbar = toolbar;
     this.context = context;
+
+    unsubscribe();
+    settings.setDecisionActiveUid("0");
 
     setListener();
 
@@ -789,12 +793,17 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
               // resolved https://tasks.n-core.ru/browse/MPSED-2154
               if ( decision != null && isActiveOrRed( decision ) && decision.getApproved() != null && !decision.getApproved() && !isProcessed() ) {
                 setEditDecisionMenuItemVisible( true );
+              } else {
+                setEditDecisionMenuItemVisible( false );
               }
 
               if ( hasChangedDecision() ) {
-                setCreateDecisionMenuItemVisible(false);
-                setEditDecisionMenuItemVisible(false);
+                setCreateDecisionMenuItemVisible( false );
+                setEditDecisionMenuItemVisible( false );
               }
+
+            } else {
+              setEditDecisionMenuItemVisible( false );
             }
           },
 

@@ -793,6 +793,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     } else {
       Timber.e("no decisions");
 
+      settings.setDecisionActiveUid("0");
+
       decision_spinner_adapter.clear();
 
       Decision empty = new Decision();
