@@ -12,8 +12,6 @@ import android.view.MenuItem;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -22,23 +20,19 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.images.RImage;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
-import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -46,85 +40,29 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
-public class ToolbarManager  implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
+public class ToolbarManager implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
   @Inject MemoryStore store;
 
-
   private final String TAG = this.getClass().getSimpleName();
 
-  private int decision_count;
-
   private Toolbar toolbar;
-//  private Context context = EsdApplication.getApplication().getApplicationContext();
   private Context context;
 
-  private RDocumentEntity doc;
-  private String command;
-  private static ToolbarManager instance;
+  private InMemoryDocument doc;
 
-  public ToolbarManager (Context context, Toolbar toolbar) {
-    this.context = context;
-    this.toolbar = toolbar;
+  private CompositeSubscription subscription;
+
+  ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
-
-    registerEvents();
-    setListener();
-
     operationManager.registerCallBack(this);
-
-    // FIX починить и убрать из релиза
-    getFirstForLenovo();
-
-    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
   }
 
-  public ToolbarManager() {
-  }
-
-  public static ToolbarManager getInstance(){
-    if (instance == null) {
-      instance = new ToolbarManager();
-    }
-    return instance;
-  }
-
-  public ToolbarManager withToolbar(Toolbar toolbar){
-    this.toolbar = toolbar;
-    return this;
-  }
-  public ToolbarManager withContext(Context context){
-    this.context = context;
-    return this;
-  }
-  public ToolbarManager build(){
-    EsdApplication.getManagerComponent().inject(this);
-
-    registerEvents();
-    setListener();
-
-    operationManager.registerCallBack(this);
-
-    // FIX починить и убрать из релиза
-    getFirstForLenovo();
-
-    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-    return instance;
-  }
-
-  private void registerEvents() {
-    EventBus.getDefault().unregister(this);
-    EventBus.getDefault().register(this);
-  }
-
-  private void getFirstForLenovo() {
-    doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings.getUid())).get().firstOrNull();
-    registerEvents();
+  private void getDocument() {
+    doc = store.getDocuments().get( settings.getUid() );
   }
 
   private void setListener() {
@@ -132,31 +70,27 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     toolbar.setOnMenuItemClickListener(
       item -> {
-
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
 
         switch ( item.getItemId() ){
-          // sent_to_the_report (отправлен на доклад)
-//          case R.id.menu_info_from_the_report:
-//            operation = CommandFactory.Operation.FROM_THE_REPORT;
-//            break;
           case R.id.menu_info_to_the_primary_consideration:
-
             Timber.v("primary_consideration");
 
             showPrimaryConsiderationDialog(activity);
 
             operation = CommandFactory.Operation.INCORRECT;
+
             break;
 
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_delegate_performance:
             operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
             params.setPerson( settings.getCurrentUserId() );
-            break;
-          case R.id.menu_info_to_the_approval_performance:
 
+            break;
+
+          case R.id.menu_info_to_the_approval_performance:
             // настройка
             // Показывать подтверждения о действиях с документом
             if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
@@ -166,11 +100,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               operation = CommandFactory.Operation.FROM_THE_REPORT;
               params.setPerson( settings.getCurrentUserId() );
             }
+
             break;
 
           // primary_consideration (первичное рассмотрение)
           case R.id.menu_info_approval_next_person:
-
             // настройка
             // Показывать подтверждения о действиях с документом
             if ( settings.isActionsConfirm() ){
@@ -180,8 +114,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
               params.setPerson( "" );
             }
-//
+
             break;
+
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
@@ -192,8 +127,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
               params.setPerson( "" );
             }
-            break;
 
+            break;
 
           // approval (согласование проектов документов)
           case R.id.menu_info_approval_change_person:
@@ -210,11 +145,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             approveDialogFragment.registerCallBack( this );
             approveDialogFragment.withDocumentUid( settings.getUid() );
             approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
-//
+
             break;
 
           case R.id.menu_info_sign_change_person:
-          operation = CommandFactory.Operation.INCORRECT;
+            operation = CommandFactory.Operation.INCORRECT;
 
             SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
             Bundle signBundle = new Bundle();
@@ -228,15 +163,13 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             sign.withDocumentUid( settings.getUid() );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
-          break;
+            break;
 
           case R.id.menu_info_sign_next_person:
-
             //resolved https://tasks.n-core.ru/browse/MVDESD-13952
             // при подписании проекта без ЭО не подписывать
             // и не перемещать в обработанные
             if ( hasImages() ){
-
               //проверим что все образы меньше 25Мб
               if ( checkImagesSize() ){
 
@@ -251,9 +184,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
                 }
 
               } else {
-
-
-
                 new MaterialDialog.Builder(context)
                   .title("Внимание!")
                   .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
@@ -263,6 +193,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
                 operation = CommandFactory.Operation.INCORRECT;
               }
+
             } else {
               new MaterialDialog.Builder(context)
                 .title("Внимание!")
@@ -274,11 +205,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               operation = CommandFactory.Operation.INCORRECT;
             }
 
-
-
             break;
-          case R.id.menu_info_sign_prev_person:
 
+          case R.id.menu_info_sign_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
             if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
@@ -304,10 +233,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_decision_edit:
             EventBus.getDefault().post( new ShowDecisionConstructor() );
             operation = CommandFactory.Operation.INCORRECT;
-            break;
-          case R.id.menu_info_shared_to_favorites:
 
+            break;
+
+          case R.id.menu_info_shared_to_favorites:
             operation = CommandFactory.Operation.ADD_TO_FOLDER;
+
             if ( isFromFavorites() ){
              operation = CommandFactory.Operation.REMOVE_FROM_FOLDER;
             }
@@ -325,13 +256,13 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             params.setFolder( favorites );
 
             break;
+
           case R.id.menu_info_shared_to_control:
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
 
             boolean isCitizenRequest = false;
 
-            InMemoryDocument doc = store.getDocuments().get( settings.getUid() );
             if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
               isCitizenRequest = true;
             }
@@ -344,6 +275,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             } else {
               operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
             }
+
             break;
 
           case R.id.menu_info_decision_create_with_assignment:
@@ -354,6 +286,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             settings.setDecisionActiveUid("0");
             Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_assigment_intent);
+
             break;
 
           // resolved https://tasks.n-core.ru/browse/MVDESD-13368
@@ -378,7 +311,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         return false;
       }
     );
-    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
   }
 
   public void showPrimaryConsiderationDialog(Activity activity) {
@@ -409,9 +341,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     Boolean result = true;
 
     if ( doc.getImages() != null && doc.getImages().size() > 0 ){
-      for (RImage _image: doc.getImages()) {
-        RImageEntity image = (RImageEntity) _image;
-
+      for (Image image: doc.getImages()) {
         int max_size = parseIntOrDefault( settings.getMaxImageSize(), 20 )*1024*1024;
 
         if (max_size > 20*1024*1024){
@@ -434,91 +364,54 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   public void invalidate() {
-    getFirstForLenovo();
+    Timber.tag(TAG).i("invalidate");
 
-    if (doc != null){
+    getDocument();
 
+    if ( doc != null ) {
       inflateMenu();
 
-      // Из папки обработанное
-      if (isProcessed()){
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
-        showAsProcessed(true);
+      if ( doc.getDecisions().size() == 0 ) {
+        setEditDecisionMenuItemVisible( false );
+        setCreateDecisionMenuItemVisible( true );
       }
-
-      // Из папки избранное
-      if (isFromFavoritesFolder() ){
-        showAsProcessed(false);
-      }
-
-
-      decision_count = doc.getDecisions().size();
-      switch (decision_count) {
-        case 0:
-          processEmptyDecisions();
-          break;
-        default:
-          safeSetVisibility(R.id.menu_info_decision_create, false);
-          safeSetVisibility(R.id.menu_info_decision_edit,   false);
-
-//          if ( doc.isProcessed() != null && doc.isProcessed() ){
-//            safeSetVisibility(R.id.menu_info_decision_edit, false);
-//          }
-          break;
-      }
-
-      processFavoritesAndControlIcons();
-
-      if (isFromProject() || isFromFavoritesFolder() ) {
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-        // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
-        safeSetVisibility(R.id.menu_info_shared_to_control, false);
-      }
-
-
-      // Если документ обработан - то изменяем резолюции на поручения
-      if ( isProcessed() ){
-        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
-        safeSetVisibility(R.id.menu_info_decision_create, settings.isShowCreateDecisionPost());
-
-        if (isFromProject()){
-          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
-        }
-      }
-
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13259
       // Кнопка "Без ответа" только на документах без резолюции
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13330
       // Или если нет активной резолюции
-      if ( hasActiveDecision() ){
+      if ( hasActiveDecision() ) {
         safeSetVisibility(R.id.menu_info_to_the_approval_performance, false);
-        safeSetVisibility(R.id.menu_info_decision_create, false);
-//        safeSetVisibility(R.id.menu_info_decision_edit,   true);
+        setCreateDecisionMenuItemVisible( false );
       } else {
-        safeSetVisibility(R.id.menu_info_decision_create, true);
+        setCreateDecisionMenuItemVisible( true );
       }
 
-      if (isFromFavoritesFolder()){
-        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
+      processFavoritesAndControlIcons();
 
-        if ( settings.isProject() ){
-          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
-          safeSetVisibility(R.id.menu_info_decision_edit, false);
-          safeSetVisibility(R.id.menu_info_decision_create, false);
-        }
+      // Из папки обработанное или папки избранное или проект
+      if ( isProcessed() || isFromFavoritesFolder() || isFromProject() ) {
+        // Если документ обработан и не проект, то изменяем резолюции на поручения
+        // У проектов скрываем все пункты меню, связанные с созданием/редактированием резолюций/поручений
+        setCreateDecisionMenuItemVisible( false );
+        setCreateWithAssignmentDecisionMenuItemVisible( !isFromProject() && settings.isShowCreateDecisionPost() );
+        setEditDecisionMenuItemVisible( false );
+      }
+
+      if ( isFromProject() || isFromFavoritesFolder() ) {
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+        // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
+        setControlMenuItemVisible( false );
       }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
-      // Или если нет активной резолюции
-      if ( isShared() ){
+      // Если общие документы
+      if ( isShared() ) {
         clearToolbar();
       }
 
-      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-
+      subscribeToDecisionActiveUid();
     }
   }
 
@@ -547,8 +440,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private void inflateMenu() {
-
-    toolbar.getMenu().clear();
+    clearToolbar();
     int menu = R.menu.info_menu;
 
     if (settings.getStatusCode() != null) {
@@ -574,8 +466,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         }
       }
     }
-    toolbar.inflateMenu(menu);
 
+    if ( isProcessed() || isFromFavoritesFolder() ) {
+      menu = R.menu.info_menu;
+    }
+
+    toolbar.inflateMenu(menu);
   }
 
   private void safeSetVisibility(int item, boolean value) {
@@ -586,39 +482,24 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
   }
 
-
   private boolean isFromProject() {
-    return doc != null && doc.getFilter() != null && Arrays.asList( JournalStatus.APPROVAL.getName(), JournalStatus.SIGNING.getName() ).contains(doc.getFilter());
+    return settings.isProject() || ( doc != null && doc.getFilter() != null && Arrays.asList( JournalStatus.APPROVAL.getName(), JournalStatus.SIGNING.getName() ).contains(doc.getFilter()) );
   }
 
   private void clearToolbar() {
     toolbar.getMenu().clear();
   }
 
-  private void showAsProcessed(Boolean showCreateButton) {
-    Timber.tag(TAG).e("showAsProcessed");
-
-    toolbar.getMenu().clear();
-    toolbar.inflateMenu(R.menu.info_menu);
-
-    safeSetVisibility(R.id.menu_info_decision_create, showCreateButton);
-    safeSetVisibility(R.id.menu_info_decision_edit, false);
-    safeSetVisibility(R.id.menu_info_shared_to_control, true);
-    safeSetVisibility(R.id.menu_info_shared_to_favorites, true);
-
-  }
-
   private boolean isShared() {
-    return doc != null && doc.getAddressedToType() != null && Objects.equals(doc.getAddressedToType(), "group");
+    return doc != null && doc.getDocument() != null && Objects.equals(doc.getDocument().getAddressedToType(), "group");
   }
 
   private boolean hasActiveDecision() {
     Boolean result = false;
 
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
-      for ( RDecision _decision: doc.getDecisions() ) {
-        RDecisionEntity decision = (RDecisionEntity) _decision;
-        if (decision.isApproved() != null && decision.isRed() != null && !decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
+      for ( Decision decision: doc.getDecisions() ) {
+        if ( decision.getApproved() != null && !decision.getApproved() && ( Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.getRed() != null && decision.getRed() ) ) {
           result = true;
           break;
         }
@@ -631,11 +512,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private boolean hasChangedDecision() {
     Boolean result = false;
 
-    if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
-      for ( RDecision _decision: doc.getDecisions() ) {
-        RDecisionEntity decision = (RDecisionEntity) _decision;
-
-        if ( decision.isChanged() != null && decision.isChanged() ) {
+    if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0) {
+      for ( Decision decision : doc.getDecisions() ) {
+        if ( decision.isChanged() ) {
           result = true;
           break;
         }
@@ -646,65 +525,64 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private boolean isProcessed() {
-    return doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder();
+    return doc != null && ( doc.isProcessed() != null && doc.isProcessed() || doc.getDocument().isFromProcessedFolder() );
   }
 
   private boolean isFromControl() {
-    return doc.isControl() != null && doc.isControl();
+    return doc != null && doc.getDocument().getControl() != null && doc.getDocument().getControl();
   }
 
   private boolean isFromFavorites() {
-    return doc.isFavorites() != null && doc.isFavorites();
+    return doc != null && doc.getDocument().getFavorites() != null && doc.getDocument().getFavorites();
   }
 
   private boolean isFromFavoritesFolder() {
-    return doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
+    return doc != null && doc.getDocument().isFromFavoritesFolder();
   }
 
-
-  //REFACTOR переделать это
-  private void processEmptyDecisions() {
-    Timber.tag(TAG).e("processEmptyDecisions");
-    safeSetVisibility( R.id.menu_info_decision_edit  , false);
-    showCreateDecisionButton();
+  private void setCreateDecisionMenuItemVisible(boolean visible) {
+    safeSetVisibility(R.id.menu_info_decision_create, visible);
   }
 
-  public void setEditDecisionMenuItemVisible(boolean visible){
-    safeSetVisibility( R.id.menu_info_decision_edit, visible);
-    // if (visible){
-    //   safeSetVisibility( R.id.menu_info_decision_edit, false);
-    // } else {
-    //   safeSetVisibility( R.id.menu_info_decision_edit, false);
-    // }
+  private void setEditDecisionMenuItemVisible(boolean visible){
+    safeSetVisibility(R.id.menu_info_decision_edit, visible);
   }
 
-  public void init() {
+  private void setCreateWithAssignmentDecisionMenuItemVisible(boolean visible) {
+    safeSetVisibility(R.id.menu_info_decision_create_with_assignment, visible);
+  }
 
-    toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
-    toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_300 ) );
+  private void setControlMenuItemVisible(boolean visible) {
+    safeSetVisibility(R.id.menu_info_shared_to_control, visible);
+  }
 
-    toolbar.setContentInsetStartWithNavigation(250);
+  public void init(Toolbar toolbar, Context context) {
+    Timber.tag(TAG).i("init");
 
-    toolbar.setNavigationOnClickListener(v ->{
+    this.toolbar = toolbar;
+    this.context = context;
+
+    unsubscribe();
+    settings.setDecisionActiveUid("0");
+
+    setListener();
+
+    this.toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
+    this.toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_300 ) );
+
+    this.toolbar.setContentInsetStartWithNavigation(250);
+
+    this.toolbar.setNavigationOnClickListener(v ->{
       Activity activity = (Activity) context;
       activity.finish();
       }
     );
 
-
     Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
 
-    invalidate();
-
-    toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
-    if (doc!=null && doc.getDocumentType() != null){
-      toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getDocumentType() ) ) );
-    }
-  }
-
-  private void showCreateDecisionButton() {
-    if (!isFromProject()){
-      safeSetVisibility( R.id.menu_info_decision_create, true);
+    this.toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
+    if ( doc != null && doc.getIndex() != null) {
+      this.toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
     }
   }
 
@@ -723,7 +601,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .positiveText(R.string.approve)
       .negativeText(R.string.cancel)
       .onPositive((dialog1, which) -> {
-
         CommandFactory.Operation operation;
 
         operation = !finalIsControl ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
@@ -734,7 +611,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       })
       .autoDismiss(true)
       .build().show();
-
   }
 
   // Подписание/Согласование
@@ -745,7 +621,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .positiveText(R.string.yes)
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
-
         CommandFactory.Operation operation;
         operation = !isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
 
@@ -759,7 +634,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private void showPrevDialog(Boolean isApproval) {
-    String comment = "";
     CommandParams params = new CommandParams();
 
     MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(context)
@@ -768,7 +642,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .positiveText(R.string.yes)
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
-
         CommandFactory.Operation operation;
         operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
 
@@ -776,9 +649,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         // если есть комментарий
         if (settings.getPrevDialogComment() != null && settings.isShowCommentPost() ) {
-//          params.setComment("SignFileCommand");
           if ( settings.isShowCommentPost() ) {
-            params.setComment(dialog1.getInputEditText().getText().toString());
+            params.setComment(dialog1.getInputEditText() != null ? dialog1.getInputEditText().getText().toString() : "");
           }
         }
 
@@ -796,12 +668,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           }).cancelable(false);
       }
 
-
     prev_dialog.build().show();
   }
 
   private void showFromTheReportDialog() {
-
     CommandParams params = new CommandParams();
 
     MaterialDialog.Builder fromTheReportDialog = new MaterialDialog.Builder(context)
@@ -810,13 +680,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .positiveText(R.string.yes)
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
-
         CommandFactory.Operation operation;
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getCurrentUserId() );
         if ( settings.isShowCommentPost() ) {
-          params.setComment(dialog1.getInputEditText().getText().toString());
+          params.setComment(dialog1.getInputEditText() != null ? dialog1.getInputEditText().getText().toString() : "");
         }
 
         operationManager.execute(operation, params);
@@ -832,7 +701,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           params.setComment( input.toString() );
         }).cancelable(false);
     }
-
 
     fromTheReportDialog.build().show();
   }
@@ -869,14 +737,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   @Override
   public void onSearchError(Throwable error) {
-
   }
 
   /* OperationManager.Callback */
   @Override
   public void onExecuteSuccess(String command) {
     Timber.tag(TAG).w("updateFromJob %s", command );
-    this.command = command;
     switch (command){
       case "check_for_control":
         EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
@@ -908,30 +774,71 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   @Override
   public void onExecuteError() {
-
   }
 
+  private void subscribeToDecisionActiveUid() {
+    unsubscribe();
+    subscription = new CompositeSubscription();
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(DecisionVisibilityEvent event){
-    Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.toString() );
+    subscription.add(
+      settings.getDecisionActiveUidPreference()
+        .asObservable()
+        .subscribe(
+          decisionActiveUid -> {
+            Timber.tag(TAG).d("DecisionActiveUidSubscription: decision uid = %s", decisionActiveUid);
 
-    if (event.approved != null) {
+            if ( !Objects.equals( decisionActiveUid, "0" ) ) {
+              Decision decision = getDecision( decisionActiveUid );
 
-      // resolved https://tasks.n-core.ru/browse/MPSED-2154
-      setEditDecisionMenuItemVisible(event.approved);
+              // resolved https://tasks.n-core.ru/browse/MPSED-2154
+              if ( decision != null && isActiveOrRed( decision ) && decision.getApproved() != null && !decision.getApproved() && !isProcessed() && !decision.isTemporary() ) {
+                setEditDecisionMenuItemVisible( true );
+              } else {
+                setEditDecisionMenuItemVisible( false );
+              }
 
-      if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
-        setEditDecisionMenuItemVisible(false);
-      }
+              // resolved https://tasks.n-core.ru/browse/MPSED-2212
+              // в оффлайне на резолюциях, которые находятся на синхронизации, добавить кнопку редактировать. Сейчас доступен только дабл клик по предпросмотру
+              if ( settings.isOnline() && hasChangedDecision() ) {
+                setCreateDecisionMenuItemVisible( false );
+                setEditDecisionMenuItemVisible( false );
+              }
 
-      if ( hasChangedDecision() ){
-        safeSetVisibility(R.id.menu_info_decision_edit, false);
-        safeSetVisibility(R.id.menu_info_decision_create, false);
-      }
+            } else {
+              setEditDecisionMenuItemVisible( false );
+            }
+          },
 
-    } else if ( event.hideEditDecision != null && event.hideEditDecision ) {
-      setEditDecisionMenuItemVisible(false);
+          Timber::e
+        )
+    );
+  }
+
+  public void unsubscribe() {
+    if ( subscription != null && subscription.hasSubscriptions() ) {
+      subscription.unsubscribe();
     }
+  }
+
+  private Decision getDecision(String decisionUid) {
+    Decision result = null;
+
+    if ( doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0 ) {
+      for ( Decision decision : doc.getDecisions() ) {
+        if ( Objects.equals( decision.getId(), decisionUid ) ) {
+          result = decision;
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private boolean isActiveOrRed(Decision decision) {
+    return decision != null && decision.getSignerId() != null
+      && decision.getSignerId().equals( settings.getCurrentUserId() )
+      || decision != null && decision.getRed() != null
+      && decision.getRed();
   }
 }

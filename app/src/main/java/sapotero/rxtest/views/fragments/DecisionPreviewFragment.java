@@ -61,10 +61,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
-import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
-import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
-import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -450,8 +446,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       initEvents();
-
-      sendDecisionVisibilityEvent();
     }
   }
 
@@ -467,7 +461,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
           decision = decision_spinner_adapter.getItem(position);
-          settings.setDecisionActiveUid( decision.getId() );
           displayDecision();
         } else {
           // resolved https://tasks.n-core.ru/browse/MPSED-2154
@@ -568,7 +561,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void checkActiveDecision() {
     if ( !decision_spinner_adapter.hasActiveDecision() && !isInEditor ){
       Timber.tag(TAG).e("NO ACTIVE DECISION");
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+      temporary.setVisibility(View.GONE);
     }
   }
 
@@ -800,9 +793,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     } else {
       Timber.e("no decisions");
 
-      if (doc.isProcessed() != null && !doc.isProcessed()){
-        EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
-      }
+      settings.setDecisionActiveUid("0");
 
       decision_spinner_adapter.clear();
 
@@ -817,7 +808,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       decision_count.setVisibility(View.GONE);
       invalidateSpinner(false);
       hideButtons();
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+      temporary.setVisibility(View.GONE);
 
       bottom_line.setVisibility( View.GONE);
 
@@ -853,14 +844,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       settings.setDecisionActiveUid( decision.getId() );
 
       updateVisibility( decision.getApproved() != null ? decision.getApproved() : false );
-
-      sendDecisionVisibilityEvent();
-    }
-  }
-
-  private void sendDecisionVisibilityEvent() {
-    if (decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) && !isInEditor) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && decision.getApproved() != null && !decision.getApproved(), decision.getId(), null ) );
     }
   }
 
@@ -934,8 +917,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       printSigner( decision, isMagnifier ? regNumber : ( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() ) );
-
-      sendDecisionVisibilityEvent();
     }
 
     private void showEmpty(){
@@ -1218,20 +1199,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   public void onMessageEvent(InvalidateDecisionSpinnerEvent event) throws Exception {
     Timber.tag(TAG).w("InvalidateDecisionSpinnerEvent %s", event.uid);
     decision_spinner_adapter.invalidate(event.uid);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(HideTemporaryEvent event) throws Exception {
-    temporary.setVisibility(View.GONE);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
-    if (decision != null) {
-      sendDecisionVisibilityEvent();
-    } else {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, null ) );
-    }
   }
 
   private void hideButtons() {

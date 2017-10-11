@@ -6,6 +6,7 @@ import sapotero.rxtest.application.scopes.DataScope;
 import sapotero.rxtest.dagger.modules.TestEsdModule;
 import sapotero.rxtest.dagger.modules.TestRequeryDbModule;
 import sapotero.rxtest.dagger.modules.TestSettingsModule;
+import sapotero.rxtest.managers.toolbar.ToolbarManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 
@@ -15,6 +16,7 @@ import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
   TestSettingsModule.class,
   TestRequeryDbModule.class,
   MemoryStoreModule.class,
+  ToolbarManagerModule.class
 })
 
 public interface TestDataComponent extends DataComponent {

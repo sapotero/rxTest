@@ -367,6 +367,11 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public Preference<String> getDecisionActiveUidPreference() {
+    return null;
+  }
+
+  @Override
   public boolean isActionsConfirm() {
     return actionsConfirm;
   }

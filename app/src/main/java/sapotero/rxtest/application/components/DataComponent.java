@@ -8,6 +8,7 @@ import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.toolbar.ToolbarManagerModule;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
@@ -40,6 +41,7 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
   SettingsModule.class,
   RequeryDbModule.class,
   MemoryStoreModule.class,
+  ToolbarManagerModule.class
 })
 
 public interface DataComponent {

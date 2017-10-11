@@ -126,6 +126,8 @@ public interface ISettings {
 
   void setDecisionActiveUid(String value);
 
+  Preference<String> getDecisionActiveUidPreference();
+
   boolean isActionsConfirm();
 
   Preference<Boolean> getActionsConfirmPreference();

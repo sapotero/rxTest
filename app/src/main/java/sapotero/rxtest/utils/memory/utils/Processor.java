@@ -113,7 +113,9 @@ public class Processor {
 
   public Processor withTransaction(Transaction transaction) {
     if (transaction != null) {
-      transaction.getDocument().setUpdatedFromDB( false );
+      if ( transaction.getDocument() != null ) {
+        transaction.getDocument().setUpdatedFromDB( false );
+      }
       this.transaction = transaction;
       this.source = Source.TRANSACTION;
     }

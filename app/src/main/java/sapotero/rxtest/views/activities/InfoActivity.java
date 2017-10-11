@@ -44,8 +44,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
-import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
@@ -80,8 +78,8 @@ public class InfoActivity extends AppCompatActivity {
   @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject MemoryStore store;
-
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject ToolbarManager toolbarManager;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -89,7 +87,6 @@ public class InfoActivity extends AppCompatActivity {
 
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
-  private ToolbarManager toolbarManager;
   private JournalStatus status;
 
   private List<String> documentUids;
@@ -167,14 +164,7 @@ public class InfoActivity extends AppCompatActivity {
     }
     EventBus.getDefault().register(this);
 
-
-//    toolbarManager = new ToolbarManager( this, toolbar);
-//    toolbarManager.init();
-    toolbarManager = ToolbarManager.getInstance();
-    toolbarManager.withToolbar(toolbar);
-    toolbarManager.withContext(this);
-    toolbarManager.build();
-    toolbarManager.init();
+    toolbarManager.init(toolbar, this);
 
     setLastSeen();
 
@@ -374,10 +364,10 @@ public class InfoActivity extends AppCompatActivity {
 
     invalidateArrows();
 
-    chechPrimaryConsiderationDialog();
+    checkPrimaryConsiderationDialog();
   }
 
-  private void chechPrimaryConsiderationDialog() {
+  private void checkPrimaryConsiderationDialog() {
     if (settings.isShowPrimaryConsideration()){
       settings.setShowPrimaryConsideration(false);
       toolbarManager.showPrimaryConsiderationDialog(this);
@@ -443,14 +433,6 @@ public class InfoActivity extends AppCompatActivity {
     Intent intent = new Intent( this, DecisionConstructorActivity.class);
     InfoActivity activity = (InfoActivity) this;
     activity.startActivity(intent);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(HasNoActiveDecisionConstructor event) throws Exception {
-//    toolbarManager.showCreateDecisionButton();
-//    setPreview();
-    EventBus.getDefault().post( new HideTemporaryEvent() );
-
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

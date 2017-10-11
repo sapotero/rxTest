@@ -534,11 +534,11 @@ public class RoutePreviewFragment extends PreviewFragment {
     //refactor
     ItemBuilder withAction(String action) {
       this.action = action;
-      int color = 0x000000;
+      int color = ContextCompat.getColor(context, R.color.md_grey_600);
 
       TextView text = new TextView(context);
 
-      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_600) );
+      text.setTextColor( color );
 
       if (action.contains("На ") || action.contains("К ")){
         color = ContextCompat.getColor(context, R.color.md_blue_600);
