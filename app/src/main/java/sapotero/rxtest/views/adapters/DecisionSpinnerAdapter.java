@@ -80,7 +80,11 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
           .and(RDisplayFirstDecisionEntity.USER_ID.eq( current_user ))
           .get().firstOrNull();
 
-        if ( rDisplayFirstDecisionEntity != null ) {
+        // resolved https://tasks.n-core.ru/browse/MPSED-1995
+        // Если Изменить подписанта на любого кроме текущего(не активная резолюция), тогда не считать такую резолюцию "созданной мной".
+        // Отображаем резолюцию первой, если она есть в таблице резолюций, отображаемых первыми, и подписант равен текущему пользователю
+        // (так как подписанта в резолюции могли сменить в WS)
+        if ( rDisplayFirstDecisionEntity != null && Objects.equals( item.getSignerId(), current_user ) ) {
           createdAndSigner.add(item);
         } else if ( getPerformerIds(item).contains( current_user ) ){
           performer.add(item);
