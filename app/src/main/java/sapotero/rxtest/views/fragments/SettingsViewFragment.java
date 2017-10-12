@@ -7,6 +7,7 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 
 import javax.inject.Inject;
 
+import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -43,6 +44,62 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
       },Timber::e)
     );
 
+    subscriptions.add(settings.getHostPreferences().asObservable().subscribe(new Action1<String>() {
+      @Override
+      public void call(String s) {
+
+        Timber.tag("SETTINGS").d("host = %s", s );
+
+      }
+    }, new Action1<Throwable>() {
+      @Override
+      public void call(Throwable throwable) {
+        Timber.tag("SETTINGS").d("throwable = %s", throwable );
+
+      }
+    })
+    );
+
+    subscriptions.add(settings.getInfocardFontSizePreference().asObservable().subscribe(new Action1<String>() {
+      @Override
+      public void call(String s) {
+        Timber.tag("SETTINGS").d("InfocardFontSize = %s", s );
+
+      }
+    }, new Action1<Throwable>() {
+      @Override
+      public void call(Throwable throwable) {
+        Timber.tag("SETTINGS").d("throwable = %s", throwable );
+      }
+    })
+    );
+
+    subscriptions.add(settings.getUpdateTimePreference().asObservable().subscribe(new Action1<String>() {
+      @Override
+      public void call(String s) {
+        Timber.tag("SETTINGS").d("UpdateTime = %s", s );
+      }
+    }, new Action1<Throwable>() {
+      @Override
+      public void call(Throwable throwable) {
+        Timber.tag("SETTINGS").d("throwable = %s", throwable );
+      }
+    })
+    );
+    subscriptions.add(settings.getMaxImageSizePreference().asObservable().subscribe(new Action1<String>() {
+      @Override
+      public void call(String s) {
+        Timber.tag("SETTINGS").d("tMaxImageSize = %s", s );
+      }
+    }, new Action1<Throwable>() {
+      @Override
+      public void call(Throwable throwable) {
+        Timber.tag("SETTINGS").d("throwable = %s", throwable );
+      }
+    }))
+    ;
+
+
 //    *** НЕ АКТУАЛЬНО ***
 //    findPreference( context.getResources().getString(R.string.show_comment_post_key) )
 //            .setDependency( context.getResources().getString(R.string.actions_confirm_key) );
@@ -77,5 +134,12 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     if (firstFlagPreference != null) {
       firstFlagPreference.setEnabled( enable );
     }
+  }
+
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    subscriptions.unsubscribe();
   }
 }
