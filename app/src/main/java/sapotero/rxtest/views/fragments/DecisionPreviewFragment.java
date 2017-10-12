@@ -355,6 +355,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
             } else {
               Timber.tag("GestureListener").w("-1");
             }
+
+          } else {
+            // resolved https://tasks.n-core.ru/browse/MPSED-2255
+            // Если в документе без резолюций создать и сохранить в МП новую резолюцию и она будет в статусе: "Ожидает синхронизации",
+            // то при двойном тапе не появляется предупреждение, что резолюцию нельзя редактировать.
+            Toast.makeText( getContext(), R.string.decision_temporary_edit_denied, Toast.LENGTH_SHORT ).show();
           }
 
         } else {

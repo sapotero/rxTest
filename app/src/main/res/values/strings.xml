@@ -146,6 +146,7 @@
     <string name="hint_head_font_size">Шрифт исполнителя</string>
 
     <string name="decision_on_sync_edit_denied">3апрещено редактировать резолюцию. Дождитесь выполнения операции.</string>
+    <string name="decision_temporary_edit_denied">Дождитесь выполнения операции.</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
