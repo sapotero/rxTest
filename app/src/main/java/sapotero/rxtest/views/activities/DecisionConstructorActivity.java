@@ -927,9 +927,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         rDecisionEntity.setSignerBlankText(signerName);
         rDecisionEntity.setSignerPositionS(signerPosition);
 
-        if (assistantId != null) {
-          rDecisionEntity.setAssistantId(assistantId);
-        }
+        rDecisionEntity.setAssistantId(assistantId);
       }
 
       manager.setSignerId(signerId);
@@ -937,9 +935,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       manager.setSignerBlankText(signerName);
       manager.getDecision().setSignerPositionS(signerPosition);
 
-      if (assistantId != null) {
-        manager.setAssistantId(assistantId);
-      }
+      manager.setAssistantId(assistantId);
 
       signer_oshs_selector.setText(name);
 
