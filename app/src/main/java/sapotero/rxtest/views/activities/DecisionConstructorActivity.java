@@ -927,7 +927,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         rDecisionEntity.setSignerBlankText(signerName);
         rDecisionEntity.setSignerPositionS(signerPosition);
 
-        rDecisionEntity.setAssistantId(assistantId);
+        // resolved https://tasks.n-core.ru/browse/MPSED-2256
+        // Ломаются подписанты в резолюции после выбора врио
+        // Если у выбранного подписанта assistantId null, то в исходящем JSON ставим "", чтобы в СЭДе assistantId стал null
+        rDecisionEntity.setAssistantId(assistantId != null ? assistantId : "");
       }
 
       manager.setSignerId(signerId);
@@ -935,7 +938,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       manager.setSignerBlankText(signerName);
       manager.getDecision().setSignerPositionS(signerPosition);
 
-      manager.setAssistantId(assistantId);
+      // resolved https://tasks.n-core.ru/browse/MPSED-2256
+      // Ломаются подписанты в резолюции после выбора врио
+      // Если у выбранного подписанта assistantId null, то в исходящем JSON ставим "", чтобы в СЭДе assistantId стал null
+      manager.setAssistantId(assistantId != null ? assistantId : "");
 
       signer_oshs_selector.setText(name);
 
