@@ -906,7 +906,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           printAppealText( block, isOnlyOneBlock );
 
-          if ( block.getTextBefore() ){
+          if ( block.getTextBefore() != null && block.getTextBefore() ) {
 
             printBlockText( block, isOnlyOneBlock );
             if ( block.getHidePerformers() != null && !block.getHidePerformers()){
