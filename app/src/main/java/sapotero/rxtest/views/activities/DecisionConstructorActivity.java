@@ -93,6 +93,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private String originalSignerAssistantId;
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
+  private boolean createAndSignPressed = false;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -287,43 +289,50 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           break;
 
         case R.id.action_constructor_create_and_sign:
-          boolean canCreateAndSign = checkDecision();
+          Timber.tag(TAG).d("CreateAndSign pressed");
 
-          if (canCreateAndSign) {
+          if ( !createAndSignPressed ) {
+            createAndSignPressed = true;
 
+            Timber.tag(TAG).d("CreateAndSign press handle");
 
-            Decision decision = manager.getDecision();
+            boolean canCreateAndSign = checkDecision();
 
-            commandParams = new CommandParams();
-            commandParams.setDecisionModel( decision );
+            if (canCreateAndSign) {
+              Decision decision = manager.getDecision();
 
-            decision.setDocumentUid( settings.getUid() );
+              commandParams = new CommandParams();
+              commandParams.setDecisionModel( decision );
 
-            if (rDecisionEntity != null) {
-              commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
-              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              decision.setDocumentUid( settings.getUid() );
+
+              if (rDecisionEntity != null) {
+                commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
+                commandParams.setDecisionId( rDecisionEntity.getUid() );
+              }
+
+              operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+              if (rDecisionEntity != null){
+                operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
+                commandParams.setDecisionId( rDecisionEntity.getUid() );
+                commandParams.setDecisionModel( manager.getDecision() );
+              }
+
+              if ( settings.isDecisionWithAssignment() ){
+                Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
+                commandParams.setAssignment(true);
+                decision.setAssignment(true);
+              }
+
+              operationManager.execute( operation, commandParams );
+
+              finish();
             }
-
-            operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
-
-            if (rDecisionEntity != null){
-              operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-              commandParams.setDecisionId( rDecisionEntity.getUid() );
-              commandParams.setDecisionModel( manager.getDecision() );
-            }
-
-            if ( settings.isDecisionWithAssignment() ){
-              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-              commandParams.setAssignment(true);
-              decision.setAssignment(true);
-            }
-
-            operationManager.execute( operation, commandParams );
-
-            finish();
           }
 
           break;
+
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
           break;
@@ -679,16 +688,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .content("Укажите хотя бы одного исполнителя")
           .positiveText("Ок")
           .negativeText("Выход")
-          .onPositive(
-            (dialog, which) -> {
-              dialog.dismiss();
-            }
-          )
-          .onNegative(
-            (dialog, which) -> {
-              finish();
-            }
-          )
+          .onPositive( (dialog, which) -> dialog.dismiss() )
+          .onNegative( (dialog, which) -> finish() )
+          .dismissListener( dialog -> createAndSignPressed = false )
           .show();
       }
 
@@ -698,13 +700,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .title("Внимание")
           .content("Необходимо добавить хотя бы один блок")
           .positiveText("Ок")
-          .onPositive(
-            (dialog, which) -> {
-              dialog.dismiss();
-            }
-          )
+          .onPositive( (dialog, which) -> dialog.dismiss() )
+          .dismissListener( dialog -> createAndSignPressed = false )
           .show();
-
       }
 
       if (showSaveDialog && !manager.hasSigner()) {
@@ -713,11 +711,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .title("Внимание")
           .content("Необходимо выбрать подписавшего")
           .positiveText("Ок")
-          .onPositive(
-            (dialog, which) -> {
-              dialog.dismiss();
-            }
-          )
+          .onPositive( (dialog, which) -> dialog.dismiss() )
+          .dismissListener( dialog -> createAndSignPressed = false )
           .show();
       }
 
@@ -752,11 +747,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               .title("Внимание")
               .content("Подписавший и исполнитель совпадают")
               .positiveText("Ок")
-              .onPositive(
-                (dialog, which) -> {
-                  dialog.dismiss();
-                }
-              )
+              .onPositive( (dialog, which) -> dialog.dismiss() )
+              .dismissListener( dialog -> createAndSignPressed = false )
               .show();
           }
         }
