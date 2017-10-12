@@ -159,22 +159,33 @@ public abstract class DecisionCommand extends AbstractCommand {
   protected void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
     String decisionUid = data.getDecisionUid();
 
-    // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
     if ( decisionUid != null && !decisionUid.equals("") ) {
+      // Если подписант является текущим пользователем
+      // и создал резолюцию текущий пользователь (так как операция выполняется в данном мобильном приложении)
       if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
-        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
-        rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = dataStore
+          .select(RDisplayFirstDecisionEntity.class)
+          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( decisionUid ))
+          .and(RDisplayFirstDecisionEntity.USER_ID.eq( getParams().getCurrentUserId() ))
+          .get().firstOrNull();
 
-        dataStore
-          .insert( rDisplayFirstDecisionEntity )
-          .toObservable()
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            result -> Timber.tag(TAG).v("Added decision to display first decision table"),
-            error -> Timber.tag(TAG).e(error)
-          );
+        // И если UID резолюции нет в таблице резолюций, отображаемых первыми,
+        // то сохранить UID этой резолюции в таблицу
+        if ( rDisplayFirstDecisionEntity == null ) {
+          rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
+          rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
+          rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+
+          dataStore
+            .insert( rDisplayFirstDecisionEntity )
+            .toObservable()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+              result -> Timber.tag(TAG).v("Added decision %s to display first decision table", decisionUid),
+              error -> Timber.tag(TAG).e(error)
+            );
+        }
       }
     }
   }
