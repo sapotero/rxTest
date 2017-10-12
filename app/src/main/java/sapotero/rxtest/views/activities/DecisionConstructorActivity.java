@@ -121,138 +121,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
-
-
-    toolbar.setNavigationOnClickListener( v -> {
-
-
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-      Decision _dec_ = manager.getDecision();
-
-      if ( settings.isDecisionWithAssignment() ){
-        Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-        _dec_.setAssignment(true);
-      }
-
-      String json = gson.toJson( _dec_ );
-
-
-
-      Timber.tag(TAG).w("DECISION: %s", json );
-      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-
-      Decision save_decision = manager.getDecision();
-
-
-      if ( manager.isChanged() ){
-        Boolean showSaveDialog = checkDecision();
-
-        String content = "Резолюция была изменена";
-
-        if ( settings.isDecisionWithAssignment() ){
-          content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
-        }
-
-        if (showSaveDialog){
-          new MaterialDialog.Builder(this)
-            .title("Имеются несохранённые данные")
-            .content(content)
-            .positiveText("сохранить")
-            .onPositive(
-              (dialog, which) -> {
-//                manager.getDecisionBuilder().build();
-
-                Decision decision = manager.getDecision();
-
-                CommandParams params = new CommandParams();
-                params.setDecisionModel( decision );
-                decision.setDocumentUid( settings.getUid() );
-
-                if (rDecisionEntity != null) {
-//                  params.setDecision( rDecisionEntity );
-                  params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
-                  params.setDecisionId( rDecisionEntity.getUid() );
-
-                  RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-
-                  if (doc != null) {
-                    params.setDocument(doc.getUid());
-                  }
-                }
-
-                CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.CREATE_DECISION : CommandFactory.Operation.SAVE_DECISION;
-
-                if (save_decision != null && operation == CommandFactory.Operation.SAVE_DECISION) {
-                  params.setDecisionModel(save_decision);
-                }
-
-                if ( settings.isDecisionWithAssignment() ){
-                  decision = manager.getDecision();
-
-                  params = new CommandParams();
-                  params.setDecisionModel( decision );
-
-                  decision.setDocumentUid( settings.getUid() );
-
-                  if (rDecisionEntity != null) {
-                    params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
-                    params.setDecisionId( rDecisionEntity.getUid() );
-                  }
-
-                  operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
-
-                  params.setAssignment(true);
-                  decision.setAssignment(true);
-
-                }
-                operationManager.execute( operation, params );
-
-                finish();
-
-              }
-            )
-            .neutralText("выход")
-            .onNeutral(
-              (dialog, which) -> {
-                Timber.tag(TAG).w("nothing");
-
-                // Restore original signer
-                raw_decision.setSignerId(originalSignerId);
-                raw_decision.setSigner(originalSigner);
-                raw_decision.setSignerBlankText(originalSignerBlankText);
-                raw_decision.setSignerPositionS(originalSignerPosition);
-                raw_decision.setAssistantId(originalSignerAssistantId);
-
-                if (rDecisionEntity != null) {
-                  rDecisionEntity.setSignerId(originalSignerId);
-                  rDecisionEntity.setSigner(originalSigner);
-                  rDecisionEntity.setSignerBlankText(originalSignerBlankText);
-                  rDecisionEntity.setSignerPositionS(originalSignerPosition);
-                  rDecisionEntity.setAssistantId(originalSignerAssistantId);
-                }
-
-                finish();
-//                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-              }
-            )
-            .negativeText("возврат")
-            .onNegative(
-              (dialog, which) -> {
-                Timber.tag(TAG).w("negative");
-              }
-            )
-            .show();
-        }
-
-      } else {
-        finish();
-//        activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-      }
-
-    } );
-
-
+    toolbar.setNavigationOnClickListener( v -> closeActivity() );
 
     toolbar.setOnMenuItemClickListener(item -> {
 
@@ -621,6 +490,127 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
   }
 
+  private void closeActivity() {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    Decision _dec_ = manager.getDecision();
+
+    if ( settings.isDecisionWithAssignment() ){
+      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
+      _dec_.setAssignment(true);
+    }
+
+    String json = gson.toJson( _dec_ );
+
+    Timber.tag(TAG).w("DECISION: %s", json );
+    Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
+
+    Decision save_decision = manager.getDecision();
+
+    if ( manager.isChanged() ){
+      Boolean showSaveDialog = checkDecision();
+
+      String content = "Резолюция была изменена";
+
+      if ( settings.isDecisionWithAssignment() ){
+        content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
+      }
+
+      if (showSaveDialog){
+        new MaterialDialog.Builder(this)
+          .title("Имеются несохранённые данные")
+          .content(content)
+          .positiveText("сохранить")
+          .onPositive(
+            (dialog, which) -> {
+//              manager.getDecisionBuilder().build();
+
+              Decision decision = manager.getDecision();
+
+              CommandParams params = new CommandParams();
+              params.setDecisionModel( decision );
+              decision.setDocumentUid( settings.getUid() );
+
+              if (rDecisionEntity != null) {
+//                params.setDecision( rDecisionEntity );
+                params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
+                params.setDecisionId( rDecisionEntity.getUid() );
+
+                RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
+
+                if (doc != null) {
+                  params.setDocument(doc.getUid());
+                }
+              }
+
+              CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.CREATE_DECISION : CommandFactory.Operation.SAVE_DECISION;
+
+              if (save_decision != null && operation == CommandFactory.Operation.SAVE_DECISION) {
+                params.setDecisionModel(save_decision);
+              }
+
+              if ( settings.isDecisionWithAssignment() ){
+                decision = manager.getDecision();
+
+                params = new CommandParams();
+                params.setDecisionModel( decision );
+
+                decision.setDocumentUid( settings.getUid() );
+
+                if (rDecisionEntity != null) {
+                  params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
+                  params.setDecisionId( rDecisionEntity.getUid() );
+                }
+
+                operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+                params.setAssignment(true);
+                decision.setAssignment(true);
+              }
+
+              operationManager.execute( operation, params );
+
+              finish();
+            }
+          )
+          .neutralText("выход")
+          .onNeutral(
+            (dialog, which) -> {
+              Timber.tag(TAG).w("nothing");
+
+              // Restore original signer
+              raw_decision.setSignerId(originalSignerId);
+              raw_decision.setSigner(originalSigner);
+              raw_decision.setSignerBlankText(originalSignerBlankText);
+              raw_decision.setSignerPositionS(originalSignerPosition);
+              raw_decision.setAssistantId(originalSignerAssistantId);
+
+              if (rDecisionEntity != null) {
+                rDecisionEntity.setSignerId(originalSignerId);
+                rDecisionEntity.setSigner(originalSigner);
+                rDecisionEntity.setSignerBlankText(originalSignerBlankText);
+                rDecisionEntity.setSignerPositionS(originalSignerPosition);
+                rDecisionEntity.setAssistantId(originalSignerAssistantId);
+              }
+
+              finish();
+//              activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            }
+          )
+          .negativeText("возврат")
+          .onNegative(
+            (dialog, which) -> {
+              Timber.tag(TAG).w("negative");
+            }
+          )
+          .show();
+      }
+
+    } else {
+      finish();
+//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+  }
 
   private void showInfoCard() {
 
@@ -850,8 +840,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       super.onStop();
     }
 
+  @Override
+  public void onBackPressed() {
+    closeActivity();
+  }
 
-    private void showPrevDialog () {
+  private void showPrevDialog () {
       // decision_assignment_approve_body
 
       MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
