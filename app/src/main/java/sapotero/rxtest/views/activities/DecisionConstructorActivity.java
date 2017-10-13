@@ -96,6 +96,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private boolean createAndSignPressed = false;
   private boolean navigationPressed = false;
   private boolean commentPressed = false;
+  private boolean signerSelectorPressed = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -359,12 +360,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
 
     signer_oshs_selector.setOnClickListener(v -> {
-      dialogFragment = new SelectOshsDialogFragment();
-      dialogFragment.registerCallBack( this );
-      dialogFragment.withSearch(true);
-      dialogFragment.withChangePerson(false);
-      dialogFragment.showWithAssistant(true);
-      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
+      Timber.tag(TAG).d("Signer selector pressed");
+
+      if ( !signerSelectorPressed ) {
+        signerSelectorPressed = true;
+        Timber.tag(TAG).d("Signer selector press handle");
+
+        dialogFragment = new SelectOshsDialogFragment();
+        dialogFragment.registerCallBack( this );
+        dialogFragment.withSearch(true);
+        dialogFragment.withChangePerson(false);
+        dialogFragment.showWithAssistant(true);
+        dialogFragment.dismissListener(() -> signerSelectorPressed = false);
+        dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
+      }
     });
 
     sign_as_current_user.setOnClickListener(v -> {
