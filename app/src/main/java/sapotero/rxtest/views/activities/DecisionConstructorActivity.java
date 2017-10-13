@@ -438,7 +438,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       if ( !commentPressed ) {
         commentPressed = true;
         Timber.tag(TAG).d("Comment press handle");
-
         String title = getString(R.string.comment_hint);
         new DecisionTextDialog(context, decision_comment, title, title)
           .dismissListener(() -> commentPressed = false)

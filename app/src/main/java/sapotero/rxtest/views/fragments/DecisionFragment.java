@@ -101,6 +101,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private String fontSize;
 
   private boolean scrollTo = false;
+  private boolean decisionTextPressed = false;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
@@ -204,8 +205,16 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     decision_text.setMovementMethod(null);
 
     decision_text.setOnClickListener(v -> {
-      String title = getString(R.string.decision_text);
-      new DecisionTextDialog(mContext, decision_text, title, title).show();
+      Timber.tag(TAG).v( "Decision text pressed" );
+
+      if ( !decisionTextPressed ) {
+        decisionTextPressed = true;
+        Timber.tag(TAG).v( "Decision text press handle" );
+        String title = getString(R.string.decision_text);
+        new DecisionTextDialog(mContext, decision_text, title, title)
+          .dismissListener(() -> decisionTextPressed = false)
+          .show();
+      }
     });
 
     decision_text.addTextChangedListener(new TextWatcher() {
