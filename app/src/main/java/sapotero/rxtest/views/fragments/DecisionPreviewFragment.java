@@ -145,6 +145,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private boolean isMagnifier = false; // true if used as magnifier
 
   private boolean magnifierPressed = false;
+  private boolean commentPressed = false;
 
   private DismissListener dismissListener;
 
@@ -691,61 +692,67 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @OnClick(R.id.activity_info_decision_preview_comment)
   public void comment(){
     Timber.tag(TAG).v("comment_button");
+    Timber.tag(TAG).d("Comment pressed");
 
-    MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
-      .title("Комментарий резолюции")
-      .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
-      .input("Комментарий", decision.getComment(), (dialog, input) -> {})
+    if ( !commentPressed ) {
+      commentPressed = true;
+      Timber.tag(TAG).d("Comment press handle");
 
-      .positiveText(R.string.constructor_save)
-      .negativeText(R.string.constructor_close)
-      .neutralText(R.string.constructor_clear)
-      
-      .onPositive((dialog, which) -> {
+      MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
+        .title("Комментарий резолюции")
+        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+        .input("Комментарий", decision.getComment(), (dialog, input) -> {})
 
-        if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
+        .positiveText(R.string.constructor_save)
+        .negativeText(R.string.constructor_close)
+        .neutralText(R.string.constructor_clear)
 
-          CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
-          CommandParams params = new CommandParams();
+        .onPositive((dialog, which) -> {
+          if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
+            CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
+            CommandParams params = new CommandParams();
 
-          Decision decision = new DecisionMapper().toFormattedModel(this.decision);
-          decision.setComment( dialog.getInputEditText().getText().toString() );
-          params.setDecisionModel( decision );
-          params.setDecisionId( this.decision.getId() );
+            Decision decision = new DecisionMapper().toFormattedModel(this.decision);
+            decision.setComment( dialog.getInputEditText().getText().toString() );
+            params.setDecisionModel( decision );
+            params.setDecisionId( this.decision.getId() );
 
-          Timber.e("DECISION %s", new Gson().toJson(decision));
+            Timber.e("DECISION %s", new Gson().toJson(decision));
 
-          operationManager.execute( operation, params );
+            operationManager.execute( operation, params );
 
-          updateAfterButtonPressed();
-        }
-        dialog.dismiss();
-      })
-      .onNegative((dialog, which) -> dialog.dismiss())
-      .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
-      .autoDismiss(false)
-      .cancelable(false)
-      .build();
-
-    MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
-      .title("Комментарий резолюции")
-      .content( decision.getComment() )
-      .positiveText(R.string.constructor_close)
-      .onPositive((dialog, which) -> dialog.dismiss())
-      .autoDismiss(false);
-
-    if ( buttonsEnabled ) {
-      materialDialogBuilder
-        .neutralText(R.string.decision_preview_edit)
-        .onNeutral((dialog, which) -> {
+            updateAfterButtonPressed();
+          }
           dialog.dismiss();
-          editDialog.show();
-        });
+        })
+        .onNegative((dialog, which) -> dialog.dismiss())
+        .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
+        .autoDismiss(false)
+        .cancelable(false)
+        .dismissListener(dialog -> commentPressed = false)
+        .build();
+
+      MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
+        .title("Комментарий резолюции")
+        .content( decision.getComment() )
+        .positiveText(R.string.constructor_close)
+        .onPositive((dialog, which) -> dialog.dismiss())
+        .autoDismiss(false)
+        .dismissListener(dialog -> commentPressed = false);
+
+      if ( buttonsEnabled ) {
+        materialDialogBuilder
+          .neutralText(R.string.decision_preview_edit)
+          .onNeutral((dialog, which) -> {
+            dialog.dismiss();
+            editDialog.show();
+          });
+      }
+
+      MaterialDialog materialDialog = materialDialogBuilder.build();
+
+      materialDialog.show();
     }
-
-    MaterialDialog materialDialog = materialDialogBuilder.build();
-
-    materialDialog.show();
   }
 
   public void edit(){
