@@ -56,6 +56,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   private CompositeSubscription subscription;
 
+  private boolean selectOshsPressed = false;
+
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
     operationManager.registerCallBack(this);
@@ -132,36 +134,50 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
           // approval (согласование проектов документов)
           case R.id.menu_info_approval_change_person:
+            Timber.tag(TAG).d("Approval change person pressed");
             operation = CommandFactory.Operation.INCORRECT;
 
-            SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
-            Bundle approveBundle = new Bundle();
-            approveBundle.putString("operation", "approve");
-            approveDialogFragment.setArguments(approveBundle);
-            approveDialogFragment.withSearch(true);
-            approveDialogFragment.withConfirm( true );
-            approveDialogFragment.withPrimaryConsideration(false);
-            approveDialogFragment.withChangePerson(true);
-            approveDialogFragment.registerCallBack( this );
-            approveDialogFragment.withDocumentUid( settings.getUid() );
-            approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            if ( !selectOshsPressed ) {
+              selectOshsPressed = true;
+              Timber.tag(TAG).d("Approval change person press handle");
+
+              SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
+              Bundle approveBundle = new Bundle();
+              approveBundle.putString("operation", "approve");
+              approveDialogFragment.setArguments(approveBundle);
+              approveDialogFragment.withSearch(true);
+              approveDialogFragment.withConfirm( true );
+              approveDialogFragment.withPrimaryConsideration(false);
+              approveDialogFragment.withChangePerson(true);
+              approveDialogFragment.registerCallBack( this );
+              approveDialogFragment.withDocumentUid( settings.getUid() );
+              approveDialogFragment.dismissListener(() -> selectOshsPressed = false);
+              approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            }
 
             break;
 
           case R.id.menu_info_sign_change_person:
+            Timber.tag(TAG).d("Signing change person pressed");
             operation = CommandFactory.Operation.INCORRECT;
 
-            SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
-            Bundle signBundle = new Bundle();
-            signBundle.putString("operation", "sign");
-            sign.setArguments(signBundle);
-            sign.withSearch(true);
-            sign.withConfirm( true );
-            sign.withPrimaryConsideration(false);
-            sign.withChangePerson(true);
-            sign.registerCallBack( this );
-            sign.withDocumentUid( settings.getUid() );
-            sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            if ( !selectOshsPressed ) {
+              selectOshsPressed = true;
+              Timber.tag(TAG).d("Signing change person press handle");
+
+              SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
+              Bundle signBundle = new Bundle();
+              signBundle.putString("operation", "sign");
+              sign.setArguments(signBundle);
+              sign.withSearch(true);
+              sign.withConfirm( true );
+              sign.withPrimaryConsideration(false);
+              sign.withChangePerson(true);
+              sign.registerCallBack( this );
+              sign.withDocumentUid( settings.getUid() );
+              sign.dismissListener(() -> selectOshsPressed = false);
+              sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            }
 
             break;
 
@@ -314,17 +330,25 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   }
 
   public void showPrimaryConsiderationDialog(Activity activity) {
-    SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
-    Bundle bundle1 = new Bundle();
-    bundle1.putString("operation", "primary_consideration");
-    dialogFragment.setArguments(bundle1);
-    dialogFragment.withPrimaryConsideration(true);
-    dialogFragment.withSearch(false);
-    dialogFragment.withConfirm(true);
-    dialogFragment.withChangePerson(true);
-    dialogFragment.registerCallBack( this );
-    dialogFragment.withDocumentUid( settings.getUid() );
-    dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+    Timber.tag(TAG).d("Primary consideration pressed");
+
+    if ( !selectOshsPressed ) {
+      selectOshsPressed = true;
+      Timber.tag(TAG).d("Primary consideration press handle");
+
+      SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
+      Bundle bundle1 = new Bundle();
+      bundle1.putString("operation", "primary_consideration");
+      dialogFragment.setArguments(bundle1);
+      dialogFragment.withPrimaryConsideration(true);
+      dialogFragment.withSearch(false);
+      dialogFragment.withConfirm(true);
+      dialogFragment.withChangePerson(true);
+      dialogFragment.registerCallBack( this );
+      dialogFragment.withDocumentUid( settings.getUid() );
+      dialogFragment.dismissListener(() -> selectOshsPressed = false);
+      dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+    }
   }
 
   private static int parseIntOrDefault(String value, int defaultValue) {
