@@ -57,6 +57,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private CompositeSubscription subscription;
 
   private boolean selectOshsPressed = false;
+  private boolean controlPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -276,20 +277,24 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_shared_to_control:
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
+            Timber.tag(TAG).d("Control pressed");
+            operation = CommandFactory.Operation.INCORRECT;
 
-            boolean isCitizenRequest = false;
+            if ( !controlPressed ) {
+              Timber.tag(TAG).d("Control press handle");
+              boolean isCitizenRequest = false;
 
-            if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
-              isCitizenRequest = true;
-            }
+              if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
+                isCitizenRequest = true;
+              }
 
-            if ( settings.isControlConfirm() && isCitizenRequest ){
-              operation = CommandFactory.Operation.INCORRECT;
+              if ( settings.isControlConfirm() && isCitizenRequest ){
+                controlPressed = true;
+                showToControlDialog();
 
-              showToControlDialog();
-
-            } else {
-              operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
+              } else {
+                operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
+              }
             }
 
             break;
@@ -634,6 +639,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         operationManager.execute( operation, params );
       })
       .autoDismiss(true)
+      .dismissListener(dialog -> controlPressed = false)
       .build().show();
   }
 
