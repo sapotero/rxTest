@@ -102,6 +102,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   private boolean scrollTo = false;
   private boolean decisionTextPressed = false;
+  private boolean addPerformerPressed = false;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
@@ -452,48 +453,57 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   private void showAddOshsDialog() {
-    oshs = new SelectOshsDialogFragment();
-    oshs.withSearch(true);
+    Timber.tag(TAG).d("Add performer pressed");
 
-    //resolved https://tasks.n-core.ru/browse/MVDESD-13231 - убрать врио
-    oshs.showWithAssistant(false);
+    if ( !addPerformerPressed ) {
+      addPerformerPressed = true;
+      Timber.tag(TAG).d("Add performer press handle");
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13440
-    // Показывать организации в поиске исполнителей
-    oshs.withOrganizations(true);
+      oshs = new SelectOshsDialogFragment();
+      oshs.withSearch(true);
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-14013
-    // Диалог добавления исполнителей
-    oshs.withPerformers(true);
+      //resolved https://tasks.n-core.ru/browse/MVDESD-13231 - убрать врио
+      oshs.showWithAssistant(false);
 
-    oshs.registerCallBack( this );
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13440
+      // Показывать организации в поиске исполнителей
+      oshs.withOrganizations(true);
 
-    ArrayList<String> users = new ArrayList<>();
+      // resolved https://tasks.n-core.ru/browse/MVDESD-14013
+      // Диалог добавления исполнителей
+      oshs.withPerformers(true);
 
-    // если есть люди из dialog как исполнители
-    if ( adapter.getCount() > 0 ){
-      for (PrimaryConsiderationPeople user: adapter.getAll()) {
-        Timber.tag(TAG).e("user: %s", new Gson().toJson(user));
-        users.add( user.getId() );
+      oshs.registerCallBack( this );
+
+      ArrayList<String> users = new ArrayList<>();
+
+      // если есть люди из dialog как исполнители
+      if ( adapter.getCount() > 0 ){
+        for (PrimaryConsiderationPeople user: adapter.getAll()) {
+          Timber.tag(TAG).e("user: %s", new Gson().toJson(user));
+          users.add( user.getId() );
+        }
       }
+
+      // исключить подписанта из списка выбора исполнителей
+      if (blockFactory != null) {
+        String signerId = blockFactory.getDecision().getSignerId();
+        if (signerId != null) {
+          users.add(signerId);
+        }
+
+        String assistantId = blockFactory.getDecision().getAssistantId();
+        if (assistantId != null) {
+          users.add(assistantId);
+        }
+      }
+
+      oshs.setIgnoreUsers( users );
+
+      oshs.dismissListener(() -> addPerformerPressed = false);
+
+      oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
     }
-
-    // исключить подписанта из списка выбора исполнителей
-    if (blockFactory != null) {
-      String signerId = blockFactory.getDecision().getSignerId();
-      if (signerId != null) {
-        users.add(signerId);
-      }
-
-      String assistantId = blockFactory.getDecision().getAssistantId();
-      if (assistantId != null) {
-        users.add(assistantId);
-      }
-    }
-
-    oshs.setIgnoreUsers( users );
-
-    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
   }
 
   @Override
