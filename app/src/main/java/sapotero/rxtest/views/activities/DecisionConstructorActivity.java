@@ -98,6 +98,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private boolean commentPressed = false;
   private boolean signerSelectorPressed = false;
   private boolean primaryConsiderationPressed = false;
+  private boolean showInfoCardPressed = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -649,9 +650,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   }
 
   private void showInfoCard() {
+    Timber.tag(TAG).d("Show info card pressed");
 
-    InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
-    newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
+    if ( !showInfoCardPressed ) {
+      showInfoCardPressed = true;
+      Timber.tag(TAG).d("Show info card press handle");
+
+      InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
+      newFragment.dismissListener(() -> showInfoCardPressed = false);
+      newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
+    }
   }
 
   private void invalidateSaveAndSignButton(){
