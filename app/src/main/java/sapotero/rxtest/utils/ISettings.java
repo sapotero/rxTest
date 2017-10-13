@@ -52,6 +52,8 @@ public interface ISettings {
 
   String getHost();
 
+  Preference<String> getHostPreferences();
+
   void setHost(String value);
 
   String getPassword();
@@ -71,6 +73,8 @@ public interface ISettings {
   void setUid(String value);
 
   String getUpdateTime();
+
+  Preference<String> getUpdateTimePreference();
 
   void setUpdateTime(String value);
 
@@ -160,6 +164,8 @@ public interface ISettings {
 
   String getInfocardFontSize();
 
+  Preference<String> getInfocardFontSizePreference();
+
   void setInfocardFontSize(String value);
 
   String getStartPage();
@@ -189,6 +195,8 @@ public interface ISettings {
   boolean isShowApproveOnPrimary();
 
   String getMaxImageSize();
+
+  Preference<String> getMaxImageSizePreference();
 
   void setMaxImageSize(String value);
 
