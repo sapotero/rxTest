@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -142,6 +143,14 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private boolean buttonsEnabled = true;
   private boolean isInEditor = false; // true if used in DecisionConstructorActivity
   private boolean isMagnifier = false; // true if used as magnifier
+
+  private boolean magnifierPressed = false;
+
+  private DismissListener dismissListener;
+
+  public interface DismissListener {
+    void onDismiss();
+  }
 
   public DecisionPreviewFragment() {
   }
@@ -657,18 +666,26 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   @OnClick(R.id.activity_info_decision_preview_magnifer)
-  public void magnifier(){
+  public void magnifier() {
     Timber.tag(TAG).v("magnifier");
-    Decision decision;
-    DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
+    Timber.tag(TAG).d("Magnifier pressed");
 
-    if ( decision_spinner_adapter.size() > 0 ) {
-      decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
-      magnifier.setDecision( decision );
-      magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
+    if ( !magnifierPressed) {
+      magnifierPressed = true;
+      Timber.tag(TAG).d("Magnifier press handle");
+
+      Decision decision;
+      DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
+
+      if ( decision_spinner_adapter.size() > 0 ) {
+        decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
+        magnifier.setDecision( decision );
+        magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
+      }
+
+      magnifier.dismissListener(() -> magnifierPressed = false);
+      magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
     }
-
-    magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
   }
 
   @OnClick(R.id.activity_info_decision_preview_comment)
@@ -1226,5 +1243,19 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   @Override
   public void setDecision(Decision _decision_) {
     decision = _decision_;
+  }
+
+  @Override
+  public void onDismiss(DialogInterface dialog) {
+    super.onDismiss(dialog);
+    Timber.tag(TAG).i( "onDismiss");
+
+    if ( dismissListener != null ) {
+      dismissListener.onDismiss();
+    }
+  }
+
+  public void dismissListener(DismissListener dismissListener) {
+    this.dismissListener = dismissListener;
   }
 }
