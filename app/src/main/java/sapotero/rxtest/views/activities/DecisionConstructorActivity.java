@@ -94,6 +94,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
   private boolean createAndSignPressed = false;
+  private boolean navigationPressed = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +122,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
-    toolbar.setNavigationOnClickListener( v -> closeActivity() );
+    toolbar.setNavigationOnClickListener( v -> {
+      Timber.tag(TAG).w("Navigation pressed");
+
+      if ( !navigationPressed ) {
+        navigationPressed = true;
+        Timber.tag(TAG).w("Navigation press handle");
+        closeActivity();
+      }
+    });
 
     toolbar.setOnMenuItemClickListener(item -> {
 
@@ -603,6 +612,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               Timber.tag(TAG).w("negative");
             }
           )
+          .dismissListener( dialog -> navigationPressed = false)
           .show();
       }
 
@@ -680,7 +690,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .negativeText("Выход")
           .onPositive( (dialog, which) -> dialog.dismiss() )
           .onNegative( (dialog, which) -> finish() )
-          .dismissListener( dialog -> createAndSignPressed = false )
+          .dismissListener( dialog -> {
+            navigationPressed = false;
+            createAndSignPressed = false;
+          })
           .show();
       }
 
@@ -691,7 +704,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .content("Необходимо добавить хотя бы один блок")
           .positiveText("Ок")
           .onPositive( (dialog, which) -> dialog.dismiss() )
-          .dismissListener( dialog -> createAndSignPressed = false )
+          .dismissListener( dialog -> {
+            navigationPressed = false;
+            createAndSignPressed = false;
+          })
           .show();
       }
 
@@ -702,7 +718,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .content("Необходимо выбрать подписавшего")
           .positiveText("Ок")
           .onPositive( (dialog, which) -> dialog.dismiss() )
-          .dismissListener( dialog -> createAndSignPressed = false )
+          .dismissListener( dialog -> {
+            navigationPressed = false;
+            createAndSignPressed = false;
+          })
           .show();
       }
 
@@ -738,7 +757,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               .content("Подписавший и исполнитель совпадают")
               .positiveText("Ок")
               .onPositive( (dialog, which) -> dialog.dismiss() )
-              .dismissListener( dialog -> createAndSignPressed = false )
+              .dismissListener( dialog -> {
+                navigationPressed = false;
+                createAndSignPressed = false;
+              })
               .show();
           }
         }
