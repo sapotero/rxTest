@@ -23,6 +23,8 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   private MaterialDialog dialog;
   private int position = -1;
 
+  private boolean pressed = false;
+
   public JournalSelectorView(Context context) {
     super(context);
     build();
@@ -47,23 +49,31 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
 
   @Override
   public void onClick(View v) {
-    createAdapter();
+    Timber.tag(TAG).d("Pressed");
 
-    dialog = new MaterialDialog.Builder( getContext() )
-      .adapter(adapter, null)
-      .alwaysCallSingleChoiceCallback()
-      .autoDismiss(true)
-      .build();
-    dialog.show();
+    if ( !pressed ) {
+      pressed = true;
+      Timber.tag(TAG).d("Press handle");
 
-    Window window = dialog.getWindow();
-    assert window != null;
-    WindowManager.LayoutParams layoutParams = window.getAttributes();
-    layoutParams.gravity = Gravity.START | Gravity.TOP;
-    layoutParams.x = 30;
-    layoutParams.y = 172;
-    layoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-    window.setAttributes(layoutParams);
+      createAdapter();
+
+      dialog = new MaterialDialog.Builder( getContext() )
+        .adapter(adapter, null)
+        .alwaysCallSingleChoiceCallback()
+        .autoDismiss(true)
+        .dismissListener(dialog1 -> pressed = false)
+        .build();
+      dialog.show();
+
+      Window window = dialog.getWindow();
+      assert window != null;
+      WindowManager.LayoutParams layoutParams = window.getAttributes();
+      layoutParams.gravity = Gravity.START | Gravity.TOP;
+      layoutParams.x = 30;
+      layoutParams.y = 172;
+      layoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+      window.setAttributes(layoutParams);
+    }
   }
 
   private void createAdapter() {
