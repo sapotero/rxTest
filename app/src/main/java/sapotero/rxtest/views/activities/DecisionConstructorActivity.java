@@ -97,6 +97,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private boolean navigationPressed = false;
   private boolean commentPressed = false;
   private boolean signerSelectorPressed = false;
+  private boolean primaryConsiderationPressed = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -147,25 +148,32 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           break;
 
         case R.id.action_constructor_to_the_primary_consideration:
+          Timber.tag(TAG).d("Primary consideration pressed");
 
-          if (rDecisionEntity != null) {
-            settings.setShowPrimaryConsideration(true);
+          if ( !primaryConsiderationPressed ) {
+            primaryConsiderationPressed = true;
+            Timber.tag(TAG).d("Primary consideration press handle");
 
-            Decision primary_decision = manager.getDecision();
+            if (rDecisionEntity != null) {
+              settings.setShowPrimaryConsideration(true);
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String json = gson.toJson( primary_decision );
-            Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
+              Decision primary_decision = manager.getDecision();
 
-            operation = CommandFactory.Operation.SAVE_DECISION;
+              Gson gson = new GsonBuilder().setPrettyPrinting().create();
+              String json = gson.toJson( primary_decision );
+              Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
 
-            commandParams = new CommandParams();
-            commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( manager.getDecision() );
-            operationManager.execute( operation, commandParams );
+              operation = CommandFactory.Operation.SAVE_DECISION;
 
-            finish();
+              commandParams = new CommandParams();
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              commandParams.setDecisionModel( manager.getDecision() );
+              operationManager.execute( operation, commandParams );
+
+              finish();
+            }
           }
+
           break;
 
         case R.id.action_constructor_create_and_sign:
