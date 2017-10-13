@@ -439,6 +439,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
     } else if ( !isMagnifier ) {
+      approved_text.setVisibility(View.GONE);
       temporary.setVisibility(View.GONE);
 
       setAdapter();
