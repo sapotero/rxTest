@@ -62,6 +62,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private boolean editDecisionPressed = false;
   private boolean approvalNextPersonPressed = false;
   private boolean approvalPrevPersonPressed = false;
+  private boolean signingNextPersonPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -201,43 +202,48 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
             break;
 
           case R.id.menu_info_sign_next_person:
-            //resolved https://tasks.n-core.ru/browse/MVDESD-13952
-            // при подписании проекта без ЭО не подписывать
-            // и не перемещать в обработанные
-            if ( hasImages() ){
-              //проверим что все образы меньше 25Мб
-              if ( checkImagesSize() ){
+            Timber.tag(TAG).d("Signing next person pressed");
+            operation = CommandFactory.Operation.INCORRECT;
 
-                // настройка
-                // Показывать подтверждения о действиях с документом
-                if ( settings.isActionsConfirm() ){
-                  operation = CommandFactory.Operation.INCORRECT;
-                  showNextDialog(true);
+            if ( !signingNextPersonPressed ) {
+              signingNextPersonPressed = true;
+              Timber.tag(TAG).d("Signing next person press handle");
+
+              //resolved https://tasks.n-core.ru/browse/MVDESD-13952
+              // при подписании проекта без ЭО не подписывать
+              // и не перемещать в обработанные
+              if ( hasImages() ){
+                //проверим что все образы меньше 25Мб
+                if ( checkImagesSize() ){
+
+                  // настройка
+                  // Показывать подтверждения о действиях с документом
+                  if ( settings.isActionsConfirm() ){
+                    showNextDialog(true);
+                  } else {
+                    operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+                    params.setPerson( "" );
+                  }
+
                 } else {
-                  operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-                  params.setPerson( "" );
+                  new MaterialDialog.Builder(context)
+                    .title("Внимание!")
+                    .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                    .positiveText("Продолжить")
+                    .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                    .dismissListener(dialog -> signingNextPersonPressed = false)
+                    .show();
                 }
 
               } else {
                 new MaterialDialog.Builder(context)
                   .title("Внимание!")
-                  .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                  .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
                   .positiveText("Продолжить")
                   .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                  .dismissListener(dialog -> signingNextPersonPressed = false)
                   .show();
-
-                operation = CommandFactory.Operation.INCORRECT;
               }
-
-            } else {
-              new MaterialDialog.Builder(context)
-                .title("Внимание!")
-                .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
-                .positiveText("Продолжить")
-                .icon(ContextCompat.getDrawable(context, R.drawable.attention))
-                .show();
-
-              operation = CommandFactory.Operation.INCORRECT;
             }
 
             break;
@@ -655,6 +661,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     editDecisionPressed = false;
     approvalNextPersonPressed = false;
     approvalPrevPersonPressed = false;
+    signingNextPersonPressed = false;
   }
 
   private void showToControlDialog() {
@@ -702,7 +709,10 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         operationManager.execute( operation, params );
       })
       .autoDismiss(true)
-      .dismissListener(dialog -> approvalNextPersonPressed = false)
+      .dismissListener(dialog -> {
+        approvalNextPersonPressed = false;
+        signingNextPersonPressed = false;
+      })
       .build().show();
   }
 
