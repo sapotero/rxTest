@@ -316,11 +316,18 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_decision_create_with_assignment:
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
+            Timber.tag(TAG).d("Create with assignment pressed");
             operation = CommandFactory.Operation.INCORRECT;
-            settings.setDecisionWithAssignment(true);
-            settings.setDecisionActiveUid("0");
-            Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
-            activity.startActivity(create_assigment_intent);
+
+            if ( !createDecisionPressed ) {
+              createDecisionPressed = true;
+              Timber.tag(TAG).d("Create with assignment press handle");
+
+              settings.setDecisionWithAssignment(true);
+              settings.setDecisionActiveUid("0");
+              Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
+              activity.startActivity(create_assigment_intent);
+            }
 
             break;
 
