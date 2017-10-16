@@ -16,6 +16,7 @@ import android.widget.ScrollView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jakewharton.rxbinding.view.RxView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -96,7 +98,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private boolean createAndSignPressed = false;
   private boolean navigationPressed = false;
   private boolean commentPressed = false;
-  private boolean signerSelectorPressed = false;
   private boolean primaryConsiderationPressed = false;
   private boolean showInfoCardPressed = false;
 
@@ -367,23 +368,18 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       manager.setUrgency( item );
     });
 
-
-    signer_oshs_selector.setOnClickListener(v -> {
-      Timber.tag(TAG).d("Signer selector pressed");
-
-      if ( !signerSelectorPressed ) {
-        signerSelectorPressed = true;
+    RxView
+      .clicks(signer_oshs_selector)
+      .throttleFirst(1000, TimeUnit.MILLISECONDS)
+      .subscribe(click -> {
         Timber.tag(TAG).d("Signer selector press handle");
-
         dialogFragment = new SelectOshsDialogFragment();
         dialogFragment.registerCallBack( this );
         dialogFragment.withSearch(true);
         dialogFragment.withChangePerson(false);
         dialogFragment.showWithAssistant(true);
-        dialogFragment.dismissListener(() -> signerSelectorPressed = false);
         dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
-      }
-    });
+      });
 
     sign_as_current_user.setOnClickListener(v -> {
       Timber.tag(TAG).e( "%s | %s", rDecisionEntity == null, raw_decision == null );
