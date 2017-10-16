@@ -105,7 +105,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private String fontSize;
 
   private boolean scrollTo = false;
-  private boolean addPerformerPressed = false;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;

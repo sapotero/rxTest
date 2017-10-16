@@ -36,6 +36,7 @@ import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.rxbinding.Bind;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
@@ -56,15 +57,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   private CompositeSubscription subscription;
 
-  private boolean selectOshsPressed = false;
-  private boolean controlPressed = false;
-  private boolean createDecisionPressed = false;
-  private boolean editDecisionPressed = false;
-  private boolean approvalNextPersonPressed = false;
-  private boolean approvalPrevPersonPressed = false;
-  private boolean signingNextPersonPressed = false;
-  private boolean signingPrevPersonPressed = false;
-
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
     operationManager.registerCallBack(this);
@@ -77,7 +69,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private void setListener() {
     final Activity activity = (Activity) context;
 
-    toolbar.setOnMenuItemClickListener(
+    Bind.menuItemClick( toolbar,
       item -> {
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
@@ -116,19 +108,14 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_approval_next_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            Timber.tag(TAG).d("Approval next person pressed");
+            Timber.tag(TAG).d("Approval next person press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !approvalNextPersonPressed ) {
-              approvalNextPersonPressed = true;
-              Timber.tag(TAG).d("Approval next person press handle");
-
-              if ( settings.isActionsConfirm() ){
-                showNextDialog(false);
-              } else {
-                operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-                params.setPerson( "" );
-              }
+            if ( settings.isActionsConfirm() ){
+              showNextDialog(false);
+            } else {
+              operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
+              params.setPerson( "" );
             }
 
             break;
@@ -136,113 +123,91 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            Timber.tag(TAG).d("Approval prev person pressed");
+            Timber.tag(TAG).d("Approval prev person press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !approvalPrevPersonPressed ) {
-              approvalPrevPersonPressed = true;
-              Timber.tag(TAG).d("Approval prev person press handle");
-
-              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
-                showPrevDialog(true);
-              } else {
-                operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
-                params.setPerson( "" );
-              }
+            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+              showPrevDialog(true);
+            } else {
+              operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
+              params.setPerson( "" );
             }
 
             break;
 
           // approval (согласование проектов документов)
           case R.id.menu_info_approval_change_person:
-            Timber.tag(TAG).d("Approval change person pressed");
+            Timber.tag(TAG).d("Approval change person press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !selectOshsPressed ) {
-              selectOshsPressed = true;
-              Timber.tag(TAG).d("Approval change person press handle");
-
-              SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
-              Bundle approveBundle = new Bundle();
-              approveBundle.putString("operation", "approve");
-              approveDialogFragment.setArguments(approveBundle);
-              approveDialogFragment.withSearch(true);
-              approveDialogFragment.withConfirm( true );
-              approveDialogFragment.withPrimaryConsideration(false);
-              approveDialogFragment.withChangePerson(true);
-              approveDialogFragment.registerCallBack( this );
-              approveDialogFragment.withDocumentUid( settings.getUid() );
-              approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
-            }
+            SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
+            Bundle approveBundle = new Bundle();
+            approveBundle.putString("operation", "approve");
+            approveDialogFragment.setArguments(approveBundle);
+            approveDialogFragment.withSearch(true);
+            approveDialogFragment.withConfirm( true );
+            approveDialogFragment.withPrimaryConsideration(false);
+            approveDialogFragment.withChangePerson(true);
+            approveDialogFragment.registerCallBack( this );
+            approveDialogFragment.withDocumentUid( settings.getUid() );
+            approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
             break;
 
           case R.id.menu_info_sign_change_person:
-            Timber.tag(TAG).d("Signing change person pressed");
+            Timber.tag(TAG).d("Signing change person press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !selectOshsPressed ) {
-              selectOshsPressed = true;
-              Timber.tag(TAG).d("Signing change person press handle");
-
-              SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
-              Bundle signBundle = new Bundle();
-              signBundle.putString("operation", "sign");
-              sign.setArguments(signBundle);
-              sign.withSearch(true);
-              sign.withConfirm( true );
-              sign.withPrimaryConsideration(false);
-              sign.withChangePerson(true);
-              sign.registerCallBack( this );
-              sign.withDocumentUid( settings.getUid() );
-              sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
-            }
+            SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
+            Bundle signBundle = new Bundle();
+            signBundle.putString("operation", "sign");
+            sign.setArguments(signBundle);
+            sign.withSearch(true);
+            sign.withConfirm( true );
+            sign.withPrimaryConsideration(false);
+            sign.withChangePerson(true);
+            sign.registerCallBack( this );
+            sign.withDocumentUid( settings.getUid() );
+            sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
             break;
 
           case R.id.menu_info_sign_next_person:
-            Timber.tag(TAG).d("Signing next person pressed");
+            Timber.tag(TAG).d("Signing next person press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !signingNextPersonPressed ) {
-              signingNextPersonPressed = true;
-              Timber.tag(TAG).d("Signing next person press handle");
+            //resolved https://tasks.n-core.ru/browse/MVDESD-13952
+            // при подписании проекта без ЭО не подписывать
+            // и не перемещать в обработанные
+            if ( hasImages() ){
+              //проверим что все образы меньше 25Мб
+              if ( checkImagesSize() ){
 
-              //resolved https://tasks.n-core.ru/browse/MVDESD-13952
-              // при подписании проекта без ЭО не подписывать
-              // и не перемещать в обработанные
-              if ( hasImages() ){
-                //проверим что все образы меньше 25Мб
-                if ( checkImagesSize() ){
-
-                  // настройка
-                  // Показывать подтверждения о действиях с документом
-                  if ( settings.isActionsConfirm() ){
-                    showNextDialog(true);
-                  } else {
-                    operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-                    params.setPerson( "" );
-                  }
-
+                // настройка
+                // Показывать подтверждения о действиях с документом
+                if ( settings.isActionsConfirm() ){
+                  showNextDialog(true);
                 } else {
-                  new MaterialDialog.Builder(context)
-                    .title("Внимание!")
-                    .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
-                    .positiveText("Продолжить")
-                    .icon(ContextCompat.getDrawable(context, R.drawable.attention))
-                    .dismissListener(dialog -> signingNextPersonPressed = false)
-                    .show();
+                  operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+                  params.setPerson( "" );
                 }
 
               } else {
                 new MaterialDialog.Builder(context)
                   .title("Внимание!")
-                  .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
+                  .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
                   .positiveText("Продолжить")
                   .icon(ContextCompat.getDrawable(context, R.drawable.attention))
-                  .dismissListener(dialog -> signingNextPersonPressed = false)
                   .show();
               }
+
+            } else {
+              new MaterialDialog.Builder(context)
+                .title("Внимание!")
+                .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
+                .positiveText("Продолжить")
+                .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                .show();
             }
 
             break;
@@ -250,48 +215,34 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_sign_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            Timber.tag(TAG).d("Signing prev person pressed");
+            Timber.tag(TAG).d("Signing prev person press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !signingPrevPersonPressed ) {
-              signingPrevPersonPressed = true;
-              Timber.tag(TAG).d("Signing prev person press handle");
-
-              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
-                showPrevDialog(false);
-              } else {
-                operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
-                params.setPerson( "" );
-              }
+            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+              showPrevDialog(false);
+            } else {
+              operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
+              params.setPerson( "" );
             }
 
             break;
 
           case R.id.menu_info_decision_create:
-            Timber.tag(TAG).d("Create decision pressed");
+            Timber.tag(TAG).d("Create decision press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !createDecisionPressed ) {
-              createDecisionPressed = true;
-              Timber.tag(TAG).d("Create decision press handle");
+            settings.setDecisionActiveUid("0");
 
-              settings.setDecisionActiveUid("0");
-
-              Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-              activity.startActivity(create_intent);
-            }
+            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+            activity.startActivity(create_intent);
 
             break;
 
           case R.id.menu_info_decision_edit:
-            Timber.tag(TAG).d("Edit decision pressed");
+            Timber.tag(TAG).d("Edit decision press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !editDecisionPressed ) {
-              editDecisionPressed = true;
-              Timber.tag(TAG).d("Edit decision press handle");
-              EventBus.getDefault().post( new ShowDecisionConstructor() );
-            }
+            EventBus.getDefault().post( new ShowDecisionConstructor() );
 
             break;
 
@@ -319,24 +270,20 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_shared_to_control:
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
-            Timber.tag(TAG).d("Control pressed");
+            Timber.tag(TAG).d("Control press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !controlPressed ) {
-              Timber.tag(TAG).d("Control press handle");
-              boolean isCitizenRequest = false;
+            boolean isCitizenRequest = false;
 
-              if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
-                isCitizenRequest = true;
-              }
+            if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
+              isCitizenRequest = true;
+            }
 
-              if ( settings.isControlConfirm() && isCitizenRequest ){
-                controlPressed = true;
-                showToControlDialog();
+            if ( settings.isControlConfirm() && isCitizenRequest ){
+              showToControlDialog();
 
-              } else {
-                operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
-              }
+            } else {
+              operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
             }
 
             break;
@@ -344,18 +291,13 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_decision_create_with_assignment:
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
-            Timber.tag(TAG).d("Create with assignment pressed");
+            Timber.tag(TAG).d("Create with assignment press handle");
             operation = CommandFactory.Operation.INCORRECT;
 
-            if ( !createDecisionPressed ) {
-              createDecisionPressed = true;
-              Timber.tag(TAG).d("Create with assignment press handle");
-
-              settings.setDecisionWithAssignment(true);
-              settings.setDecisionActiveUid("0");
-              Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
-              activity.startActivity(create_assigment_intent);
-            }
+            settings.setDecisionWithAssignment(true);
+            settings.setDecisionActiveUid("0");
+            Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
+            activity.startActivity(create_assigment_intent);
 
             break;
 
@@ -377,31 +319,24 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         }
 
         operationManager.execute( operation, params );
-
-        return false;
       }
     );
   }
 
   public void showPrimaryConsiderationDialog(Activity activity) {
-    Timber.tag(TAG).d("Primary consideration pressed");
+    Timber.tag(TAG).d("Primary consideration press handle");
 
-    if ( !selectOshsPressed ) {
-      selectOshsPressed = true;
-      Timber.tag(TAG).d("Primary consideration press handle");
-
-      SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
-      Bundle bundle1 = new Bundle();
-      bundle1.putString("operation", "primary_consideration");
-      dialogFragment.setArguments(bundle1);
-      dialogFragment.withPrimaryConsideration(true);
-      dialogFragment.withSearch(false);
-      dialogFragment.withConfirm(true);
-      dialogFragment.withChangePerson(true);
-      dialogFragment.registerCallBack( this );
-      dialogFragment.withDocumentUid( settings.getUid() );
-      dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
-    }
+    SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
+    Bundle bundle1 = new Bundle();
+    bundle1.putString("operation", "primary_consideration");
+    dialogFragment.setArguments(bundle1);
+    dialogFragment.withPrimaryConsideration(true);
+    dialogFragment.withSearch(false);
+    dialogFragment.withConfirm(true);
+    dialogFragment.withChangePerson(true);
+    dialogFragment.registerCallBack( this );
+    dialogFragment.withDocumentUid( settings.getUid() );
+    dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
   }
 
   private static int parseIntOrDefault(String value, int defaultValue) {
@@ -661,13 +596,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     if ( doc != null && doc.getIndex() != null) {
       this.toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
     }
-
-    createDecisionPressed = false;
-    editDecisionPressed = false;
-    approvalNextPersonPressed = false;
-    approvalPrevPersonPressed = false;
-    signingNextPersonPressed = false;
-    signingPrevPersonPressed = false;
   }
 
   private void showToControlDialog() {
@@ -694,7 +622,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         operationManager.execute( operation, params );
       })
       .autoDismiss(true)
-      .dismissListener(dialog -> controlPressed = false)
       .build().show();
   }
 
@@ -715,10 +642,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         operationManager.execute( operation, params );
       })
       .autoDismiss(true)
-      .dismissListener(dialog -> {
-        approvalNextPersonPressed = false;
-        signingNextPersonPressed = false;
-      })
       .build().show();
   }
 
@@ -745,11 +668,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
         operationManager.execute(operation, params);
       })
-      .autoDismiss(true)
-      .dismissListener(dialog -> {
-        approvalPrevPersonPressed = false;
-        signingPrevPersonPressed = false;
-      });
+      .autoDismiss(true);
 
       // настройка
       // Показывать комментарий при отклонении
@@ -933,9 +852,5 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       && decision.getSignerId().equals( settings.getCurrentUserId() )
       || decision != null && decision.getRed() != null
       && decision.getRed();
-  }
-
-  public void setEditDecisionPressed(boolean value) {
-    editDecisionPressed = value;
   }
 }

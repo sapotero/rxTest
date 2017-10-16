@@ -419,15 +419,12 @@ public class InfoActivity extends AppCompatActivity {
         if ( settings.isOnline() ){
           if ( decision.isChanged() != null && decision.isChanged() ){
             Toast.makeText( this, R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT).show();
-            toolbarManager.setEditDecisionPressed( false );
           } else {
             showDecisionEditor();
           }
         } else {
           showDecisionEditor();
         }
-    } else {
-      toolbarManager.setEditDecisionPressed( false );
     }
 //    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
   }
