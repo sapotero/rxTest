@@ -172,7 +172,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
               approveDialogFragment.withChangePerson(true);
               approveDialogFragment.registerCallBack( this );
               approveDialogFragment.withDocumentUid( settings.getUid() );
-              approveDialogFragment.dismissListener(() -> selectOshsPressed = false);
               approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
             }
 
@@ -196,7 +195,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
               sign.withChangePerson(true);
               sign.registerCallBack( this );
               sign.withDocumentUid( settings.getUid() );
-              sign.dismissListener(() -> selectOshsPressed = false);
               sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
             }
 
@@ -402,7 +400,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       dialogFragment.withChangePerson(true);
       dialogFragment.registerCallBack( this );
       dialogFragment.withDocumentUid( settings.getUid() );
-      dialogFragment.dismissListener(() -> selectOshsPressed = false);
       dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
     }
   }
