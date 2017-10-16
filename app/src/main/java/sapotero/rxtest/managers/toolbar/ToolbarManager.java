@@ -58,6 +58,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   private boolean selectOshsPressed = false;
   private boolean controlPressed = false;
+  private boolean createDecisionPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -238,12 +239,18 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
             break;
 
           case R.id.menu_info_decision_create:
+            Timber.tag(TAG).d("Create decision pressed");
             operation = CommandFactory.Operation.INCORRECT;
 
-            settings.setDecisionActiveUid("0");
+            if ( !createDecisionPressed ) {
+              createDecisionPressed = true;
+              Timber.tag(TAG).d("Create decision press handle");
 
-            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-            activity.startActivity(create_intent);
+              settings.setDecisionActiveUid("0");
+
+              Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+              activity.startActivity(create_intent);
+            }
 
             break;
 
@@ -613,6 +620,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     if ( doc != null && doc.getIndex() != null) {
       this.toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getIndex() ) ) );
     }
+
+    createDecisionPressed = false;
   }
 
   private void showToControlDialog() {
