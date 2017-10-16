@@ -10,7 +10,7 @@ import rx.Subscription;
 
 public class Bind {
   // Time period during which multiple clicks will be ignored
-  public static final int MULTIPLE_CLICK_IGNORE_WINDOW = 1000;
+  private static final int MULTIPLE_CLICK_IGNORE_WINDOW = 1000;
 
   public interface OnClickListener {
     void onClick();

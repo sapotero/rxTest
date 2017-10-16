@@ -14,12 +14,6 @@ public class DecisionTextDialog {
   private MaterialDialog dialog;
   private EditText textInput;
 
-  private DismissListener dismissListener;
-
-  public interface DismissListener {
-    void onDismiss();
-  }
-
   public DecisionTextDialog(Context context, EditText parentEditText, CharSequence title, CharSequence hint) {
     if (context != null && parentEditText != null && title != null && hint != null) {
       dialogBuilder = new MaterialDialog.Builder(context)
@@ -55,18 +49,8 @@ public class DecisionTextDialog {
           dialog1.dismiss();
         })
       .cancelable(false)
-      .autoDismiss(false)
-      .dismissListener(dialog1 -> {
-        if ( dismissListener != null ) {
-          dismissListener.onDismiss();
-        }
-      });
+      .autoDismiss(false);
     }
-  }
-
-  public DecisionTextDialog dismissListener(DismissListener dismissListener) {
-    this.dismissListener = dismissListener;
-    return this;
   }
 
   public void show() {

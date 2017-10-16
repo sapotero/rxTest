@@ -96,7 +96,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
   private boolean createAndSignPressed = false;
   private boolean navigationPressed = false;
-  private boolean commentPressed = false;
   private boolean primaryConsiderationPressed = false;
   private boolean showInfoCardPressed = false;
 
@@ -442,17 +441,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     // Disable EditText scrolling
     decision_comment.setMovementMethod(null);
 
-    decision_comment.setOnClickListener(v -> {
-      Timber.tag(TAG).d("Comment pressed");
-
-      if ( !commentPressed ) {
-        commentPressed = true;
-        Timber.tag(TAG).d("Comment press handle");
-        String title = getString(R.string.comment_hint);
-        new DecisionTextDialog(context, decision_comment, title, title)
-          .dismissListener(() -> commentPressed = false)
-          .show();
-      }
+    Bind.click( decision_comment, () -> {
+      Timber.tag(TAG).d("Comment press handle");
+      String title = getString(R.string.comment_hint);
+      new DecisionTextDialog(context, decision_comment, title, title).show();
     });
 
     decision_comment.addTextChangedListener(new TextWatcher() {

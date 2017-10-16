@@ -44,6 +44,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.rxbinding.Bind;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
@@ -101,7 +102,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private String fontSize;
 
   private boolean scrollTo = false;
-  private boolean decisionTextPressed = false;
   private boolean addPerformerPressed = false;
 
   public void setBlockFactory(BlockFactory blockFactory) {
@@ -205,17 +205,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     // Disable EditText scrolling
     decision_text.setMovementMethod(null);
 
-    decision_text.setOnClickListener(v -> {
-      Timber.tag(TAG).v( "Decision text pressed" );
-
-      if ( !decisionTextPressed ) {
-        decisionTextPressed = true;
-        Timber.tag(TAG).v( "Decision text press handle" );
-        String title = getString(R.string.decision_text);
-        new DecisionTextDialog(mContext, decision_text, title, title)
-          .dismissListener(() -> decisionTextPressed = false)
-          .show();
-      }
+    Bind.click( decision_text, () -> {
+      Timber.tag(TAG).v( "Decision text press handle" );
+      String title = getString(R.string.decision_text);
+      new DecisionTextDialog(mContext, decision_text, title, title).show();
     });
 
     decision_text.addTextChangedListener(new TextWatcher() {
