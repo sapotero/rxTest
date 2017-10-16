@@ -60,6 +60,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private boolean controlPressed = false;
   private boolean createDecisionPressed = false;
   private boolean editDecisionPressed = false;
+  private boolean approvalNextPersonPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -112,12 +113,19 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_approval_next_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isActionsConfirm() ){
-              operation = CommandFactory.Operation.INCORRECT;
-              showNextDialog(false);
-            } else {
-              operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-              params.setPerson( "" );
+            Timber.tag(TAG).d("Approval next person pressed");
+            operation = CommandFactory.Operation.INCORRECT;
+
+            if ( !approvalNextPersonPressed ) {
+              approvalNextPersonPressed = true;
+              Timber.tag(TAG).d("Approval next person press handle");
+
+              if ( settings.isActionsConfirm() ){
+                showNextDialog(false);
+              } else {
+                operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
+                params.setPerson( "" );
+              }
             }
 
             break;
@@ -637,6 +645,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
     createDecisionPressed = false;
     editDecisionPressed = false;
+    approvalNextPersonPressed = false;
   }
 
   private void showToControlDialog() {
@@ -684,6 +693,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         operationManager.execute( operation, params );
       })
       .autoDismiss(true)
+      .dismissListener(dialog -> approvalNextPersonPressed = false)
       .build().show();
   }
 
