@@ -63,6 +63,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private boolean approvalNextPersonPressed = false;
   private boolean approvalPrevPersonPressed = false;
   private boolean signingNextPersonPressed = false;
+  private boolean signingPrevPersonPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -251,12 +252,19 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_sign_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
-              operation = CommandFactory.Operation.INCORRECT;
-              showPrevDialog(false);
-            } else {
-              operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
-              params.setPerson( "" );
+            Timber.tag(TAG).d("Signing prev person pressed");
+            operation = CommandFactory.Operation.INCORRECT;
+
+            if ( !signingPrevPersonPressed ) {
+              signingPrevPersonPressed = true;
+              Timber.tag(TAG).d("Signing prev person press handle");
+
+              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+                showPrevDialog(false);
+              } else {
+                operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
+                params.setPerson( "" );
+              }
             }
 
             break;
@@ -662,6 +670,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     approvalNextPersonPressed = false;
     approvalPrevPersonPressed = false;
     signingNextPersonPressed = false;
+    signingPrevPersonPressed = false;
   }
 
   private void showToControlDialog() {
@@ -740,7 +749,10 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         operationManager.execute(operation, params);
       })
       .autoDismiss(true)
-      .dismissListener(dialog -> approvalPrevPersonPressed = false);
+      .dismissListener(dialog -> {
+        approvalPrevPersonPressed = false;
+        signingPrevPersonPressed = false;
+      });
 
       // настройка
       // Показывать комментарий при отклонении
