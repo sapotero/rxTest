@@ -59,6 +59,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private boolean selectOshsPressed = false;
   private boolean controlPressed = false;
   private boolean createDecisionPressed = false;
+  private boolean editDecisionPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -255,8 +256,14 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
             break;
 
           case R.id.menu_info_decision_edit:
-            EventBus.getDefault().post( new ShowDecisionConstructor() );
+            Timber.tag(TAG).d("Edit decision pressed");
             operation = CommandFactory.Operation.INCORRECT;
+
+            if ( !editDecisionPressed ) {
+              editDecisionPressed = true;
+              Timber.tag(TAG).d("Edit decision press handle");
+              EventBus.getDefault().post( new ShowDecisionConstructor() );
+            }
 
             break;
 
@@ -622,6 +629,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     }
 
     createDecisionPressed = false;
+    editDecisionPressed = false;
   }
 
   private void showToControlDialog() {
@@ -879,5 +887,9 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
       && decision.getSignerId().equals( settings.getCurrentUserId() )
       || decision != null && decision.getRed() != null
       && decision.getRed();
+  }
+
+  public void setEditDecisionPressed(boolean value) {
+    editDecisionPressed = value;
   }
 }
