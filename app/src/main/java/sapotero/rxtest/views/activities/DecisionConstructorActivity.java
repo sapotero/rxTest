@@ -16,7 +16,6 @@ import android.widget.ScrollView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jakewharton.rxbinding.view.RxView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -54,6 +52,7 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.rxbinding.Bind;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
@@ -368,18 +367,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       manager.setUrgency( item );
     });
 
-    RxView
-      .clicks(signer_oshs_selector)
-      .throttleFirst(1000, TimeUnit.MILLISECONDS)
-      .subscribe(click -> {
-        Timber.tag(TAG).d("Signer selector press handle");
-        dialogFragment = new SelectOshsDialogFragment();
-        dialogFragment.registerCallBack( this );
-        dialogFragment.withSearch(true);
-        dialogFragment.withChangePerson(false);
-        dialogFragment.showWithAssistant(true);
-        dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
-      });
+    Bind.click(signer_oshs_selector, () -> {
+      Timber.tag(TAG).d("Signer selector press handle");
+      dialogFragment = new SelectOshsDialogFragment();
+      dialogFragment.registerCallBack( this );
+      dialogFragment.withSearch( true );
+      dialogFragment.withChangePerson( false );
+      dialogFragment.showWithAssistant( true );
+      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment" );
+    });
 
     sign_as_current_user.setOnClickListener(v -> {
       Timber.tag(TAG).e( "%s | %s", rDecisionEntity == null, raw_decision == null );
