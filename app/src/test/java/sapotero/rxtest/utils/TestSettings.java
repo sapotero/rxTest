@@ -192,6 +192,11 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public Preference<String> getHostPreferences() {
+    return null;
+  }
+
+  @Override
   public void setHost(String value) {
     host = value;
   }
@@ -238,6 +243,11 @@ public class TestSettings implements ISettings {
 
   @Override
   public String getUpdateTime() {
+    return null;
+  }
+
+  @Override
+  public Preference<String> getUpdateTimePreference() {
     return null;
   }
 
@@ -367,6 +377,11 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public Preference<String> getDecisionActiveUidPreference() {
+    return null;
+  }
+
+  @Override
   public boolean isActionsConfirm() {
     return actionsConfirm;
   }
@@ -447,6 +462,11 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public Preference<String> getInfocardFontSizePreference() {
+    return null;
+  }
+
+  @Override
   public void setInfocardFontSize(String value) {
 
   }
@@ -519,6 +539,11 @@ public class TestSettings implements ISettings {
   @Override
   public String getMaxImageSize() {
     return maxImageSize;
+  }
+
+  @Override
+  public Preference<String> getMaxImageSizePreference() {
+    return null;
   }
 
   @Override

@@ -69,14 +69,13 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     viewHolder.name.setText( user.getName() );
     viewHolder.title.setText( user.getOrganization() );
 
-    Timber.e( "getIImage %s", user.getIImage() );
-
     if (user.getIImage() != null){
       try {
         String str = user.getIImage().replaceAll("(\\n)", "");
         byte[] decodedString = Base64.decode(str.getBytes(), Base64.DEFAULT);
         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
         viewHolder.image.setImageBitmap(decodedByte);
+        viewHolder.image_wrapper.setVisibility(View.VISIBLE);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -88,8 +87,6 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     if ( user.isDelimiter() ){
       viewHolder.image_wrapper.setVisibility(View.GONE);
     }
-
-
 
     return view;
   }

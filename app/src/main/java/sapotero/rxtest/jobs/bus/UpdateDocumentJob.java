@@ -13,8 +13,6 @@ import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -36,9 +34,6 @@ public class UpdateDocumentJob extends DocumentJob {
   private Boolean forceProcessed    = false;
   private Boolean forceDropFavorite = false;
   private DocumentType documentType = DocumentType.DOCUMENT;
-
-  private int oldSignerId;
-  private int oldRouteId;
 
   private boolean fromLinks = false;
 
@@ -122,18 +117,23 @@ public class UpdateDocumentJob extends DocumentJob {
   public void onRun() throws Throwable {
     Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting job");
 
-    RDocumentEntity documentExisting = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get().firstOrNull();
+    RDocumentEntity documentExisting = getDocumentExisting();
 
     if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Loading document");
       loadDocument(uid, TAG);
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
+      Timber.tag(TAG).d("documentExisting == null ? %s", documentExisting == null);
       EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
     }
+  }
+
+  private RDocumentEntity getDocumentExisting() {
+    return dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().firstOrNull();
   }
 
   @Override
@@ -146,10 +146,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
 
-    RDocumentEntity documentExisting = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get().firstOrNull();
+    RDocumentEntity documentExisting = getDocumentExisting();
 
     if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting update");
@@ -159,26 +156,24 @@ public class UpdateDocumentJob extends DocumentJob {
         forceUpdate = true;
       }
 
-//      // Force update, if document exists and it must be from processed folder, but is not
-//      if ( documentExisting.isFromProcessedFolder() != null && !documentExisting.isFromProcessedFolder() && documentType == DocumentType.PROCESSED ) {
-//        forceUpdate = true;
-//      }
-
       if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) || forceUpdate ) {
         Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 not equal, updating document");
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
 
-        saveIdsToDelete( documentExisting );
-
-        DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
-        documentMapper.setBaseFields( documentExisting, documentReceived );
-        documentMapper.setJournal( documentExisting, index );
-        documentMapper.setFilter( documentExisting, filter );
-
-        deleteLinkedDataPartOne( documentExisting );
-
+        // Create new RDocumentEntity and copy state from the existing one
+        RDocumentEntity documentNew = new RDocumentEntity();
+        copyDocumentState( documentNew, documentExisting );
         boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
-        documentMapper.setNestedFields( documentExisting, documentReceived, isFromProcessedFolder );
+
+        // Delete existing entity and all linked data from DB
+        new Deleter().deleteDocument( documentExisting, TAG );
+
+        // Update fields of the new entity with loaded data
+        DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
+        documentMapper.setBaseFields( documentNew, documentReceived );
+        documentMapper.setJournal( documentNew, index );
+        documentMapper.setFilter( documentNew, filter );
+        documentMapper.setNestedFields( documentNew, documentReceived, isFromProcessedFolder );
 
         boolean isSetProcessedFalse = true;
 
@@ -192,57 +187,55 @@ public class UpdateDocumentJob extends DocumentJob {
           isSetProcessedFalse = false;
         }
 
-        if ( filter != null && Objects.equals(documentExisting.getFilter(), filter) ) {
+        if ( filter != null && Objects.equals(documentNew.getFilter(), filter) ) {
           // если указан статус, и статус не изменился, то не убираем из обработанных
           isSetProcessedFalse = false;
         }
 
-        if ( index != null && Objects.equals(documentExisting.getDocumentType(), index) ) {
+        if ( index != null && Objects.equals(documentNew.getDocumentType(), index) ) {
           // если указан журнал, и журнал не изменился, то не убираем из обработанных
           isSetProcessedFalse = false;
         }
 
         if ( isSetProcessedFalse ) {
           // если прилетело обновление и документ не из папки обработанных и указаны статус или журнал и хотя бы один из них изменился - уберем из обработанных
-          documentExisting.setProcessed( false );
+          documentNew.setProcessed( false );
         }
 
         // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных и из папки избранных
         // (например, документ возвращен текущему пользователю после отклонения)
-        if ( addressedToCurrentUser( documentReceived, documentExisting, documentMapper ) ) {
+        if ( addressedToCurrentUser( documentReceived, documentNew, documentMapper ) ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = false");
-          documentExisting.setProcessed( false );
-          documentExisting.setFromProcessedFolder( false );
-          documentExisting.setFromFavoritesFolder( false );
+          documentNew.setProcessed( false );
+          documentNew.setFromProcessedFolder( false );
+          documentNew.setFromFavoritesFolder( false );
 
-          setReturnedRejectedAgainLabel( documentExisting );
+          setReturnedRejectedAgainLabel( documentNew );
         }
 
         if ( forceProcessed ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = true");
-          clearReturnedRejectedAgainLabels( documentExisting );
-          documentExisting.setProcessed( true );
+          clearReturnedRejectedAgainLabels( documentNew );
+          documentNew.setProcessed( true );
         }
 
-//        if ( documentType == DocumentType.PROCESSED ) {
-//          documentExisting.setProcessed( true );
-//          documentExisting.setFromProcessedFolder( true );
-//        }
-
         if ( documentType == DocumentType.FAVORITE ) {
-          documentExisting.setFavorites( true );
+          documentNew.setFavorites( true );
         }
 
         if ( forceDropFavorite ) {
-          documentExisting.setFavorites( false );
-          documentExisting.setFromFavoritesFolder( false );
+          documentNew.setFavorites( false );
+          documentNew.setFromFavoritesFolder( false );
         }
 
-        documentExisting.setFromLinks( fromLinks );
-        documentExisting.setChanged( false );
+        documentNew.setFromLinks( fromLinks );
+        documentNew.setChanged( false );
 
-        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
-        updateDocument( documentReceived, documentExisting, TAG );
+        // Insert new entity and linked data into DB if existing entity has been properly deleted
+        if ( getDocumentExisting() == null ) {
+          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
+          insert( documentReceived, documentNew, false, true, TAG );
+        }
 
       } else {
         Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 equal");
@@ -250,84 +243,63 @@ public class UpdateDocumentJob extends DocumentJob {
       }
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
+      Timber.tag(TAG).d("documentExisting == null ? %s", documentExisting == null);
     }
   }
 
-  private void setReturnedRejectedAgainLabel(RDocumentEntity documentExisting) {
-    clearReturnedRejectedAgainLabels( documentExisting );
+  private void copyDocumentState(RDocumentEntity documentNew, RDocumentEntity documentExisting) {
+    documentNew.setFavorites( documentExisting.isFavorites() );
+    documentNew.setProcessed( documentExisting.isProcessed() );
+    documentNew.setControl( documentExisting.isControl() );
+    documentNew.setFromLinks( documentExisting.isFromLinks() );
+    documentNew.setFromProcessedFolder( documentExisting.isFromProcessedFolder() );
+    documentNew.setFromFavoritesFolder( documentExisting.isFromFavoritesFolder() );
+    documentNew.setChanged( documentExisting.isChanged() );
+    documentNew.setReturned( documentExisting.isReturned() );
+    documentNew.setRejected( documentExisting.isRejected() );
+    documentNew.setAgain( documentExisting.isAgain() );
+    documentNew.setRed( documentExisting.isRed() );
+    documentNew.setUpdatedAt( documentExisting.getUpdatedAt() );
+    documentNew.setProcessedDate( documentExisting.getProcessedDate() );
+    documentNew.setFilter( documentExisting.getFilter() );
+    documentNew.setDocumentType( documentExisting.getDocumentType() );
+    documentNew.setAddressedToType( documentExisting.getAddressedToType() );
+  }
+
+  private void setReturnedRejectedAgainLabel(RDocumentEntity document) {
+    clearReturnedRejectedAgainLabels( document );
 
     RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
       .select( RReturnedRejectedAgainEntity.class )
-      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( documentExisting.getUid() ) )
+      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( document.getUid() ) )
       .and( RReturnedRejectedAgainEntity.USER.eq( login ) )
       .get().firstOrNull();
 
-    if ( returnedRejectedAgainEntity != null && Objects.equals( documentExisting.getFilter(), returnedRejectedAgainEntity.getStatus() ) ) {
+    if ( returnedRejectedAgainEntity != null && Objects.equals( document.getFilter(), returnedRejectedAgainEntity.getStatus() ) ) {
       switch (returnedRejectedAgainEntity.getDocumentCondition()) {
         case PROCESSED:
-          documentExisting.setReturned( true );
+          document.setReturned( true );
           break;
         case REJECTED:
-          documentExisting.setAgain( true );
+          document.setAgain( true );
           break;
       }
     }
   }
 
-  private void clearReturnedRejectedAgainLabels(RDocumentEntity documentExisting) {
-    documentExisting.setReturned( false );
-    documentExisting.setRejected( false );
-    documentExisting.setAgain( false );
+  private void clearReturnedRejectedAgainLabels(RDocumentEntity document) {
+    document.setReturned( false );
+    document.setRejected( false );
+    document.setAgain( false );
   }
 
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
-    deleteLinkedDataPartTwo();
-
     if (document != null && !fromLinks) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterUpdate");
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, filter, index );
       store.process( document, filter, index );
     }
-  }
-
-  private void saveIdsToDelete(RDocumentEntity document) {
-    oldSignerId = getOldSignerId( document );
-    oldRouteId = getOldRouteId( document );
-  }
-
-  private int getOldSignerId(RDocumentEntity document) {
-    if ( exist( document.getSigner() ) ) {
-      return ((RSignerEntity) document.getSigner()).getId();
-    } else {
-      return 0;
-    }
-  }
-
-  private int getOldRouteId(RDocumentEntity document) {
-    if ( exist( document.getRoute() ) ) {
-      return ((RRouteEntity) document.getRoute()).getId();
-    } else {
-      return 0;
-    }
-  }
-
-  private void deleteLinkedDataPartOne(RDocumentEntity document) {
-    Deleter deleter = new Deleter();
-
-    deleter.deleteDecisions( document, TAG );
-    deleter.deleteExemplars( document, TAG );
-    deleter.deleteImages( document, TAG );
-    deleter.deleteControlLabels( document, TAG );
-    deleter.deleteActions( document, TAG );
-    deleter.deleteLinks( document, TAG );
-  }
-
-  private void deleteLinkedDataPartTwo() {
-    Deleter deleter = new Deleter();
-
-    deleter.deleteSigner( oldSignerId, TAG );
-    deleter.deleteRoute( oldRouteId, TAG );
   }
 
   @Override

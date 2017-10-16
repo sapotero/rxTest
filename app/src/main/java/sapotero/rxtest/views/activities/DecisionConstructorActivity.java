@@ -3,21 +3,19 @@ package sapotero.rxtest.views.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,8 +43,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.ApproveDecisionEvent;
-import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -64,7 +60,7 @@ import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements OperationManager.Callback, SelectOshsDialogFragment.Callback {
+public class DecisionConstructorActivity extends AppCompatActivity implements SelectOshsDialogFragment.Callback {
 
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
@@ -77,7 +73,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
   @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
   @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
-  @BindView(R.id.select_oshs_wrapper) LinearLayout select_oshs_wrapper;
+  @BindView(R.id.select_signer_cardview) CardView selectSignerCardView;
   @BindView(R.id.activity_decision_constructor_scroll_wrapper) ScrollView scroll;
   @BindView(R.id.decision_constructor_decision_comment) EditText decision_comment;
   @BindView(R.id.decision_constructor_decision_date)    EditText decision_date;
@@ -536,13 +532,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
       manager.setDate( date );
     }
 
-
-
-
     if ( status == JournalStatus.FOR_REPORT ){
       // настройка
-      if ( !settings.isShowChangeSigner() ){
-        select_oshs_wrapper.setVisibility(View.GONE);
+      if ( !settings.isShowChangeSigner() ) {
+        // resolved https://tasks.n-core.ru/browse/MPSED-2250
+        // Убрать блок "подписал" в резолюциях на рассмотрение(по настройке)
+        selectSignerCardView.setVisibility(View.GONE);
       }
     }
 
@@ -633,31 +628,30 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
 
     if (rDecisionEntity != null) {
-
       RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-      Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
 
-      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) {
-        if (
-          manager.getDecision() != null &&
-            manager.getDecision().getSignerId() != null &&
-            Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())) {
-          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+      if ( doc != null ) {
+        Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
+
+        if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) {
+          if (
+              manager.getDecision() != null &&
+              manager.getDecision().getSignerId() != null &&
+              Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())) {
+            toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+          } else {
+            toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+          }
+        }
+
+        if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
+          if (rDecisionEntity != null){
+            toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
+          }
         } else {
-          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+          toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(false);
         }
       }
-
-
-
-      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
-        if (rDecisionEntity != null){
-          toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
-        }
-      } else {
-        toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(false);
-      }
-
 
     } else {
       // если новая резолюция
@@ -769,14 +763,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
       }
 
       return showSaveDialog;
-    }
-
-    @Override
-    protected void onResume () {
-      super.onPostResume();
-
-
-      operationManager.registerCallBack(this);
     }
 
   private void loadDecision () {
@@ -924,28 +910,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
         .autoDismiss(true);
 
       prev_dialog.build().show();
-    }
-
-    @Override
-    public void onExecuteSuccess (String command){
-      if (Objects.equals(command, "approve_decision")) {
-        finish();
-//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        EventBus.getDefault().post(new ApproveDecisionEvent());
-      }
-
-      if (Objects.equals(command, "reject_decision")) {
-        finish();
-//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-
-        EventBus.getDefault().post(new RejectDecisionEvent());
-      }
-    }
-
-
-    @Override
-    public void onExecuteError () {
-
     }
 
     @Override

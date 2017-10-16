@@ -4,6 +4,7 @@ import com.birbit.android.jobqueue.Params;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +24,6 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Action;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -36,6 +36,8 @@ import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
 abstract class DocumentJob extends BaseJob {
+
+  private static final int IMAGE_SIZE_MULTIPLIER = 5;
 
   public String currentUserId;
 
@@ -127,23 +129,23 @@ abstract class DocumentJob extends BaseJob {
     if ( isLink ) {
       // If link, insert only if doesn't exist
       if ( !exist( existingDoc ) ) {
-        insert(documentReceived, documentToSave, isLink, TAG);
+        insert(documentReceived, documentToSave, isLink, false, TAG);
       }
     } else {
       // If not link and doesn't exist, insert
       if ( !exist( existingDoc ) ) {
-        insert(documentReceived, documentToSave, isLink, TAG);
+        insert(documentReceived, documentToSave, isLink, false, TAG);
       } else {
         // If not link and exists and is from links, delete existing and insert new instead
         if ( existingDoc.isFromLinks() ) {
           new Deleter().deleteDocument(existingDoc, TAG);
-          insert(documentReceived, documentToSave, isLink, TAG);
+          insert(documentReceived, documentToSave, isLink, false, TAG);
         }
       }
     }
   }
 
-  private void insert(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
+  protected void insert(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, boolean update, String TAG) {
     dataStore
       .insert( documentToSave )
       .toObservable()
@@ -151,24 +153,9 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( Schedulers.computation() )
       .subscribe(
         result -> {
-          Timber.tag(TAG).d("Created " + result.getUid());
-          doAfterUpdate(result);
+          Timber.tag(TAG).d( update ? "Updated MD5 " + result.getMd5() : "Created " + result.getUid() );
           loadLinkedData( documentReceived, result, isLink );
-        },
-        error -> Timber.tag(TAG).e(error)
-      );
-  }
-
-  void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
-    dataStore
-      .update( documentToUpdate )
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( Schedulers.computation() )
-      .subscribe(
-        result -> {
-          Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
           doAfterUpdate(result);
-          loadLinkedData( documentReceived, result, false );
         },
         error -> Timber.tag(TAG).e(error)
       );
@@ -186,12 +173,55 @@ abstract class DocumentJob extends BaseJob {
 
   private void loadImages(Set<RImage> images) {
     if ( notEmpty( images ) ) {
+      long totalSize = getTotalImagesSize( images );
+      long usableSpace = getUsableSpace();
+
+      Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * totalSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * totalSize);
+
       for (RImage _image : images) {
-        settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId(), login ) );
+
+        // resolved https://tasks.n-core.ru/browse/MPSED-2205
+        // Работа МП при нехватке места на планшете
+        // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х суммарный_размер_образов_в_документе
+        if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * totalSize ) {
+          settings.addTotalDocCount(1);
+          jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+        } else {
+          setNoFreeSpace( image );
+        }
       }
     }
+  }
+
+  private long getTotalImagesSize(Set<RImage> images) {
+    long totalSize = 0;
+
+    for (RImage _image : images) {
+      RImageEntity image = (RImageEntity) _image;
+      long imageSize = image.getSize() != null ? image.getSize() : 0;
+      totalSize += imageSize;
+    }
+
+    return totalSize;
+  }
+
+  private long getUsableSpace() {
+    File fileDir = new File(getApplicationContext().getFilesDir().getAbsolutePath());
+    return fileDir.getUsableSpace();
+  }
+
+  private void setNoFreeSpace(RImageEntity image) {
+    // Set no free space flag in RImageEntity to update document in MemoryStore (in doAfterUpdate)
+    image.setNoFreeSpace( true );
+    image.setError( true );
+
+    // Set no free space flag in DB
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.ERROR, true)
+      .set(RImageEntity.NO_FREE_SPACE, true)
+      .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
   private void loadLinks(List<String> links, String parentUid) {

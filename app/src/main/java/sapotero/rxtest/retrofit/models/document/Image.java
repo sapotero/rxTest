@@ -34,6 +34,8 @@ public class Image implements Serializable {
     private Boolean signed;
 
     private transient boolean deleted = false;
+    private transient String fileName = "";
+    private transient boolean noFreeSpace = false;
 
     public boolean isDeleted() {
         return deleted;
@@ -185,5 +187,21 @@ public class Image implements Serializable {
      */
     public void setSigned(Boolean signed) {
         this.signed = signed;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public boolean isNoFreeSpace() {
+        return noFreeSpace;
+    }
+
+    public void setNoFreeSpace(boolean noFreeSpace) {
+        this.noFreeSpace = noFreeSpace;
     }
 }

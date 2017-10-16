@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -31,6 +30,8 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    setRemoveRedLabel();
+
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     updateLocal();
@@ -53,8 +54,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
     getParams().getDecisionModel().setApproved( true );
     updateInMemory();
-
-    setDecisionChanged();
+    updateInDb();
 
     setChangedInDb();
     InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
@@ -78,8 +78,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
     } else {
       setSyncLabelInMemory();
     }
-
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
 
   @Override

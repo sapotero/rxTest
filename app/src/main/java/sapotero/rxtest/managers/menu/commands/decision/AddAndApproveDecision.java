@@ -27,6 +27,8 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    setRemoveRedLabel();
+
     getParams().getDecisionModel().setApproved( true );
     createTemporaryDecision();
 
@@ -40,8 +42,6 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
-
-    setDecisionChanged();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда

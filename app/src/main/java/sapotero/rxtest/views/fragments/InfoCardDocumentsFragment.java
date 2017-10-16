@@ -44,23 +44,19 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.images.RImage;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
@@ -72,8 +68,8 @@ import timber.log.Timber;
 public class InfoCardDocumentsFragment extends PreviewFragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   public static final int REQUEST_CODE_INDEX = 1;
+
   @Inject ISettings settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
 
@@ -87,6 +83,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
+  @BindView(R.id.no_free_space) FrameLayout noFreeSpace;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
@@ -115,7 +112,6 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
 
   private final SwipeUtil swipeUtil;
-  private Toast toast;
   private boolean toastShown = false;
   private Subscription sub;
   private Subscription reload;
@@ -209,19 +205,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   public void updateDocument(){
+    ArrayList<Image> images = new ArrayList<>();
+    adapter = new DocumentLinkAdapter(mContext, images);
 
-    ArrayList<Image> documents = new ArrayList<Image>();
-    adapter = new DocumentLinkAdapter(mContext, documents);
-
-    RDocumentEntity document = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid == null ? settings.getUid() : uid))
-      .get()
-      .firstOrNull();
+    InMemoryDocument document = store.getDocuments().get( uid == null ? settings.getUid() : uid );
 
     if ( document != null ) {
       //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
-      if ( document.getUrgency() != null ){
+      if ( document.getDocument() != null && document.getDocument().getUrgency() != null ) {
         urgency.setVisibility(View.VISIBLE);
       }
 
@@ -230,12 +221,8 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
       if (document.getImages().size() > 0){
         adapter.clear();
 
-        List<RImageEntity> tmp = new ArrayList<>();
-
-        for (RImage image : document.getImages()) {
-          RImageEntity img = (RImageEntity) image;
-          tmp.add(img);
-        }
+        List<Image> tmp = new ArrayList<>();
+        tmp.addAll( document.getImages() );
 
         try {
           Collections.sort(tmp, (o1, o2) -> o1.getCreatedAt().compareTo(o2.getCreatedAt()));
@@ -249,10 +236,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
           e.printStackTrace();
         }
 
-
-        for (RImageEntity image : tmp) {
-          adapter.add( image );
-        }
+        adapter.addAll( tmp );
 
         showPdf();
 
@@ -271,24 +255,26 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   private void setPdfPreview() throws FileNotFoundException {
     if (getContext() != null && getContext().getFilesDir() != null ){
       Image image = adapter.getItem(index);
-      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
-
+      file = new File(getContext().getFilesDir(), image.getFileName() );
 
       Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
       Timber.tag(TAG).e("file: %s", file.toString() );
 
-      // Проверяем что файл загружен полность,
-      // иначе рисуем крутилку с окошком
-      if (image.getSize() != null && file.length() == image.getSize()){
-        Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
-        showFileLoading(false);
+      // Проверяем, существует ли ЭО
+      // ЭО автоматически удаляются через период времени
+      // заданный в настройках
+      if ( image.isDeleted() ) {
+        showDownloadButton();
 
-        // Проверяем, существует ли ЭО
-        // ЭО автоматически удаляются через период времени
-        // заданный в настройках
-        if ( image.isDeleted() ){
-          showDownloadButton();
-        } else {
+      } else if ( image.isNoFreeSpace() ) {
+        showNoFreeSpace();
+
+      } else {
+        // Проверяем что файл загружен полность,
+        // иначе рисуем крутилку с окошком
+        if (image.getSize() != null && file.length() == image.getSize()) {
+          Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
+          showFileLoading(false);
 
           contentType = image.getContentType();
           document_title.setText( image.getTitle() );
@@ -302,15 +288,12 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
               pdfView
                 .fromStream(targetStream)
-                //         .fromFile( file )
                 .enableSwipe(true)
                 .enableDoubletap(true)
                 .defaultPage(0)
                 .swipeHorizontal(false)
                 .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-                .onPageChange((page, pageCount) -> {
-                  updatePageCount();
-                })
+                .onPageChange((page, pageCount) -> updatePageCount())
                 .onPageScroll(this::setDirection)
                 .enableAnnotationRendering(true)
                 .scrollHandle(null)
@@ -322,7 +305,6 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
               pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
               pdfView.setDrawingCacheEnabled(true);
               pdfView.enableRenderDuringScale(false);
-
             }
 
             pdfView.setVisibility(View.VISIBLE);
@@ -339,9 +321,9 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
           updatePageCount();
           updateVisibility();
 
+        } else {
+          showFileLoading(true);
         }
-      } else {
-        showFileLoading(true);
       }
 
       hideZoom();
@@ -376,6 +358,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         }
       }, Timber::e );
   }
+
   private void stopReloadSubscription() {
     if (reload != null) {
       reload.unsubscribe();
@@ -400,7 +383,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         if (direction != SwipeUtil.DIRECTION.OTHER) {
 
           if ( !toastShown ) {
-            toast = Toast.makeText(getContext(), direction.getMessage(), Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getContext(), direction.getMessage(), Toast.LENGTH_SHORT);
 
             if ( index == adapter.getCount()-1 && direction != SwipeUtil.DIRECTION.DOWN
               || index == 0 && direction != SwipeUtil.DIRECTION.UP){
@@ -432,9 +415,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     deletedImage.setVisibility(View.VISIBLE);
   }
 
+  private void showNoFreeSpace() {
+    noFreeSpace.setVisibility(View.VISIBLE);
+  }
+
   private void updateVisibility() {
     hideZoom();
     deletedImage.setVisibility(View.GONE);
+    noFreeSpace.setVisibility(View.GONE);
   }
 
   private void hideZoom() {
@@ -478,6 +466,11 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     jobManager.addJobInBackground( new ReloadProcessedImageJob( settings.getUid() ) );
 
     getActivity().finish();
+  }
+
+  @OnClick(R.id.info_card_pdf_reload_no_free_space)
+  public void reloadImageNoFreeSpace() {
+    reloadImage();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
@@ -674,7 +667,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
       public String getMessage() {
         return message;
       }
-    };
+    }
 
     DIRECTION direction;
 

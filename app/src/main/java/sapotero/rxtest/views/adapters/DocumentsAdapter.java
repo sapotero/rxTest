@@ -26,6 +26,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.InfoActivity;
 import timber.log.Timber;
@@ -167,8 +168,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       //  В подписавших резолюцию должен быть Министр.
 
       if ( item.isRed() ){
-        viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
-        viewHolder.setBackgroundResourceId( R.drawable.top_border );
+        viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, doc.getState() != InMemoryState.LOADING ? R.drawable.top_border : R.drawable.top_border_loading) );
+        viewHolder.setBackgroundResourceId( doc.getState() != InMemoryState.LOADING ? R.drawable.top_border : R.drawable.top_border_loading );
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-13426
         // Выделять номер документа красным на плитке
@@ -203,10 +204,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       case LOADING:
         viewHolder.cv.setCardElevation(0f);
-        viewHolder.cv.setBackground( ContextCompat.getDrawable( mContext, R.drawable.color_change_to_dark) );
-        TransitionDrawable transition = (TransitionDrawable) viewHolder.cv.getBackground();
-        transition.startTransition(300);
-        transition.setCrossFadeEnabled(true);
+
+        if ( !doc.getDocument().isRed() ) {
+          viewHolder.cv.setBackground( ContextCompat.getDrawable( mContext, R.color.md_grey_100) );
+        }
 
         viewHolder.sync_label.setVisibility(View.VISIBLE);
         viewHolder.cv.setClickable(false);

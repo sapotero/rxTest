@@ -2,6 +2,9 @@ package sapotero.rxtest.managers.menu.commands;
 
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,14 +15,19 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RManagerEntity;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
@@ -132,10 +140,8 @@ public abstract class DecisionCommand extends AbstractCommand {
 
     Tuple manager = dataStore
       .select(RManagerEntity.UID)
-      .where(RManagerEntity.USER.eq(settings.getLogin()))
+      .where(RManagerEntity.USER.eq(getParams().getLogin()))
       .get().firstOrNull();
-
-
 
     return
       // если активная резолюция
@@ -153,22 +159,33 @@ public abstract class DecisionCommand extends AbstractCommand {
   protected void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
     String decisionUid = data.getDecisionUid();
 
-    // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
     if ( decisionUid != null && !decisionUid.equals("") ) {
+      // Если подписант является текущим пользователем
+      // и создал резолюцию текущий пользователь (так как операция выполняется в данном мобильном приложении)
       if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
-        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
-        rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = dataStore
+          .select(RDisplayFirstDecisionEntity.class)
+          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( decisionUid ))
+          .and(RDisplayFirstDecisionEntity.USER_ID.eq( getParams().getCurrentUserId() ))
+          .get().firstOrNull();
 
-        dataStore
-          .insert( rDisplayFirstDecisionEntity )
-          .toObservable()
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            result -> Timber.tag(TAG).v("Added decision to display first decision table"),
-            error -> Timber.tag(TAG).e(error)
-          );
+        // И если UID резолюции нет в таблице резолюций, отображаемых первыми,
+        // то сохранить UID этой резолюции в таблицу
+        if ( rDisplayFirstDecisionEntity == null ) {
+          rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
+          rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
+          rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+
+          dataStore
+            .insert( rDisplayFirstDecisionEntity )
+            .toObservable()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+              result -> Timber.tag(TAG).v("Added decision %s to display first decision table", decisionUid),
+              error -> Timber.tag(TAG).e(error)
+            );
+        }
       }
     }
   }
@@ -192,21 +209,126 @@ public abstract class DecisionCommand extends AbstractCommand {
       InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
 
       if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
+        boolean decisionAdded = false;
         List<Decision> inMemoryDecisions = inMemoryDocument.getDecisions();
 
-        if ( inMemoryDecisions.size() > 0 ) {
-          for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
-            Decision inMemoryDecision = inMemoryDecisions.get(i);
+        // If decision already exists, replace it
+        for ( int i = 0; i < inMemoryDecisions.size(); i++ ) {
+          Decision inMemoryDecision = inMemoryDecisions.get(i);
 
-            if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
-              inMemoryDecisions.set(i, dec);
-              break;
-            }
+          if ( Objects.equals( inMemoryDecision.getId(), dec.getId() ) ) {
+            inMemoryDecisions.set(i, dec);
+            decisionAdded = true;
+            break;
           }
-        } else {
+        }
+
+        // If decision doesn't exist, add it
+        if ( !decisionAdded ) {
           inMemoryDecisions.add( dec );
         }
       }
     }
+  }
+
+  protected void updateInDb() {
+    Decision dec = getParams().getDecisionModel();
+    Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
+
+    RDecisionEntity decision = dataStore
+      .select(RDecisionEntity.class)
+      .where(RDecisionEntity.UID.eq(dec.getId()))
+      .get().firstOrNull();
+
+    if (dec.getUrgencyText() != null) {
+      decision.setUrgencyText(dec.getUrgencyText());
+    }
+
+    decision.setComment(dec.getComment());
+    decision.setDate( dec.getDate());
+    decision.setSigner( dec.getSigner() );
+    decision.setSignerBlankText(dec.getSignerBlankText());
+    decision.setSignerId(dec.getSignerId());
+    decision.setSignerPositionS(dec.getSignerPositionS());
+    decision.setApproved(dec.getApproved());
+    decision.setChanged(true);
+    decision.setRed(dec.getRed());
+
+    if (dec.getBlocks().size() > 0) {
+      decision.getBlocks().clear();
+    }
+
+    BlockMapper blockMapper = new BlockMapper();
+
+    for (Block _block : dec.getBlocks()) {
+      RBlockEntity block = blockMapper.toEntity(_block);
+      block.setDecision(decision);
+      decision.getBlocks().add(block);
+    }
+
+    dataStore
+      .update(decision)
+      .toObservable()
+      .observeOn(Schedulers.io())
+      .subscribeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).e("UPDATED %s", data.getSigner() );
+          EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( data.getUid() ));
+        },
+        error -> queueManager.setExecutedWithError(this, Collections.singletonList("db_error"))
+      );
+
+    Timber.tag(TAG).e("1 updateFromJob params%s", new Gson().toJson( params ));
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2206
+  // Проставлять признак red у документа, при создании/подписании резолюции
+  protected void setRemoveRedLabel() {
+    int count = dataStore
+      .count( RManagerEntity.class )
+      .where( RManagerEntity.USER.eq( getParams().getLogin() ) )
+      .and( RManagerEntity.UID.eq( getParams().getDecisionModel().getSignerId() ) )
+      .get().value();
+
+    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+
+    if ( count > 0 && !Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() ) ) {
+      // Если подписант министр и подписант не равен текущему пользователю (т.е. текущий пользователь не министр),
+      // то ставим red у документа и резолюции
+      setRed( inMemoryDocument, true );
+
+    } else {
+      // Иначе просматриваем все резолюции документа, кроме текущей и, если ни одна из них не red,
+      // то снимаем red у документа и резолюции
+      if ( inMemoryDocument != null && inMemoryDocument.getDecisions() != null ) {
+        boolean red = false;
+
+        for ( Decision decision : inMemoryDocument.getDecisions() ) {
+          if ( decision.getRed() != null && decision.getRed() && !Objects.equals( decision.getId(), getParams().getDecisionModel().getId() ) ) {
+            red = true;
+            break;
+          }
+        }
+
+        if ( !red ) {
+          setRed( inMemoryDocument, false );
+        }
+      }
+    }
+  }
+
+  private void setRed(InMemoryDocument inMemoryDocument, boolean value) {
+    getParams().getDecisionModel().setRed( value );
+
+    if ( inMemoryDocument != null ) {
+      inMemoryDocument.getDocument().setRed( value );
+    }
+
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.RED, value )
+      .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
+      .get().value();
   }
 }

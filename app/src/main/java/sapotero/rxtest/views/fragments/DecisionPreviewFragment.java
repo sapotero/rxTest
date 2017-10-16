@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
@@ -60,13 +61,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.decision.ApproveDecisionEvent;
-import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
-import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
-import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
-import sapotero.rxtest.events.decision.HideTemporaryEvent;
-import sapotero.rxtest.events.decision.RejectDecisionEvent;
-import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -94,6 +88,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
   public static final int MIN_FONT_SIZE = 12;
   public static final int SEEK_BAR_INIT_PROGRESS = 12;
+  public static final String NO_DECISIONS = "Нет резолюций";
 
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
@@ -336,37 +331,33 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( doc != null && Objects.equals(doc.getDocument().getAddressedToType(), "") ){
-        if ( !doc.getDocument().isFromLinks() && decision != null && !decision.isTemporary() ) {
-          if ( settings.isOnline() ){
-            if ( decision.isChanged() ){
-              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
-              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
-              // как по кнопке, так и по двойному тапу
-              EventBus.getDefault().post( new ShowDecisionConstructor() );
-            }
+      if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
+        if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
+          if ( !decision.isTemporary() ) {
+            if ( settings.isOnline() ) {
+              if ( decision.isChanged() ) {
+                // resolved https://tasks.n-core.ru/browse/MVDESD-13727
+                // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
+                // как по кнопке, так и по двойному тапу
+                Toast.makeText( getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT ).show();
 
-            if ( decision.getApproved() != null &&
-              !decision.getApproved() &&
-              !decision.isChanged() && !doc.isProcessed() &&  isActiveOrRed()){
-              Timber.tag("GestureListener").w("2");
-              edit();
-            } else {
-              Timber.tag("GestureListener").w("-2");
-            }
+              } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
+                Timber.tag("GestureListener").w("2");
+                edit();
 
-          } else {
-            if (
-              decision.isChanged() && !doc.isProcessed() ){
+              } else {
+                Timber.tag("GestureListener").w("-2");
+              }
+
+            } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
               Timber.tag("GestureListener").w("1");
               edit();
             } else {
               Timber.tag("GestureListener").w("-1");
             }
           }
-        }
 
-        if ( !doc.getDocument().isFromLinks() && decision == null ) {
+        } else {
           settings.setDecisionActiveUid("0");
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
@@ -455,8 +446,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       initEvents();
-
-      sendDecisionVisibilityEvent();
     }
   }
 
@@ -472,7 +461,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
           decision = decision_spinner_adapter.getItem(position);
-          settings.setDecisionActiveUid( decision.getId() );
           displayDecision();
         } else {
           // resolved https://tasks.n-core.ru/browse/MPSED-2154
@@ -513,22 +501,13 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     next_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
     prev_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
 
-    showDecisionCardToolbarMenuItems(true);
-
-    // FIX для ссылок
-    if (decision == null) {
-      next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
-      prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
-    }
-
     approved_text.setVisibility(!approved ? View.GONE : View.VISIBLE);
 
     checkActiveDecision();
 
-    //FIX не даем выполнять операции для связанных документов
-    if ( doc != null && doc.getDocument().isFromLinks() ) {
-      next_person_button.setVisibility( View.GONE );
-      prev_person_button.setVisibility( View.GONE );
+    // FIX не даем выполнять операции для связанных документов и обработанных документов
+    if ( doc != null && ( doc.getDocument().isFromLinks() || ( doc.isProcessed() != null && doc.isProcessed() ) ) ) {
+      hideButtons();
     }
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13146
@@ -553,16 +532,10 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
     }
 
-    if ( doc != null && doc.isProcessed() != null && doc.isProcessed() && decision.getApproved() != null && !decision.getApproved() ){
-      next_person_button.setVisibility( View.INVISIBLE );
-      prev_person_button.setVisibility( View.INVISIBLE );
-    }
-
     if ( decision != null && decision.isChanged() ){
       temporary.setVisibility(View.VISIBLE);
       approved_text.setVisibility( View.GONE );
-      next_person_button.setVisibility( View.GONE );
-      prev_person_button.setVisibility( View.GONE );
+      hideButtons();
     } else {
       temporary.setVisibility(View.GONE);
     }
@@ -588,7 +561,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private void checkActiveDecision() {
     if ( !decision_spinner_adapter.hasActiveDecision() && !isInEditor ){
       Timber.tag(TAG).e("NO ACTIVE DECISION");
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+      temporary.setVisibility(View.GONE);
     }
   }
 
@@ -648,18 +621,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     next_person_button.setClickable(active);
     next_person_button.setFocusable(active);
     next_person_button.setEnabled(active);
-  }
-
-
-  private void showDecisionCardToolbarMenuItems(boolean visible) {
-    try {
-      if (!visible){
-        next_person_button.setVisibility( View.GONE );
-        prev_person_button.setVisibility( View.GONE );
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   @Override public void onDestroyView() {
@@ -770,10 +731,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
 
-
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
-
     context.startActivity(intent);
   }
 
@@ -834,23 +793,22 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     } else {
       Timber.e("no decisions");
 
-      if (doc.isProcessed() != null && !doc.isProcessed()){
-        EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
-      }
+      settings.setDecisionActiveUid("0");
 
       decision_spinner_adapter.clear();
 
       Decision empty = new Decision();
-      empty.setSignerBlankText("Нет резолюций");
+      empty.setSignerBlankText(NO_DECISIONS);
       decision_spinner_adapter.add( empty );
+      decision = empty;
 
       preview.showEmpty();
 
       comment_button.setVisibility(View.GONE);
       decision_count.setVisibility(View.GONE);
       invalidateSpinner(false);
-      showDecisionCardToolbarMenuItems(false);
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+      hideButtons();
+      temporary.setVisibility(View.GONE);
 
       bottom_line.setVisibility( View.GONE);
 
@@ -886,14 +844,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       settings.setDecisionActiveUid( decision.getId() );
 
       updateVisibility( decision.getApproved() != null ? decision.getApproved() : false );
-
-      sendDecisionVisibilityEvent();
-    }
-  }
-
-  private void sendDecisionVisibilityEvent() {
-    if (decision != null && !isInEditor) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && decision.getApproved() != null && !decision.getApproved(), decision.getId(), null ) );
     }
   }
 
@@ -943,7 +893,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         List<Block> blocks = new ArrayList<>();
         blocks.addAll( decision.getBlocks() );
 
-        Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+        Collections.sort(blocks, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0);
 
         for (Block block : blocks){
           Timber.tag("showPosition").v( "ShowPosition: %s", block.getAppealText() );
@@ -967,8 +917,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
       printSigner( decision, isMagnifier ? regNumber : ( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() ) );
-
-      sendDecisionVisibilityEvent();
     }
 
     private void showEmpty(){
@@ -1240,21 +1188,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(ApproveDecisionEvent event) throws Exception {
-    Timber.d("ApproveDecisionEvent");
-    decision.setApproved(true);
-    displayDecision();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(RejectDecisionEvent event) throws Exception {
-    Timber.d("RejectDecisionEvent");
-    decision.setApproved(false);
-    displayDecision();
-    hideButtons();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
     if (Objects.equals(event.uid, settings.getUid())){
@@ -1268,23 +1201,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     decision_spinner_adapter.invalidate(event.uid);
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(HideTemporaryEvent event) throws Exception {
-    temporary.setVisibility(View.GONE);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
-    if (decision != null) {
-      sendDecisionVisibilityEvent();
-    } else {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, null ) );
-    }
-  }
-
   private void hideButtons() {
-    next_person_button.setVisibility( View.INVISIBLE );
-    prev_person_button.setVisibility( View.INVISIBLE );
+    next_person_button.setVisibility( View.GONE );
+    prev_person_button.setVisibility( View.GONE );
   }
 
   private void setRegNumber(String regNumber) {

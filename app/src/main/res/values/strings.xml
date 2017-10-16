@@ -145,6 +145,9 @@
     <string name="hint_urgency">Срочность</string>
     <string name="hint_head_font_size">Шрифт исполнителя</string>
 
+    <string name="decision_on_sync_edit_denied">3апрещено редактировать резолюцию. Дождитесь выполнения операции.</string>
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <!--<string name="decision_create_no_answer"> ❌ Удалить</string>-->
@@ -241,6 +244,7 @@
     <string name="no_files">Нет электронных образов</string>
     <string name="deleted_image">Срок хранения ЭО истёк.</string>
     <string name="deleted_image_load">Загрузить повторно</string>
+    <string name="no_free_space">Невозможно загрузить электронный образ, на устройстве нет свободного места</string>
     <string name="cannot_open_image">Невозможно открыть электронный образ</string>
     <string name="open_in_another_app">Открыть в другом приложении</string>
     <string name="remove_from_favorites"> Из избранного </string>

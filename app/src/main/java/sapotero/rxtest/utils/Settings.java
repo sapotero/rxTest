@@ -443,6 +443,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<String> getHostPreferences() {
+    return host;
+  }
+
+  @Override
   public void setHost(String value) {
     setString(host, value);
   }
@@ -492,6 +497,11 @@ public class Settings implements ISettings {
   @Override
   public String getUpdateTime() {
     return getString(updateTime);
+  }
+
+  @Override
+  public Preference<String> getUpdateTimePreference() {
+    return updateTime;
   }
 
   @Override
@@ -632,6 +642,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<String> getDecisionActiveUidPreference() {
+   return decisionActiveId;
+  }
+
+  @Override
   public boolean isActionsConfirm() {
     return getBoolean(actionsConfirm);
   }
@@ -728,6 +743,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<String> getInfocardFontSizePreference() {
+    return infocard_fontSize;
+  }
+
+  @Override
   public void setInfocardFontSize(String value) {
     setString(infocard_fontSize, value);
   }
@@ -800,6 +820,11 @@ public class Settings implements ISettings {
   @Override
   public String getMaxImageSize() {
     return getString(maxImageSize);
+  }
+
+  @Override
+  public Preference<String> getMaxImageSizePreference() {
+    return maxImageSize;
   }
 
   @Override
