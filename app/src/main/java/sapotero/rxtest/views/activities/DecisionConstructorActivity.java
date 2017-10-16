@@ -94,11 +94,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   private String originalSignerAssistantId;
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
-  private boolean createAndSignPressed = false;
-  private boolean navigationPressed = false;
-  private boolean primaryConsiderationPressed = false;
-  private boolean showInfoCardPressed = false;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -125,98 +120,78 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
-    toolbar.setNavigationOnClickListener( v -> {
-      Timber.tag(TAG).w("Navigation pressed");
-
-      if ( !navigationPressed ) {
-        navigationPressed = true;
-        Timber.tag(TAG).w("Navigation press handle");
-        closeActivity();
-      }
+    Bind.menuNavigationClick( toolbar, () -> {
+      Timber.tag(TAG).w("Navigation press handle");
+      closeActivity();
     });
 
-    toolbar.setOnMenuItemClickListener(item -> {
-
+    Bind.menuItemClick(toolbar, item -> {
       CommandParams commandParams;
       CommandFactory.Operation operation;
 
       switch (item.getItemId()){
-
-
         case R.id.action_constructor_infocard:
           showInfoCard();
           break;
 
         case R.id.action_constructor_to_the_primary_consideration:
-          Timber.tag(TAG).d("Primary consideration pressed");
+          Timber.tag(TAG).d("Primary consideration press handle");
 
-          if ( !primaryConsiderationPressed ) {
-            primaryConsiderationPressed = true;
-            Timber.tag(TAG).d("Primary consideration press handle");
+          if (rDecisionEntity != null) {
+            settings.setShowPrimaryConsideration(true);
 
-            if (rDecisionEntity != null) {
-              settings.setShowPrimaryConsideration(true);
+            Decision primary_decision = manager.getDecision();
 
-              Decision primary_decision = manager.getDecision();
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String json = gson.toJson( primary_decision );
+            Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
 
-              Gson gson = new GsonBuilder().setPrettyPrinting().create();
-              String json = gson.toJson( primary_decision );
-              Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
+            operation = CommandFactory.Operation.SAVE_DECISION;
 
-              operation = CommandFactory.Operation.SAVE_DECISION;
+            commandParams = new CommandParams();
+            commandParams.setDecisionId( rDecisionEntity.getUid() );
+            commandParams.setDecisionModel( manager.getDecision() );
+            operationManager.execute( operation, commandParams );
 
-              commandParams = new CommandParams();
-              commandParams.setDecisionId( rDecisionEntity.getUid() );
-              commandParams.setDecisionModel( manager.getDecision() );
-              operationManager.execute( operation, commandParams );
-
-              finish();
-            }
+            finish();
           }
 
           break;
 
         case R.id.action_constructor_create_and_sign:
-          Timber.tag(TAG).d("CreateAndSign pressed");
+          Timber.tag(TAG).d("CreateAndSign press handle");
+          boolean canCreateAndSign = checkDecision();
 
-          if ( !createAndSignPressed ) {
-            createAndSignPressed = true;
+          if (canCreateAndSign) {
+            Decision decision = manager.getDecision();
 
-            Timber.tag(TAG).d("CreateAndSign press handle");
+            commandParams = new CommandParams();
+            commandParams.setDecisionModel( decision );
 
-            boolean canCreateAndSign = checkDecision();
+            decision.setDocumentUid( settings.getUid() );
 
-            if (canCreateAndSign) {
-              Decision decision = manager.getDecision();
-
-              commandParams = new CommandParams();
-              commandParams.setDecisionModel( decision );
-
-              decision.setDocumentUid( settings.getUid() );
-
-              if (rDecisionEntity != null) {
-                commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
-                commandParams.setDecisionId( rDecisionEntity.getUid() );
-              }
-
-              operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
-
-              if (rDecisionEntity != null){
-                operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-                commandParams.setDecisionId( rDecisionEntity.getUid() );
-                commandParams.setDecisionModel( manager.getDecision() );
-              }
-
-              if ( settings.isDecisionWithAssignment() ){
-                Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-                commandParams.setAssignment(true);
-                decision.setAssignment(true);
-              }
-
-              operationManager.execute( operation, commandParams );
-
-              finish();
+            if (rDecisionEntity != null) {
+              commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
             }
+
+            operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+            if (rDecisionEntity != null){
+              operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              commandParams.setDecisionModel( manager.getDecision() );
+            }
+
+            if ( settings.isDecisionWithAssignment() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
+              commandParams.setAssignment(true);
+              decision.setAssignment(true);
+            }
+
+            operationManager.execute( operation, commandParams );
+
+            finish();
           }
 
           break;
@@ -270,8 +245,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         default:
           break;
       }
-
-      return false;
     });
 
     raw_decision = null;
@@ -623,7 +596,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               Timber.tag(TAG).w("negative");
             }
           )
-          .dismissListener( dialog -> navigationPressed = false)
           .show();
       }
 
@@ -634,16 +606,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   }
 
   private void showInfoCard() {
-    Timber.tag(TAG).d("Show info card pressed");
+    Timber.tag(TAG).d("Show info card press handle");
 
-    if ( !showInfoCardPressed ) {
-      showInfoCardPressed = true;
-      Timber.tag(TAG).d("Show info card press handle");
-
-      InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
-      newFragment.dismissListener(() -> showInfoCardPressed = false);
-      newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
-    }
+    InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
+    newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
   }
 
   private void invalidateSaveAndSignButton(){
@@ -708,10 +674,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .negativeText("Выход")
           .onPositive( (dialog, which) -> dialog.dismiss() )
           .onNegative( (dialog, which) -> finish() )
-          .dismissListener( dialog -> {
-            navigationPressed = false;
-            createAndSignPressed = false;
-          })
           .show();
       }
 
@@ -722,10 +684,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .content("Необходимо добавить хотя бы один блок")
           .positiveText("Ок")
           .onPositive( (dialog, which) -> dialog.dismiss() )
-          .dismissListener( dialog -> {
-            navigationPressed = false;
-            createAndSignPressed = false;
-          })
           .show();
       }
 
@@ -736,10 +694,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .content("Необходимо выбрать подписавшего")
           .positiveText("Ок")
           .onPositive( (dialog, which) -> dialog.dismiss() )
-          .dismissListener( dialog -> {
-            navigationPressed = false;
-            createAndSignPressed = false;
-          })
           .show();
       }
 
@@ -775,10 +729,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               .content("Подписавший и исполнитель совпадают")
               .positiveText("Ок")
               .onPositive( (dialog, which) -> dialog.dismiss() )
-              .dismissListener( dialog -> {
-                navigationPressed = false;
-                createAndSignPressed = false;
-              })
               .show();
           }
         }
