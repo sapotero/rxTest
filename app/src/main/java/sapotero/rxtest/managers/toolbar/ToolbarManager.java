@@ -61,6 +61,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private boolean createDecisionPressed = false;
   private boolean editDecisionPressed = false;
   private boolean approvalNextPersonPressed = false;
+  private boolean approvalPrevPersonPressed = false;
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -133,12 +134,19 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
-              operation = CommandFactory.Operation.INCORRECT;
-              showPrevDialog(true);
-            } else {
-              operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
-              params.setPerson( "" );
+            Timber.tag(TAG).d("Approval prev person pressed");
+            operation = CommandFactory.Operation.INCORRECT;
+
+            if ( !approvalPrevPersonPressed ) {
+              approvalPrevPersonPressed = true;
+              Timber.tag(TAG).d("Approval prev person press handle");
+
+              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+                showPrevDialog(true);
+              } else {
+                operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
+                params.setPerson( "" );
+              }
             }
 
             break;
@@ -646,6 +654,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     createDecisionPressed = false;
     editDecisionPressed = false;
     approvalNextPersonPressed = false;
+    approvalPrevPersonPressed = false;
   }
 
   private void showToControlDialog() {
@@ -720,7 +729,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
         operationManager.execute(operation, params);
       })
-      .autoDismiss(true);
+      .autoDismiss(true)
+      .dismissListener(dialog -> approvalPrevPersonPressed = false);
 
       // настройка
       // Показывать комментарий при отклонении
