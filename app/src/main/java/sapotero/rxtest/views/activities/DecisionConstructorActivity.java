@@ -333,7 +333,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         );
     }
 
-
+    Bind.click( urgency_selector, () -> urgency_selector.click() );
 
     urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
       manager.setUrgency( item );
@@ -446,6 +446,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       fonts.add(new FontItem("13", "13"));
       fonts.add(new FontItem("14", "14"));
       fonts.add(new FontItem("15", "15"));
+
+      Bind.click( font_selector, () -> font_selector.click() );
 
       font_selector.setItems(fonts);
       font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
