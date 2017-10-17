@@ -347,6 +347,12 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     this.mAllText = allText;
   }
 
+  public void dismiss() {
+    if ( dialog != null ) {
+      dialog.dismiss();
+    }
+  }
+
 
   private class DialogListItem {
     private boolean checked;

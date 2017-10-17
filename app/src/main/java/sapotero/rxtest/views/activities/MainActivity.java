@@ -12,6 +12,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -26,6 +27,7 @@ import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
@@ -713,6 +715,25 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         }
       )
+      .withOnDrawerListener(new Drawer.OnDrawerListener() {
+        @Override
+        public void onDrawerOpened(View drawerView) {
+        }
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+        }
+
+        @Override
+        public void onDrawerSlide(View drawerView, float slideOffset) {
+          if ( journalSelector != null ) {
+            journalSelector.dismiss();
+          }
+          if ( ORGANIZATION_SELECTOR != null ) {
+            ORGANIZATION_SELECTOR.dismiss();
+          }
+        }
+      })
       .build();
   }
 

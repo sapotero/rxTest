@@ -110,4 +110,10 @@ public class JournalSelectorView extends AppCompatTextView {
   public void setPosition(int position) {
     this.position = position;
   }
+
+  public void dismiss() {
+    if ( dialog != null ) {
+      dialog.dismiss();
+    }
+  }
 }
