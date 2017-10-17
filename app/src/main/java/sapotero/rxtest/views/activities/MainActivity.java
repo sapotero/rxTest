@@ -82,6 +82,7 @@ import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
+import sapotero.rxtest.utils.rxbinding.Bind;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
@@ -186,6 +187,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     searchSubject = PublishSubject.create();
 
     initAdapters();
+
+    Bind.click( journalSelector, () -> journalSelector.click() );
 
     menuBuilder = new MenuBuilder(this);
     menuBuilder

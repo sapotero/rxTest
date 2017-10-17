@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -16,7 +15,7 @@ import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import timber.log.Timber;
 
-public class JournalSelectorView extends AppCompatTextView implements View.OnClickListener {
+public class JournalSelectorView extends AppCompatTextView {
   private String TAG = this.getClass().getSimpleName();
 
   private JournalSelectorAdapter adapter;
@@ -41,39 +40,30 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   }
 
   public void build(){
-    setOnClickListener(this);
     adapter = new JournalSelectorAdapter();
     setText( adapter.setDefault() );
   }
 
+  public void click() {
+    Timber.tag(TAG).d("Press handle");
 
-  @Override
-  public void onClick(View v) {
-    Timber.tag(TAG).d("Pressed");
+    createAdapter();
 
-    if ( !pressed ) {
-      pressed = true;
-      Timber.tag(TAG).d("Press handle");
+    dialog = new MaterialDialog.Builder( getContext() )
+      .adapter(adapter, null)
+      .alwaysCallSingleChoiceCallback()
+      .autoDismiss(true)
+      .build();
+    dialog.show();
 
-      createAdapter();
-
-      dialog = new MaterialDialog.Builder( getContext() )
-        .adapter(adapter, null)
-        .alwaysCallSingleChoiceCallback()
-        .autoDismiss(true)
-        .dismissListener(dialog1 -> pressed = false)
-        .build();
-      dialog.show();
-
-      Window window = dialog.getWindow();
-      assert window != null;
-      WindowManager.LayoutParams layoutParams = window.getAttributes();
-      layoutParams.gravity = Gravity.START | Gravity.TOP;
-      layoutParams.x = 30;
-      layoutParams.y = 172;
-      layoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-      window.setAttributes(layoutParams);
-    }
+    Window window = dialog.getWindow();
+    assert window != null;
+    WindowManager.LayoutParams layoutParams = window.getAttributes();
+    layoutParams.gravity = Gravity.START | Gravity.TOP;
+    layoutParams.x = 30;
+    layoutParams.y = 172;
+    layoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+    window.setAttributes(layoutParams);
   }
 
   private void createAdapter() {
