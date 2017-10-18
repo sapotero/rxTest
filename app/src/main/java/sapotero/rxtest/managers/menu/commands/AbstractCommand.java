@@ -103,6 +103,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public String getSign() {
     String sign = null;
 
+
     // resolved https://tasks.n-core.ru/browse/MVDESD-14117
     // При входе по логин/паролю давать возможность подписывать документы
     if ( settings.isSignedWithDc() ) {

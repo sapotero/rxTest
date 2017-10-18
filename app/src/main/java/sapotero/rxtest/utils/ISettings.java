@@ -8,6 +8,11 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 
 
 public interface ISettings {
+
+  int getCryptoStoreIndex();
+
+  void setCryptoStoreIndex(int index);
+
   boolean isShowPrimaryConsideration();
 
   void setShowPrimaryConsideration(boolean value);

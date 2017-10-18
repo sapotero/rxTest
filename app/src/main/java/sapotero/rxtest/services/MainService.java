@@ -103,6 +103,7 @@ public class MainService extends Service {
   private int keyStoreTypeIndex = 0;
 
   boolean isOnCreateComplete = false;
+  private static int current_store;
 
   public MainService() {
 
@@ -160,6 +161,9 @@ public class MainService extends Service {
         isOnCreateComplete = true;
 
       }, Timber::e);
+
+
+    current_store = settings.getCryptoStoreIndex();
   }
 
   private void loadParams() {
@@ -452,7 +456,17 @@ public class MainService extends Service {
       String.valueOf(appInfo.uid);
   }
 
-  private void setKeyEvent(String data) {
+  private void setKeyEvent(String data, int index) {
+
+    Timber.e(data);
+
+    try {
+      current_store = index;
+      settings.setCryptoStoreIndex(current_store);
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+
     try {
       KeyStoreType.saveCurrentType(data);
     } catch (Exception e) {
@@ -619,6 +633,7 @@ public class MainService extends Service {
 
   public static String getFakeSign(String password, File file) throws Exception {
 
+//    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(current_store), null, aliasesList.get(current_store), null);
     ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
 
     adapter.setProviderType(ProviderType.currentProviderType());
@@ -709,8 +724,7 @@ public class MainService extends Service {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(SelectKeyStoreEvent event){
-    setKeyEvent(event.data);
-
+    setKeyEvent(event.data, event.index);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
