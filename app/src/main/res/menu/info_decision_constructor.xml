@@ -8,7 +8,7 @@
         android:id="@+id/action_constructor_infocard"
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/infocard"
-        android:title="Информация"/>
+        android:title="@string/decision_constructor_info"/>
     <item
         android:id="@+id/action_constructor_documents"
         app:showAsAction="ifRoom|withText"
