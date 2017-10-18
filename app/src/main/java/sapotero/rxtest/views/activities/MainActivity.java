@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private String TAG = MainActivity.class.getSimpleName();
   private OrganizationAdapter organization_adapter;
   private DrawerBuilder drawer;
+  private Drawer navigationDrawer;
 
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
@@ -191,12 +192,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initAdapters();
 
     Bind.click( journalSelector, () -> {
-      ORGANIZATION_SELECTOR.dismiss();
+      if ( ORGANIZATION_SELECTOR != null ) {
+        ORGANIZATION_SELECTOR.dismiss();
+      }
       journalSelector.click();
     });
 
     Bind.click( ORGANIZATION_SELECTOR, () -> {
-      journalSelector.dismiss();
+      if ( journalSelector != null ) {
+        journalSelector.dismiss();
+      }
       ORGANIZATION_SELECTOR.click();
     });
 
@@ -435,6 +440,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .subscribe(
         data -> {
           if (data.size() > 0){
+            if ( navigationDrawer != null ) {
+              navigationDrawer.closeDrawer();
+            }
+            if ( journalSelector != null ) {
+              journalSelector.dismiss();
+            }
+            if ( ORGANIZATION_SELECTOR != null ) {
+              ORGANIZATION_SELECTOR.dismiss();
+            }
+
             searchView.onOptionsItemSelected(getFragmentManager(), data.get(0));
           }
         },
@@ -642,7 +657,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         .withName("Версия приложения: " + version )
         .withSelectable(false));
 
-      drawer.withOnDrawerItemClickListener(
+    navigationDrawer = drawer.withOnDrawerItemClickListener(
         (view, position, drawerItem) -> {
 
           Timber.tag(TAG).d("drawerItem.getIdentifier(): " + drawerItem.getIdentifier());
