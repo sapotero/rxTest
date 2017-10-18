@@ -190,8 +190,15 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initAdapters();
 
-    Bind.click( journalSelector, () -> journalSelector.click() );
-    Bind.click( ORGANIZATION_SELECTOR, () -> ORGANIZATION_SELECTOR.click() );
+    Bind.click( journalSelector, () -> {
+      ORGANIZATION_SELECTOR.dismiss();
+      journalSelector.click();
+    });
+
+    Bind.click( ORGANIZATION_SELECTOR, () -> {
+      journalSelector.dismiss();
+      ORGANIZATION_SELECTOR.click();
+    });
 
     menuBuilder = new MenuBuilder(this);
     menuBuilder
