@@ -3,11 +3,25 @@ package sapotero.rxtest.managers.toolbar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.view.menu.ActionMenuItem;
+import android.support.v7.view.menu.ActionMenuItemView;
+import android.support.v7.widget.ActionMenuView;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
@@ -400,6 +414,13 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         setCreateDecisionMenuItemVisible( true );
       }
 
+      // resolved https://tasks.n-core.ru/browse/MPSED-2257
+      // Блокировать кнопки в момент синхронизации документа: Без ответа, передать, отклонить.
+      boolean hasChangedDecision = hasChangedDecision();
+      safeSetEnabled(R.id.menu_info_to_the_approval_performance, !hasChangedDecision);
+      safeSetEnabled(R.id.menu_info_to_the_primary_consideration, !hasChangedDecision);
+      safeSetEnabled(R.id.menu_info_report_dismiss, !hasChangedDecision);
+
       processFavoritesAndControlIcons();
 
       // Из папки обработанное или папки избранное или проект
@@ -490,6 +511,44 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     if (toolbar.getMenu() != null) {
       if (toolbar.getMenu().findItem(item) != null) {
         toolbar.getMenu().findItem(item).setVisible(value);
+      }
+    }
+  }
+
+  private void safeSetEnabled(int item, boolean enabled) {
+    if ( toolbar.getMenu() != null ) {
+      MenuItem menuItem = toolbar.getMenu().findItem( item );
+
+      if ( menuItem != null ) {
+        menuItem.setEnabled( enabled );
+
+        for ( int i = 0; i < toolbar.getChildCount(); i++ ) {
+          final View v = toolbar.getChildAt( i );
+          if ( v instanceof ActionMenuView ) {
+            int childCount = ((ActionMenuView) v).getChildCount();
+            for ( int j = 0; j < childCount; j++ ) {
+              final View innerView = ((ActionMenuView) v).getChildAt( j );
+              if ( innerView instanceof ActionMenuItemView ) {
+                if ( Objects.equals(((ActionMenuItemView) innerView).getItemData().getTitle(), menuItem.getTitle()) ) {
+                  innerView.setAlpha( 0.5f );
+                }
+              }
+            }
+          }
+        }
+
+//        View menuView = toolbar.findViewById( item );
+//        if ( menuView != null ) {
+//          menuView.setAlpha( 0.5f );
+//        }
+
+//        menuItem.getIcon().setAlpha( enabled ? 0xFF : 0x80 );
+
+//        final ForegroundColorSpan color = new ForegroundColorSpan( enabled ? 0xFFFFFFFF : 0x80FFFFFF );
+//        final ForegroundColorSpan color = new ForegroundColorSpan( Color.RED );
+//        final SpannableStringBuilder title = new SpannableStringBuilder( menuItem.getTitle().toString() );
+//        title.setSpan(color, 0, menuItem.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+//        menuItem.setTitle(title);
       }
     }
   }
