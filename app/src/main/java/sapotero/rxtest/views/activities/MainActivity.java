@@ -200,14 +200,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       if ( ORGANIZATION_SELECTOR != null ) {
         ORGANIZATION_SELECTOR.dismiss();
       }
-      journalSelector.click();
+      if ( !searchViewShown() ) {
+        journalSelector.click();
+      }
     });
 
     Bind.click( ORGANIZATION_SELECTOR, () -> {
       if ( journalSelector != null ) {
         journalSelector.dismiss();
       }
-      ORGANIZATION_SELECTOR.click();
+      if ( !searchViewShown() ) {
+        ORGANIZATION_SELECTOR.click();
+      }
     });
 
     menuBuilder = new MenuBuilder(this);
@@ -242,6 +246,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     removeAllNotification();
     unregisterEventBus();
     EventBus.getDefault().register(this);
+  }
+
+  private boolean searchViewShown() {
+    boolean result = false;
+
+    if ( searchView != null ) {
+      result = searchView.isShown();
+    }
+
+     return result;
   }
 
   private void removeAllNotification(){
