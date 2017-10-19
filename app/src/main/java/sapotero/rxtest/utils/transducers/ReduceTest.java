@@ -1,19 +1,25 @@
 package sapotero.rxtest.utils.transducers;
 
-import timber.log.Timber;
+import android.util.Pair;
 
-public class ReduceTest {
-  public static void calculate(String words[]) {
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
 
-    Function<String,Long> decode = Long::valueOf;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.transducers.doc.SortUid;
 
-    Reducer<Long,Long> sum = new Sum();
+public class ReduceTest implements Serializable {
 
-    Reducer<String,Long> process = new Mapping(decode).transduce(sum);
+  public static HashMap<String, List<String>> group(List<InMemoryDocument> docs) {
 
-    WordReader inputs = new WordReader(words);
+    Function<InMemoryDocument, Pair<String, InMemoryDocument>> decode =
+      inMemoryDocument -> new Pair<>(inMemoryDocument.getIndex(), inMemoryDocument);
 
-    Long result = inputs.reduce(process);
-    Timber.e("sum = %s" , result);
+    Reducer<Pair<String, InMemoryDocument>, HashMap<String, List<InMemoryDocument>>> sortUid = new SortUid();
+
+    Reducer<InMemoryDocument, HashMap<String, List<String>>> groupBy = new Mapping(decode).transduce(sortUid);
+
+    return new DocsReader(docs).reduce(groupBy);
   }
 }

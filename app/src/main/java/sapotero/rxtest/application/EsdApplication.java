@@ -21,7 +21,6 @@ import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
-import sapotero.rxtest.utils.transducers.ReduceTest;
 import timber.log.Timber;
 
 import static org.acra.ReportField.ANDROID_VERSION;
@@ -162,9 +161,6 @@ public final class EsdApplication extends Application {
     AnnotationTest.getInstance();
 
 
-    String[] array = new String[] {"1", "2", "2", "2", "222", "20"};
-    ReduceTest.calculate(array);
-    
   }
 
   private void initComponents() {

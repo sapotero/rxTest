@@ -24,6 +24,7 @@ import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
+import sapotero.rxtest.utils.transducers.ReduceTest;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -99,7 +100,6 @@ public class DBQueryBuilder {
       Timber.tag(TAG).w("!!!!! byStatus : %s", new Gson().toJson( filter.getStatuses() ) );
       Timber.tag(TAG).w("!!!!! indexes  : %s", new Gson().toJson(  filter.getTypes() ) );
 
-      long startTime = System.nanoTime();
       Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
       _docs = _docs
@@ -112,13 +112,30 @@ public class DBQueryBuilder {
         .filter(filter::isFavorites)
         .filter(filter::isControl);
 
-       _docs = _docs.sortBy(filter::byJournalDateNumber);
 
-      List<InMemoryDocument> docs = _docs.toList();
+
+      List<InMemoryDocument> _filterd_docs = _docs.toList();
+
+      long startTime = System.nanoTime();
+      HashMap<String, List<String>> result = ReduceTest.group(_filterd_docs);
       long endTime = System.nanoTime();
-      long duration = (endTime - startTime)/1000000;
+      long duration = (endTime - startTime)/1000;
+      Timber.tag(TAG).d("\nREDUCER\n%s\n  ** %sus **\n\n", new Gson().toJson(result), duration);
 
-      Timber.e("SIZE: %s | %sms", docs.size(), duration);
+
+      startTime = System.nanoTime();
+      List<String> sq_map = _docs.map(InMemoryDocument::getUid).toList();
+      endTime = System.nanoTime();
+      duration = (endTime - startTime)/1000;
+      Timber.tag(TAG).d("\nMAP\n%s\n  ** %sus **\n\n", new Gson().toJson(sq_map), duration);
+
+
+      startTime = System.nanoTime();
+      _docs = _docs.sortBy(filter::byJournalDateNumber);
+      List<InMemoryDocument> docs = _docs.toList();
+      endTime = System.nanoTime();
+      duration = (endTime - startTime)/1000;
+      Timber.e("SIZE: %s | %sus", docs.size(), duration);
 
 
 
