@@ -120,9 +120,9 @@
     <string name="approve">Подтвердить</string>
 
 
-    <string name="info_create_decision"> Создать резолюцию </string>
-    <string name="info_create_decision_processed"> Создать поручение </string>
-    <string name="info_edit_decision"> Редактировать </string>
+    <string name="info_create_decision"> СОЗДАТЬ РЕЗОЛЮЦИЮ </string>
+    <string name="info_create_decision_processed"> СОЗДАТЬ ПОРУЧЕНИЕ </string>
+    <string name="info_edit_decision"> РЕДАКТИРОВАТЬ </string>
     <string name="info_create_no_answer"> Без ответа </string>
     <string name="info_create_to_control"> Добавить отметку о контроле </string>
     <string name="info_create_to_favorites"> Добавить в избранное </string>
@@ -146,6 +146,7 @@
     <string name="hint_head_font_size">Шрифт исполнителя</string>
 
     <string name="decision_on_sync_edit_denied">3апрещено редактировать резолюцию. Дождитесь выполнения операции.</string>
+    <string name="decision_temporary_edit_denied">Дождитесь выполнения операции.</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -207,7 +208,7 @@
     <string name="decision_text">Текст резолюции</string>
 
     <string name="hint_decision_size">Шрифт</string>
-    <string name="constructor_add_block">Добавить блок</string>
+    <string name="constructor_add_block">ДОБАВИТЬ БЛОК</string>
     <string name="constructor_save">Сохранить</string>
     <string name="constructor_close">Закрыть</string>
     <string name="constructor_clear">Очистить</string>
@@ -217,16 +218,16 @@
     <string name="menu_info_from_the_report">Возврата с доклада</string>
     <string name="return_to_the_primary_consideration">Отклонить</string>
 
-    <string name="menu_info_delegate_performance">Передать подписание</string>
-    <string name="menu_info_delegate_sign">Передать согласование</string>
-    <string name="menu_info_to_the_approval_performance">Без ответа</string>
+    <string name="menu_info_delegate_performance">ПЕРЕДАТЬ ПОДПИСАНИЕ</string>
+    <string name="menu_info_delegate_sign">ПЕРЕДАТЬ СОГЛАСОВАНИЕ</string>
+    <string name="menu_info_to_the_approval_performance">БЕЗ ОТВЕТА</string>
 
     <string name="menu_info_to_the_primary_consideration">Передать</string>
 
-    <string name="menu_info_change_person">Передать</string>
-    <string name="menu_info_next_person">Подписать</string>
-    <string name="menu_info_sign_next_person">Согласовать</string>
-    <string name="menu_info_prev_person">Отклонить</string>
+    <string name="menu_info_change_person">ПЕРЕДАТЬ</string>
+    <string name="menu_info_next_person">ПОДПИСАТЬ</string>
+    <string name="menu_info_sign_next_person">СОГЛАСОВАТЬ</string>
+    <string name="menu_info_prev_person">ОТКЛОНИТЬ</string>
     <string name="decision_preview_approved">Утверждена</string>
     <string name="decision_preview_sync"> Ожидает синхронизации</string>
     <string name="magnifer">Увеличить</string>
@@ -238,8 +239,8 @@
     <string name="field_urgency">Срочность:</string>
     <string name="field_comment">Комментарий:</string>
     <string name="field_external_number">Номер поступившего документа:</string>
-    <string name="to_favorites">В избранное</string>
-    <string name="to_control">На контроль</string>
+    <string name="to_favorites">В ИЗБРАННОЕ</string>
+    <string name="to_control">НА КОНТРОЛЬ</string>
     <string name="dialog_template_title">Шаблоны резолюции</string>
     <string name="no_files">Нет электронных образов</string>
     <string name="deleted_image">Срок хранения ЭО истёк.</string>
@@ -247,8 +248,8 @@
     <string name="no_free_space">Невозможно загрузить электронный образ, на устройстве нет свободного места</string>
     <string name="cannot_open_image">Невозможно открыть электронный образ</string>
     <string name="open_in_another_app">Открыть в другом приложении</string>
-    <string name="remove_from_favorites"> Из избранного </string>
-    <string name="remove_from_control">С контроля</string>
+    <string name="remove_from_favorites"> ИЗ ИЗБРАННОГО </string>
+    <string name="remove_from_control">С КОНТРОЛЯ</string>
     <string name="go">Перейти</string>
     <string name="info_card_disabled">Невозможно отобразить инфокарточку</string>
     <string name="info_card">Информационная карточка</string>
@@ -491,7 +492,7 @@
     <string name="error_csp_not_installed_body">Приложение "CryptoPro CSP" не установленно на устройстве.\nУстановите его и перезапустите СЭД.</string>
     <string name="sign">sign</string>
     <string name="crashed">crash!</string>
-    <string name="menu_info_decision_create_and_sign">Сохранить и подписать</string>
+    <string name="menu_info_decision_create_and_sign">СОХРАНИТЬ И ПОДПИСАТЬ</string>
 
     <string name="fragment_decision_template_add">Добавление шаблона</string>
     <string name="fragment_decision_template_edit">Редактирование шаблона</string>
@@ -500,8 +501,8 @@
     <string name="defaultPath">/mnt/sdcard/keys</string>
     <string name="container_title">Выбор контейнера</string>
 
-    <string name="is_online">В сети</string>
-    <string name="is_offline">Не в сети</string>
+    <string name="is_online">В СЕТИ</string>
+    <string name="is_offline">НЕ В СЕТИ</string>
 
     <string name="start_substitute">Выполняется вход в режим замещения</string>
     <string name="stop_substitute">Выполняется выход из режима замещения</string>
@@ -590,6 +591,7 @@
     <string name="zoomText">Размер текста инфокарточки по умолчанию</string>
     <string name="zoomTextSize_key">zoomTextSize</string>
     <string name="primary_people_info">Для сведения</string>
+    <string name="decision_constructor_info">ИНФОРМАЦИЯ</string>
 
     <string-array name="settings_notificated_journals">
         <item>Входящие документы</item>

@@ -233,6 +233,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="8"
                 android:clipToPadding="false"
+                android:splitMotionEvents="false"
                     />
 
                 <sapotero.rxtest.views.custom.CircleRightArrow

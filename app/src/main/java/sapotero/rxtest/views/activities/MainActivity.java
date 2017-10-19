@@ -12,6 +12,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -26,6 +27,7 @@ import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
@@ -80,8 +82,10 @@ import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
@@ -136,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private String TAG = MainActivity.class.getSimpleName();
   private OrganizationAdapter organization_adapter;
   private DrawerBuilder drawer;
+  private Drawer navigationDrawer;
 
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
@@ -187,6 +192,24 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initAdapters();
 
+    Bind.click( journalSelector, () -> {
+      if ( ORGANIZATION_SELECTOR != null ) {
+        ORGANIZATION_SELECTOR.dismiss();
+      }
+      if ( !searchViewShown() ) {
+        journalSelector.click();
+      }
+    });
+
+    Bind.click( ORGANIZATION_SELECTOR, () -> {
+      if ( journalSelector != null ) {
+        journalSelector.dismiss();
+      }
+      if ( !searchViewShown() ) {
+        ORGANIZATION_SELECTOR.click();
+      }
+    });
+
     menuBuilder = new MenuBuilder(this);
     menuBuilder
       .withButtonsLayout( menu_builder_buttons )
@@ -219,6 +242,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     removeAllNotification();
     unregisterEventBus();
     EventBus.getDefault().register(this);
+  }
+
+  private boolean searchViewShown() {
+    boolean result = false;
+
+    if ( searchView != null ) {
+      result = searchView.isShown();
+    }
+
+     return result;
   }
 
   private void removeAllNotification(){
@@ -422,7 +455,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .subscribe(
         data -> {
           if (data.size() > 0){
-            searchView.onOptionsItemSelected(getFragmentManager(), data.get(0));
+            ClickTime.click( settings, () -> {
+              if ( navigationDrawer != null ) {
+                navigationDrawer.closeDrawer();
+              }
+              if ( journalSelector != null ) {
+                journalSelector.dismiss();
+              }
+              if ( ORGANIZATION_SELECTOR != null ) {
+                ORGANIZATION_SELECTOR.dismiss();
+              }
+
+              searchView.onOptionsItemSelected(getFragmentManager(), data.get(0));
+            });
           }
         },
         Timber::e
@@ -629,7 +674,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         .withName("Версия приложения: " + version )
         .withSelectable(false));
 
-      drawer.withOnDrawerItemClickListener(
+    navigationDrawer = drawer.withOnDrawerItemClickListener(
         (view, position, drawerItem) -> {
 
           Timber.tag(TAG).d("drawerItem.getIdentifier(): " + drawerItem.getIdentifier());
@@ -709,6 +754,32 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         }
       )
+      .withOnDrawerListener(new Drawer.OnDrawerListener() {
+        @Override
+        public void onDrawerOpened(View drawerView) {
+          ClickTime.save( settings );
+        }
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+        }
+
+        @Override
+        public void onDrawerSlide(View drawerView, float slideOffset) {
+          if ( !ClickTime.passed( settings ) ) {
+            if ( navigationDrawer != null ) {
+              navigationDrawer.closeDrawer();
+            }
+          } else {
+            if ( journalSelector != null ) {
+              journalSelector.dismiss();
+            }
+            if ( ORGANIZATION_SELECTOR != null ) {
+              ORGANIZATION_SELECTOR.dismiss();
+            }
+          }
+        }
+      })
       .build();
   }
 

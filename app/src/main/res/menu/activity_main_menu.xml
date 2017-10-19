@@ -9,7 +9,7 @@
         app:showAsAction="always|withText"
         android:icon="@drawable/users_white"
         android:visible="false"
-        android:title=" Режим замещения"/>
+        android:title=" РЕЖИМ ЗАМЕЩЕНИЯ"/>
 
     <item
         android:id="@+id/removeQueue"

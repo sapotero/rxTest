@@ -50,10 +50,6 @@ public class DecisionTextDialog {
         })
       .cancelable(false)
       .autoDismiss(false);
-//        .dismissListener(dialog1 -> {
-//          parentEditText.setText(textInput.getText());
-//          clearReferences();
-//        });
     }
   }
 

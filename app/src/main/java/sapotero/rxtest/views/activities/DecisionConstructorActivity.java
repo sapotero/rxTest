@@ -52,6 +52,7 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
@@ -119,152 +120,22 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
+    Bind.menuNavigationClick( toolbar, () -> {
+      Timber.tag(TAG).w("Navigation press handle");
+      closeActivity();
+    });
 
-
-    toolbar.setNavigationOnClickListener( v -> {
-
-
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-      Decision _dec_ = manager.getDecision();
-
-      if ( settings.isDecisionWithAssignment() ){
-        Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-        _dec_.setAssignment(true);
-      }
-
-      String json = gson.toJson( _dec_ );
-
-
-
-      Timber.tag(TAG).w("DECISION: %s", json );
-      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-
-      Decision save_decision = manager.getDecision();
-
-
-      if ( manager.isChanged() ){
-        Boolean showSaveDialog = checkDecision();
-
-        String content = "Резолюция была изменена";
-
-        if ( settings.isDecisionWithAssignment() ){
-          content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
-        }
-
-        if (showSaveDialog){
-          new MaterialDialog.Builder(this)
-            .title("Имеются несохранённые данные")
-            .content(content)
-            .positiveText("сохранить")
-            .onPositive(
-              (dialog, which) -> {
-//                manager.getDecisionBuilder().build();
-
-                Decision decision = manager.getDecision();
-
-                CommandParams params = new CommandParams();
-                params.setDecisionModel( decision );
-                decision.setDocumentUid( settings.getUid() );
-
-                if (rDecisionEntity != null) {
-//                  params.setDecision( rDecisionEntity );
-                  params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
-                  params.setDecisionId( rDecisionEntity.getUid() );
-
-                  RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-
-                  if (doc != null) {
-                    params.setDocument(doc.getUid());
-                  }
-                }
-
-                CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.CREATE_DECISION : CommandFactory.Operation.SAVE_DECISION;
-
-                if (save_decision != null && operation == CommandFactory.Operation.SAVE_DECISION) {
-                  params.setDecisionModel(save_decision);
-                }
-
-                if ( settings.isDecisionWithAssignment() ){
-                  decision = manager.getDecision();
-
-                  params = new CommandParams();
-                  params.setDecisionModel( decision );
-
-                  decision.setDocumentUid( settings.getUid() );
-
-                  if (rDecisionEntity != null) {
-                    params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
-                    params.setDecisionId( rDecisionEntity.getUid() );
-                  }
-
-                  operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
-
-                  params.setAssignment(true);
-                  decision.setAssignment(true);
-
-                }
-                operationManager.execute( operation, params );
-
-                finish();
-
-              }
-            )
-            .neutralText("выход")
-            .onNeutral(
-              (dialog, which) -> {
-                Timber.tag(TAG).w("nothing");
-
-                // Restore original signer
-                raw_decision.setSignerId(originalSignerId);
-                raw_decision.setSigner(originalSigner);
-                raw_decision.setSignerBlankText(originalSignerBlankText);
-                raw_decision.setSignerPositionS(originalSignerPosition);
-                raw_decision.setAssistantId(originalSignerAssistantId);
-
-                if (rDecisionEntity != null) {
-                  rDecisionEntity.setSignerId(originalSignerId);
-                  rDecisionEntity.setSigner(originalSigner);
-                  rDecisionEntity.setSignerBlankText(originalSignerBlankText);
-                  rDecisionEntity.setSignerPositionS(originalSignerPosition);
-                  rDecisionEntity.setAssistantId(originalSignerAssistantId);
-                }
-
-                finish();
-//                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-              }
-            )
-            .negativeText("возврат")
-            .onNegative(
-              (dialog, which) -> {
-                Timber.tag(TAG).w("negative");
-              }
-            )
-            .show();
-        }
-
-      } else {
-        finish();
-//        activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-      }
-
-    } );
-
-
-
-    toolbar.setOnMenuItemClickListener(item -> {
-
+    Bind.menuItemClick(toolbar, item -> {
       CommandParams commandParams;
       CommandFactory.Operation operation;
 
       switch (item.getItemId()){
-
-
         case R.id.action_constructor_infocard:
           showInfoCard();
           break;
 
         case R.id.action_constructor_to_the_primary_consideration:
+          Timber.tag(TAG).d("Primary consideration press handle");
 
           if (rDecisionEntity != null) {
             settings.setShowPrimaryConsideration(true);
@@ -284,14 +155,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
             finish();
           }
+
           break;
 
         case R.id.action_constructor_create_and_sign:
+          Timber.tag(TAG).d("CreateAndSign press handle");
           boolean canCreateAndSign = checkDecision();
 
           if (canCreateAndSign) {
-
-
             Decision decision = manager.getDecision();
 
             commandParams = new CommandParams();
@@ -324,6 +195,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           }
 
           break;
+
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
           break;
@@ -373,8 +245,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         default:
           break;
       }
-
-      return false;
     });
 
     raw_decision = null;
@@ -463,20 +333,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         );
     }
 
-
+    Bind.click( urgency_selector, () -> urgency_selector.click() );
 
     urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
       manager.setUrgency( item );
     });
 
-
-    signer_oshs_selector.setOnClickListener(v -> {
+    Bind.click(signer_oshs_selector, () -> {
+      Timber.tag(TAG).d("Signer selector press handle");
       dialogFragment = new SelectOshsDialogFragment();
       dialogFragment.registerCallBack( this );
-      dialogFragment.withSearch(true);
-      dialogFragment.withChangePerson(false);
-      dialogFragment.showWithAssistant(true);
-      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
+      dialogFragment.withSearch( true );
+      dialogFragment.withChangePerson( false );
+      dialogFragment.showWithAssistant( true );
+      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment" );
     });
 
     sign_as_current_user.setOnClickListener(v -> {
@@ -544,7 +414,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
     // Disable EditText scrolling
     decision_comment.setMovementMethod(null);
 
-    decision_comment.setOnClickListener(v -> {
+    Bind.click( decision_comment, () -> {
+      Timber.tag(TAG).d("Comment press handle");
       String title = getString(R.string.comment_hint);
       new DecisionTextDialog(context, decision_comment, title, title).show();
     });
@@ -575,6 +446,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       fonts.add(new FontItem("13", "13"));
       fonts.add(new FontItem("14", "14"));
       fonts.add(new FontItem("15", "15"));
+
+      Bind.click( font_selector, () -> font_selector.click() );
 
       font_selector.setItems(fonts);
       font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
@@ -612,8 +485,130 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
   }
 
+  private void closeActivity() {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    Decision _dec_ = manager.getDecision();
+
+    if ( settings.isDecisionWithAssignment() ){
+      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
+      _dec_.setAssignment(true);
+    }
+
+    String json = gson.toJson( _dec_ );
+
+    Timber.tag(TAG).w("DECISION: %s", json );
+    Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
+
+    Decision save_decision = manager.getDecision();
+
+    if ( manager.isChanged() ){
+      Boolean showSaveDialog = checkDecision();
+
+      String content = "Резолюция была изменена";
+
+      if ( settings.isDecisionWithAssignment() ){
+        content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
+      }
+
+      if (showSaveDialog){
+        new MaterialDialog.Builder(this)
+          .title("Имеются несохранённые данные")
+          .content(content)
+          .positiveText("сохранить")
+          .onPositive(
+            (dialog, which) -> {
+//              manager.getDecisionBuilder().build();
+
+              Decision decision = manager.getDecision();
+
+              CommandParams params = new CommandParams();
+              params.setDecisionModel( decision );
+              decision.setDocumentUid( settings.getUid() );
+
+              if (rDecisionEntity != null) {
+//                params.setDecision( rDecisionEntity );
+                params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
+                params.setDecisionId( rDecisionEntity.getUid() );
+
+                RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
+
+                if (doc != null) {
+                  params.setDocument(doc.getUid());
+                }
+              }
+
+              CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.CREATE_DECISION : CommandFactory.Operation.SAVE_DECISION;
+
+              if (save_decision != null && operation == CommandFactory.Operation.SAVE_DECISION) {
+                params.setDecisionModel(save_decision);
+              }
+
+              if ( settings.isDecisionWithAssignment() ){
+                decision = manager.getDecision();
+
+                params = new CommandParams();
+                params.setDecisionModel( decision );
+
+                decision.setDocumentUid( settings.getUid() );
+
+                if (rDecisionEntity != null) {
+                  params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
+                  params.setDecisionId( rDecisionEntity.getUid() );
+                }
+
+                operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+                params.setAssignment(true);
+                decision.setAssignment(true);
+              }
+
+              operationManager.execute( operation, params );
+
+              finish();
+            }
+          )
+          .neutralText("выход")
+          .onNeutral(
+            (dialog, which) -> {
+              Timber.tag(TAG).w("nothing");
+
+              // Restore original signer
+              raw_decision.setSignerId(originalSignerId);
+              raw_decision.setSigner(originalSigner);
+              raw_decision.setSignerBlankText(originalSignerBlankText);
+              raw_decision.setSignerPositionS(originalSignerPosition);
+              raw_decision.setAssistantId(originalSignerAssistantId);
+
+              if (rDecisionEntity != null) {
+                rDecisionEntity.setSignerId(originalSignerId);
+                rDecisionEntity.setSigner(originalSigner);
+                rDecisionEntity.setSignerBlankText(originalSignerBlankText);
+                rDecisionEntity.setSignerPositionS(originalSignerPosition);
+                rDecisionEntity.setAssistantId(originalSignerAssistantId);
+              }
+
+              finish();
+//              activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            }
+          )
+          .negativeText("возврат")
+          .onNegative(
+            (dialog, which) -> {
+              Timber.tag(TAG).w("negative");
+            }
+          )
+          .show();
+      }
+
+    } else {
+      finish();
+//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+  }
 
   private void showInfoCard() {
+    Timber.tag(TAG).d("Show info card press handle");
 
     InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
     newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
@@ -679,16 +674,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .content("Укажите хотя бы одного исполнителя")
           .positiveText("Ок")
           .negativeText("Выход")
-          .onPositive(
-            (dialog, which) -> {
-              dialog.dismiss();
-            }
-          )
-          .onNegative(
-            (dialog, which) -> {
-              finish();
-            }
-          )
+          .onPositive( (dialog, which) -> dialog.dismiss() )
+          .onNegative( (dialog, which) -> finish() )
           .show();
       }
 
@@ -698,13 +685,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .title("Внимание")
           .content("Необходимо добавить хотя бы один блок")
           .positiveText("Ок")
-          .onPositive(
-            (dialog, which) -> {
-              dialog.dismiss();
-            }
-          )
+          .onPositive( (dialog, which) -> dialog.dismiss() )
           .show();
-
       }
 
       if (showSaveDialog && !manager.hasSigner()) {
@@ -713,11 +695,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .title("Внимание")
           .content("Необходимо выбрать подписавшего")
           .positiveText("Ок")
-          .onPositive(
-            (dialog, which) -> {
-              dialog.dismiss();
-            }
-          )
+          .onPositive( (dialog, which) -> dialog.dismiss() )
           .show();
       }
 
@@ -752,11 +730,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               .title("Внимание")
               .content("Подписавший и исполнитель совпадают")
               .positiveText("Ок")
-              .onPositive(
-                (dialog, which) -> {
-                  dialog.dismiss();
-                }
-              )
+              .onPositive( (dialog, which) -> dialog.dismiss() )
               .show();
           }
         }
@@ -858,8 +832,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       super.onStop();
     }
 
+  @Override
+  public void onBackPressed() {
+    closeActivity();
+  }
 
-    private void showPrevDialog () {
+  private void showPrevDialog () {
       // decision_assignment_approve_body
 
       MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
@@ -941,9 +919,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
         rDecisionEntity.setSignerBlankText(signerName);
         rDecisionEntity.setSignerPositionS(signerPosition);
 
-        if (assistantId != null) {
-          rDecisionEntity.setAssistantId(assistantId);
-        }
+        // resolved https://tasks.n-core.ru/browse/MPSED-2256
+        // Ломаются подписанты в резолюции после выбора врио
+        // Если у выбранного подписанта assistantId null, то в исходящем JSON ставим "", чтобы в СЭДе assistantId стал null
+        rDecisionEntity.setAssistantId(assistantId != null ? assistantId : "");
       }
 
       manager.setSignerId(signerId);
@@ -951,9 +930,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       manager.setSignerBlankText(signerName);
       manager.getDecision().setSignerPositionS(signerPosition);
 
-      if (assistantId != null) {
-        manager.setAssistantId(assistantId);
-      }
+      // resolved https://tasks.n-core.ru/browse/MPSED-2256
+      // Ломаются подписанты в резолюции после выбора врио
+      // Если у выбранного подписанта assistantId null, то в исходящем JSON ставим "", чтобы в СЭДе assistantId стал null
+      manager.setAssistantId(assistantId != null ? assistantId : "");
 
       signer_oshs_selector.setText(name);
 

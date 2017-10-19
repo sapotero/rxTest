@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -44,6 +45,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
@@ -69,6 +71,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.fragment_decision_font_size) Spinner font_size;
 
   @BindView(R.id.fragment_decision_button_wrapper) LinearLayout buttons;
+  @BindView(R.id.fragment_decision_button_add_people) Button addPeople;
+  @BindView(R.id.fragment_decision_button_get_template) Button getTemplate;
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
   //  @BindView(R.id.decision_report_action) RadioGroup buttons;
   //  @BindView(R.id.head_font_selector) SpinnerWithLabel textSelector;
@@ -203,7 +207,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     // Disable EditText scrolling
     decision_text.setMovementMethod(null);
 
-    decision_text.setOnClickListener(v -> {
+    Bind.click( decision_text, () -> {
+      Timber.tag(TAG).v( "Decision text press handle" );
       String title = getString(R.string.decision_text);
       new DecisionTextDialog(mContext, decision_text, title, title).show();
     });
@@ -225,31 +230,39 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     });
 
-    card_toolbar.setOnMenuItemClickListener(
-      item -> {
+    Bind.click( addPeople, () -> {
+      Timber.tag("ADD PEOPLE").e("CLICKED");
+      showAddOshsDialog();
+    });
 
-        switch ( item.getItemId() ){
-          case R.id.decision_card_action_delete:
+    Bind.click( getTemplate, () -> {
+      Timber.tag("ADD template").e("CLICKED");
+      templates = new SelectTemplateDialog( getContext(), this, SelectTemplateDialog.DECISION );
+      templates.show();
+    });
 
-            if (blockFactory != null) {
-              blockFactory.remove(this);
+    Bind.menuItemClick( card_toolbar, item -> {
+      switch ( item.getItemId() ){
+        case R.id.decision_card_action_delete:
 
-              if (callback != null) {
-                callback.onUpdateSuccess(lastUpdate);
-              }
+          if (blockFactory != null) {
+            blockFactory.remove(this);
+
+            if (callback != null) {
+              callback.onUpdateSuccess(lastUpdate);
             }
-            getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
-            break;
-          case R.id.decision_card_user_add:
-            showAddOshsDialog();
-            break;
-          default:
-            break;
-        }
+          }
+          getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+          break;
+        case R.id.decision_card_user_add:
+          showAddOshsDialog();
+          break;
+        default:
+          break;
+      }
 
-        getActivity().getSupportFragmentManager().popBackStack();
-        return false;
-      });
+      getActivity().getSupportFragmentManager().popBackStack();
+    });
 
 //    Boolean familirization = false;
 //    if (block.getToFamiliarization() != null) {
@@ -443,6 +456,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   private void showAddOshsDialog() {
+    Timber.tag(TAG).d("Add performer press handle");
+
     oshs = new SelectOshsDialogFragment();
     oshs.withSearch(true);
 
@@ -570,22 +585,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @Override
   public void onSearchError(Throwable error) {
 
-  }
-
-
-
-  @OnClick(R.id.fragment_decision_button_get_template)
-  public void template(){
-    Timber.tag("ADD template").e("CLICKED");
-    templates = new SelectTemplateDialog( getContext(), this, SelectTemplateDialog.DECISION );
-    templates.show();
-  }
-
-  @OnClick(R.id.fragment_decision_button_add_people)
-  public void add(){
-    Timber.tag("ADD PEOPLE").e("CLICKED");
-
-    showAddOshsDialog();
   }
 
   @OnClick(R.id.fragment_decision_text_before)

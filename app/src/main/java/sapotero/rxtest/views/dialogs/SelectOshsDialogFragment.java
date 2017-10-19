@@ -69,6 +69,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
   @BindView(R.id.oshs_wrapper) FrameLayout oshs_wrapper;
 
   Callback callback;
+
   private CommandFactory.Operation operation;
   private PrimaryUsersAdapter adapter;
   private ArrayList<String> user_ids;
@@ -132,6 +133,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid);
     void onSearchError(Throwable error);
   }
+
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
@@ -466,11 +468,13 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     title.dismissDropDown();
   }
 
+  @Override
   public void onDismiss(DialogInterface dialog) {
     super.onDismiss(dialog);
     Timber.tag(TAG).i( "onDismiss");
   }
 
+  @Override
   public void onCancel(DialogInterface dialog) {
     super.onCancel(dialog);
     Timber.tag(TAG).i( "onCancel");

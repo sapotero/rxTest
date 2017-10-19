@@ -36,7 +36,6 @@ public class InfoCardDialogFragment extends DialogFragment {
 
   //  @BindView(R.id.fragment_preview_main_infocard) WebView infocard;
 
-
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_preview_main_infocard, container, false);
     ButterKnife.bind(this, view);
@@ -82,14 +81,15 @@ public class InfoCardDialogFragment extends DialogFragment {
 
   }
 
+  @Override
   public void onDismiss(DialogInterface dialog) {
     super.onDismiss(dialog);
     Timber.tag(TAG).i( "onDismiss");
   }
 
+  @Override
   public void onCancel(DialogInterface dialog) {
     super.onCancel(dialog);
     Timber.tag(TAG).i( "onCancel");
   }
-
 }

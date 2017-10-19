@@ -35,10 +35,13 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
+import timber.log.Timber;
 
 public class OrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
 
   @Inject ISettings settings;
+
+  private String TAG = this.getClass().getSimpleName();
 
   private final LayoutInflater inflater;
   //  private SpinnerAdapter mAdapter;
@@ -75,68 +78,67 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     updateNeutralButtonText();
   }
 
-  private OnClickListener onClickListener = new OnClickListener() {
-    @Override
-    public void onClick(View v) {
-      System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
+  public void click() {
+    Timber.tag(TAG).d("Press handle");
 
-      choices = new ArrayList<>();
+    System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
 
-      for (int i = 0; i < mAdapter.getCount(); i++) {
-        DialogListItem dialogListItem = new DialogListItem(
-                mSelected[i],
-                mAdapter.getItem(i).getCountForDialog(),
-                mAdapter.getItem(i).getTitleForDialog() );
-        choices.add(dialogListItem);
-      }
+    choices = new ArrayList<>();
 
-      dialogListAdapter = new DialogListAdapter(getContext(), choices);
-
-      dialog = new MaterialDialog.Builder(getContext())
-        .title("Фильтр организаций")
-        .autoDismiss(false)
-        .cancelable(true)
-        .adapter(dialogListAdapter, null)
-        .negativeText(android.R.string.cancel)
-        .negativeColor(Color.BLACK)
-        .onNegative((dialog1, which) -> {
-          System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
-          dialog1.dismiss();
-        })
-        .positiveText(android.R.string.ok)
-        .positiveColor(Color.BLACK)
-        .onPositive((dialog2, which) -> {
-          saveSelection();
-          select();
-          dialog2.dismiss();
-        })
-        .neutralColor(Color.BLACK)
-        .onNeutral((dialog3, which) -> {
-          boolean isCheckedAll = isCheckedAll();
-
-          for (int i = 0; i < choices.size(); i++) {
-            RecyclerView.ViewHolder viewHolder = dialog3.getRecyclerView().findViewHolderForAdapterPosition(i);
-
-            choices.get(i).setChecked( !isCheckedAll );
-
-            if ( viewHolder != null ) {
-              // If item is visible, check the checkbox (this is needed for checkbox animation)
-              ((DialogListHolder) viewHolder).getCheckBox().setChecked( !isCheckedAll );
-            } else {
-              // Otherwise notify adapter, that item has changed
-              dialogListAdapter.notifyItemChanged(i);
-            }
-          }
-
-          updateNeutralButtonText();
-        })
-        .build();
-
-      updateNeutralButtonText();
-
-      dialog.show();
+    for (int i = 0; i < mAdapter.getCount(); i++) {
+      DialogListItem dialogListItem = new DialogListItem(
+        mSelected[i],
+        mAdapter.getItem(i).getCountForDialog(),
+        mAdapter.getItem(i).getTitleForDialog() );
+      choices.add(dialogListItem);
     }
-  };
+
+    dialogListAdapter = new DialogListAdapter(getContext(), choices);
+
+    dialog = new MaterialDialog.Builder(getContext())
+      .title("Фильтр организаций")
+      .autoDismiss(false)
+      .cancelable(true)
+      .adapter(dialogListAdapter, null)
+      .negativeText(android.R.string.cancel)
+      .negativeColor(Color.BLACK)
+      .onNegative((dialog1, which) -> {
+        System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
+        dialog1.dismiss();
+      })
+      .positiveText(android.R.string.ok)
+      .positiveColor(Color.BLACK)
+      .onPositive((dialog2, which) -> {
+        saveSelection();
+        select();
+        dialog2.dismiss();
+      })
+      .neutralColor(Color.BLACK)
+      .onNeutral((dialog3, which) -> {
+        boolean isCheckedAll = isCheckedAll();
+
+        for (int i = 0; i < choices.size(); i++) {
+          RecyclerView.ViewHolder viewHolder = dialog3.getRecyclerView().findViewHolderForAdapterPosition(i);
+
+          choices.get(i).setChecked( !isCheckedAll );
+
+          if ( viewHolder != null ) {
+            // If item is visible, check the checkbox (this is needed for checkbox animation)
+            ((DialogListHolder) viewHolder).getCheckBox().setChecked( !isCheckedAll );
+          } else {
+            // Otherwise notify adapter, that item has changed
+            dialogListAdapter.notifyItemChanged(i);
+          }
+        }
+
+        updateNeutralButtonText();
+      })
+      .build();
+
+    updateNeutralButtonText();
+
+    dialog.show();
+  }
 
   public void select() {
     refreshSpinner();
@@ -219,8 +221,6 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         mOldSelection[i] = true;
         mSelected[i] = allSelected;
       }
-
-      setOnClickListener(onClickListener);
     }
 
     setText(mAllText);
@@ -345,6 +345,12 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   public void setAllText(String allText) {
     this.mAllText = allText;
+  }
+
+  public void dismiss() {
+    if ( dialog != null ) {
+      dialog.dismiss();
+    }
   }
 
 

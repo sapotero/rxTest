@@ -50,7 +50,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
@@ -73,10 +72,12 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.padeg.Declension;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialog;
@@ -144,78 +145,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   private boolean isMagnifier = false; // true if used as magnifier
 
   public DecisionPreviewFragment() {
-  }
-
-  // Approve current decision
-  @OnClick(R.id.activity_info_decision_preview_next_person)
-  public void decision_preview_next(){
-    Timber.tag(TAG).v("decision_preview_next star");
-
-    if ( settings.isActionsConfirm() ){
-      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-      // выводить подтверждение при подписании резолюции
-
-        MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-          .content(R.string.decision_approve_body)
-          .cancelable(true)
-          .positiveText(R.string.yes)
-          .negativeText(R.string.no)
-          .onPositive((dialog1, which) -> {
-            CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
-
-            CommandParams params = new CommandParams();
-
-            params.setDecisionId( decision.getId() );
-            params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
-
-            operationManager.execute(operation, params);
-            updateAfterButtonPressed();
-            EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
-          })
-          .autoDismiss(true);
-
-        prev_dialog.build().show();
-
-    } else {
-      CommandFactory.Operation operation;
-      operation =CommandFactory.Operation.APPROVE_DECISION;
-
-      CommandParams params = new CommandParams();
-
-      params.setDecisionId( decision.getId() );
-      params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
-
-      operationManager.execute(operation, params);
-      updateAfterButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
-    }
-
-    Timber.tag(TAG).v("decision_preview_next end");
-  }
-
-  // Reject current decision
-  @OnClick(R.id.activity_info_decision_preview_prev_person)
-  public void decision_preview_prev(){
-    Timber.tag(TAG).v("decision_preview_prev");
-
-    // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-    // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
-
-    if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
-      showPrevDialog(null);
-
-    } else {
-      CommandFactory.Operation operation;
-      operation =CommandFactory.Operation.REJECT_DECISION;
-
-      CommandParams params = new CommandParams();
-      params.setDecisionId( decision.getId() );
-      params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
-
-      operationManager.execute(operation, params);
-      updateAfterButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
-    }
   }
 
   private void showPrevDialog(String text) {
@@ -355,6 +284,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
             } else {
               Timber.tag("GestureListener").w("-1");
             }
+
+          } else {
+            // resolved https://tasks.n-core.ru/browse/MPSED-2255
+            // Если в документе без резолюций создать и сохранить в МП новую резолюцию и она будет в статусе: "Ожидает синхронизации",
+            // то при двойном тапе не появляется предупреждение, что резолюцию нельзя редактировать.
+            Toast.makeText( getContext(), R.string.decision_temporary_edit_denied, Toast.LENGTH_SHORT ).show();
           }
 
         } else {
@@ -417,6 +352,156 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       seekbar.setProgress(SEEK_BAR_INIT_PROGRESS);
     }
 
+    // Approve current decision
+    Bind.click( next_person_button, () -> {
+      ClickTime.click( settings, () -> {
+        Timber.tag(TAG).v("decision_preview_next start");
+
+        if ( settings.isActionsConfirm() ){
+          // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+          // выводить подтверждение при подписании резолюции
+
+          MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
+            .content(R.string.decision_approve_body)
+            .cancelable(true)
+            .positiveText(R.string.yes)
+            .negativeText(R.string.no)
+            .onPositive((dialog1, which) -> {
+              CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
+
+              CommandParams params = new CommandParams();
+
+              params.setDecisionId( decision.getId() );
+              params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
+
+              operationManager.execute(operation, params);
+              updateAfterButtonPressed();
+              EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+            })
+            .autoDismiss(true);
+
+          prev_dialog.build().show();
+
+        } else {
+          CommandFactory.Operation operation;
+          operation =CommandFactory.Operation.APPROVE_DECISION;
+
+          CommandParams params = new CommandParams();
+
+          params.setDecisionId( decision.getId() );
+          params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
+
+          operationManager.execute(operation, params);
+          updateAfterButtonPressed();
+          EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+        }
+
+        Timber.tag(TAG).v("decision_preview_next end");
+      });
+    });
+
+    // Reject current decision
+    Bind.click( prev_person_button, () -> {
+      ClickTime.click( settings, () -> {
+        Timber.tag(TAG).v("decision_preview_prev");
+
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+        // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
+
+        if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
+          showPrevDialog(null);
+
+        } else {
+          CommandFactory.Operation operation;
+          operation = CommandFactory.Operation.REJECT_DECISION;
+
+          CommandParams params = new CommandParams();
+          params.setDecisionId( decision.getId() );
+          params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
+
+          operationManager.execute(operation, params);
+          updateAfterButtonPressed();
+          EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+        }
+      });
+    });
+
+    Bind.click( comment_button, () -> {
+      ClickTime.click( settings, () -> {
+        Timber.tag(TAG).d("Comment press handle");
+
+        MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
+          .title("Комментарий резолюции")
+          .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+          .input("Комментарий", decision.getComment(), (dialog, input) -> {})
+
+          .positiveText(R.string.constructor_save)
+          .negativeText(R.string.constructor_close)
+          .neutralText(R.string.constructor_clear)
+
+          .onPositive((dialog, which) -> {
+            if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
+              CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
+              CommandParams params = new CommandParams();
+
+              Decision decision = new DecisionMapper().toFormattedModel(this.decision);
+              decision.setComment( dialog.getInputEditText().getText().toString() );
+              params.setDecisionModel( decision );
+              params.setDecisionId( this.decision.getId() );
+
+              Timber.e("DECISION %s", new Gson().toJson(decision));
+
+              operationManager.execute( operation, params );
+
+              updateAfterButtonPressed();
+            }
+            dialog.dismiss();
+          })
+          .onNegative((dialog, which) -> dialog.dismiss())
+          .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
+          .autoDismiss(false)
+          .cancelable(false)
+          .build();
+
+        MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
+          .title("Комментарий резолюции")
+          .content( decision.getComment() )
+          .positiveText(R.string.constructor_close)
+          .onPositive((dialog, which) -> dialog.dismiss())
+          .autoDismiss(false);
+
+        if ( buttonsEnabled ) {
+          materialDialogBuilder
+            .neutralText(R.string.decision_preview_edit)
+            .onNeutral((dialog, which) -> {
+              dialog.dismiss();
+              editDialog.show();
+            });
+        }
+
+        MaterialDialog materialDialog = materialDialogBuilder.build();
+
+        materialDialog.show();
+      });
+    });
+
+    Bind.click( magnifer, () -> {
+      ClickTime.click( settings, () -> {
+        Timber.tag(TAG).d("Magnifier press handle");
+
+        Decision decision;
+        DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
+
+        if ( decision_spinner_adapter.size() > 0 ) {
+          decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
+          magnifier.setDecision( decision );
+          magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
+        }
+
+        magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
+      });
+    });
+
     return view;
   }
 
@@ -433,6 +518,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       }
 
     } else if ( !isMagnifier ) {
+      approved_text.setVisibility(View.GONE);
       temporary.setVisibility(View.GONE);
 
       setAdapter();
@@ -649,81 +735,6 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     return this;
   }
 
-  @OnClick(R.id.activity_info_decision_preview_magnifer)
-  public void magnifier(){
-    Timber.tag(TAG).v("magnifier");
-    Decision decision;
-    DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
-
-    if ( decision_spinner_adapter.size() > 0 ) {
-      decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
-      magnifier.setDecision( decision );
-      magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
-    }
-
-    magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
-  }
-
-  @OnClick(R.id.activity_info_decision_preview_comment)
-  public void comment(){
-    Timber.tag(TAG).v("comment_button");
-
-    MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
-      .title("Комментарий резолюции")
-      .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
-      .input("Комментарий", decision.getComment(), (dialog, input) -> {})
-
-      .positiveText(R.string.constructor_save)
-      .negativeText(R.string.constructor_close)
-      .neutralText(R.string.constructor_clear)
-      
-      .onPositive((dialog, which) -> {
-
-        if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
-
-          CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
-          CommandParams params = new CommandParams();
-
-          Decision decision = new DecisionMapper().toFormattedModel(this.decision);
-          decision.setComment( dialog.getInputEditText().getText().toString() );
-          params.setDecisionModel( decision );
-          params.setDecisionId( this.decision.getId() );
-
-          Timber.e("DECISION %s", new Gson().toJson(decision));
-
-          operationManager.execute( operation, params );
-
-          updateAfterButtonPressed();
-        }
-        dialog.dismiss();
-      })
-      .onNegative((dialog, which) -> dialog.dismiss())
-      .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
-      .autoDismiss(false)
-      .cancelable(false)
-      .build();
-
-    MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
-      .title("Комментарий резолюции")
-      .content( decision.getComment() )
-      .positiveText(R.string.constructor_close)
-      .onPositive((dialog, which) -> dialog.dismiss())
-      .autoDismiss(false);
-
-    if ( buttonsEnabled ) {
-      materialDialogBuilder
-        .neutralText(R.string.decision_preview_edit)
-        .onNeutral((dialog, which) -> {
-          dialog.dismiss();
-          editDialog.show();
-        });
-    }
-
-    MaterialDialog materialDialog = materialDialogBuilder.build();
-
-    materialDialog.show();
-  }
-
   public void edit(){
     Timber.tag(TAG).v("edit");
     Decision data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
@@ -900,7 +911,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
           printAppealText( block, isOnlyOneBlock );
 
-          if ( block.getTextBefore() ){
+          if ( block.getTextBefore() != null && block.getTextBefore() ) {
 
             printBlockText( block, isOnlyOneBlock );
             if ( block.getHidePerformers() != null && !block.getHidePerformers()){

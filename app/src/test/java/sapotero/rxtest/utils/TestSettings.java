@@ -76,6 +76,7 @@ public class TestSettings implements ISettings {
   public boolean isUpdateAuthStarted;
   public boolean isTabChanged;
   public boolean isStartRegularRefresh;
+  public long lastClickTime;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -788,5 +789,15 @@ public class TestSettings implements ISettings {
   @Override
   public void setCurrentUserImage(String value) {
     currentUserImage = value;
+  }
+
+  @Override
+  public long getLastClickTime() {
+    return lastClickTime;
+  }
+
+  @Override
+  public void setLastClickTime(long value) {
+    lastClickTime = value;
   }
 }

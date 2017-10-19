@@ -62,26 +62,22 @@ public class SpinnerWithLabel<T extends Listable> extends EditText {
       for (T item : mItems) {
         mListableItems[i++] = item.getLabel();
       }
-
-      configureOnClickListener();
     }
 
-    private void configureOnClickListener() {
-      setOnClickListener(view -> {
-        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-        builder.setTitle(mHint);
+    public void click() {
+      AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+      builder.setTitle(mHint);
 
-        builder.setItems(mListableItems, (dialogInterface, selectedIndex) -> {
-          setText(mListableItems[selectedIndex]);
+      builder.setItems(mListableItems, (dialogInterface, selectedIndex) -> {
+        setText(mListableItems[selectedIndex]);
 
-          if (onItemSelectedListener != null) {
-            onItemSelectedListener.onItemSelectedListener(mItems.get(selectedIndex), selectedIndex);
-          }
-        });
-
-        builder.setPositiveButton(R.string.constructor_close, null);
-        builder.create().show();
+        if (onItemSelectedListener != null) {
+          onItemSelectedListener.onItemSelectedListener(mItems.get(selectedIndex), selectedIndex);
+        }
       });
+
+      builder.setPositiveButton(R.string.constructor_close, null);
+      builder.create().show();
     }
 
     public void setOnItemSelectedListener(OnItemSelectedListener<T> onItemSelectedListener) {

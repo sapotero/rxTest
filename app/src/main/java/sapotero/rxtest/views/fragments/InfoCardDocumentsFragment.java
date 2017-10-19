@@ -54,10 +54,12 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Transaction;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
@@ -81,18 +83,21 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   @BindView(R.id.info_card_pdf_fullscreen_document_counter) TextView document_counter;
   @BindView(R.id.info_card_pdf_fullscreen_page_title)       TextView document_title;
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
+  @BindView(R.id.info_card_pdf_open) FrameLayout openPdf;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
   @BindView(R.id.no_free_space) FrameLayout noFreeSpace;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
+  @BindView(R.id.info_card_pdf_reload_no_free_space) Button reloadImageNoFreeSpace;
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
 
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
   @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
   @BindView(R.id.open_in_another_app_wrapper) LinearLayout open_in_another_app_wrapper;
+  @BindView(R.id.open_in_another_app) Button openInAnotherApp;
   @BindView(R.id.pdf_linear_wrapper) RelativeLayout pdf_linear_wrapper;
 
   private Context mContext;
@@ -138,6 +143,12 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
+
+    Bind.click( fullscreen, () -> ClickTime.click( settings, this::fullscreen ) );
+    Bind.click( openPdf, () -> ClickTime.click( settings, this::openInAnotherApp ) );
+    Bind.click( openInAnotherApp, () -> ClickTime.click( settings, this::openInAnotherApp ) );
+    Bind.click( reloadImageButton, () -> ClickTime.click( settings, this::reloadImage ) );
+    Bind.click( reloadImageNoFreeSpace, () -> ClickTime.click( settings, this::reloadImage ) );
 
     new Handler().postDelayed(this::updateDocument, 200);
 //    updateDocument();
@@ -441,22 +452,20 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
   @OnClick(R.id.info_card_pdf_fullscreen_prev_document)
   public void getPrevImage() {
-    Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
-    if ( index <= 0 ){
-      index = 0;
-    } else {
-      index--;
-      settings.setImageIndex( index );
-      showPdf();
-    }
-    Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
-
-
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE, () -> {
+      Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
+      if ( index <= 0 ){
+        index = 0;
+      } else {
+        index--;
+        settings.setImageIndex( index );
+        showPdf();
+      }
+      Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
+    });
   }
 
-  @OnClick(R.id.info_card_pdf_reload)
-  public void reloadImage(){
-
+  private void reloadImage(){
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get( settings.getUid() ) )
@@ -468,22 +477,19 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     getActivity().finish();
   }
 
-  @OnClick(R.id.info_card_pdf_reload_no_free_space)
-  public void reloadImageNoFreeSpace() {
-    reloadImage();
-  }
-
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
   public void getNextImage() {
-    Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
-    if ( index >= adapter.getCount()-1 ){
-      index = adapter.getCount()-1;
-    } else {
-      index++;
-      settings.setImageIndex( index );
-      showPdf();
-    }
-    Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE, () -> {
+      Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
+      if ( index >= adapter.getCount()-1 ){
+        index = adapter.getCount()-1;
+      } else {
+        index++;
+        settings.setImageIndex( index );
+        showPdf();
+      }
+      Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
+    });
   }
 
   private void showPdf() {
@@ -520,19 +526,11 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     broken_image.setVisibility(View.GONE);
   }
 
-  @OnClick(R.id.info_card_pdf_fullscreen_button)
-  public void fullscreen() {
+  private void fullscreen() {
     // Start DocumentImageFullScreenActivity, which uses another instance of this fragment for full screen PDF view.
     Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
     startActivityForResult(intent, REQUEST_CODE_INDEX);
   }
-
-  @OnClick(R.id.info_card_pdf_open)
-  public void openPdf() {
-    openInAnotherApp();
-  }
-
-
 
   // This is called, when DocumentImageFullScreenActivity returns
   // (needed to switch to the image shown in full screen).
@@ -603,8 +601,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13415
   // Если ЭО имеет формат, отличный от PDF, предлагать открыть во внешнем приложении
-  @OnClick(R.id.open_in_another_app)
-  public void openInAnotherApp() {
+  private void openInAnotherApp() {
     if ( file != null && contentType != null) {
       Uri contentUri = FileProvider.getUriForFile(getContext(), "sed.mobile.fileprovider", file);
       Intent intent = new Intent();

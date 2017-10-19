@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -16,12 +15,14 @@ import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import timber.log.Timber;
 
-public class JournalSelectorView extends AppCompatTextView implements View.OnClickListener {
+public class JournalSelectorView extends AppCompatTextView {
   private String TAG = this.getClass().getSimpleName();
 
   private JournalSelectorAdapter adapter;
   private MaterialDialog dialog;
   private int position = -1;
+
+  private boolean pressed = false;
 
   public JournalSelectorView(Context context) {
     super(context);
@@ -39,14 +40,13 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   }
 
   public void build(){
-    setOnClickListener(this);
     adapter = new JournalSelectorAdapter();
     setText( adapter.setDefault() );
   }
 
+  public void click() {
+    Timber.tag(TAG).d("Press handle");
 
-  @Override
-  public void onClick(View v) {
     createAdapter();
 
     dialog = new MaterialDialog.Builder( getContext() )
@@ -109,5 +109,11 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
 
   public void setPosition(int position) {
     this.position = position;
+  }
+
+  public void dismiss() {
+    if ( dialog != null ) {
+      dialog.dismiss();
+    }
   }
 }

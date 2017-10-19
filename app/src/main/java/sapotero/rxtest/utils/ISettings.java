@@ -293,4 +293,7 @@ public interface ISettings {
 
   void setStartRegularRefresh(boolean value);
 
+  long getLastClickTime();
+
+  void setLastClickTime(long value);
 }

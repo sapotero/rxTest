@@ -56,6 +56,7 @@ import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
@@ -296,12 +297,12 @@ public class InfoActivity extends AppCompatActivity {
 
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){
-    showNextDocument();
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_DOC, this::showNextDocument );
   }
 
   @OnClick(R.id.activity_info_next_document)
   public void next_doc(){
-    showPrevDocument();
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_DOC, this::showPrevDocument );
   }
 
   @OnClick(R.id.activity_info_left_button)
