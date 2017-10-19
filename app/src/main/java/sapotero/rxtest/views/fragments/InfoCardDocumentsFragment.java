@@ -54,6 +54,7 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -451,17 +452,19 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
   @OnClick(R.id.info_card_pdf_fullscreen_prev_document)
   public void getPrevImage() {
-    Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
-    if ( index <= 0 ){
-      index = 0;
-    } else {
-      index--;
-      settings.setImageIndex( index );
-      showPdf();
+    if ( ClickTime.passed( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE ) ) {
+      ClickTime.save( settings );
+
+      Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
+      if ( index <= 0 ){
+        index = 0;
+      } else {
+        index--;
+        settings.setImageIndex( index );
+        showPdf();
+      }
+      Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
     }
-    Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
-
-
   }
 
   private void reloadImage(){
@@ -478,15 +481,19 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
   public void getNextImage() {
-    Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
-    if ( index >= adapter.getCount()-1 ){
-      index = adapter.getCount()-1;
-    } else {
-      index++;
-      settings.setImageIndex( index );
-      showPdf();
+    if ( ClickTime.passed( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE ) ) {
+      ClickTime.save( settings );
+
+      Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
+      if ( index >= adapter.getCount()-1 ){
+        index = adapter.getCount()-1;
+      } else {
+        index++;
+        settings.setImageIndex( index );
+        showPdf();
+      }
+      Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
     }
-    Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
   }
 
   private void showPdf() {
