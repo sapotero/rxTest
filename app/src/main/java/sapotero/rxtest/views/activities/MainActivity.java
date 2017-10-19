@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -83,6 +82,7 @@ import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.utils.click.Bind;
@@ -112,8 +112,6 @@ import static sapotero.rxtest.db.requery.utils.Journals.ORDERS_DDO;
 import static sapotero.rxtest.db.requery.utils.Journals.PROCESSED;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
-
-  public static final int TIME_BETWEEN_CLICKS = 1000;
 
   @Inject JobManager jobManager;
   @Inject ISettings settings;
@@ -175,8 +173,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private boolean switchToSubstituteModeStarted = false;
   private boolean exitFromSubstituteModeStarted = false;
-
-  private long lastClickTime = 0;
 
   public static Intent newIntent(Context context){
     Intent intent = new Intent(context, MainActivity.class);
@@ -459,8 +455,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .subscribe(
         data -> {
           if (data.size() > 0){
-            if ( timeBetweenClicksPassed() ) {
-              saveClickTime();
+            if ( ClickTime.passed( settings ) ) {
+              ClickTime.save( settings );
 
               if ( navigationDrawer != null ) {
                 navigationDrawer.closeDrawer();
@@ -478,14 +474,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         },
         Timber::e
       );
-  }
-
-  private boolean timeBetweenClicksPassed() {
-    return SystemClock.elapsedRealtime() - lastClickTime >= TIME_BETWEEN_CLICKS;
-  }
-
-  private void saveClickTime() {
-    lastClickTime = SystemClock.elapsedRealtime();
   }
 
   private void initService() {
@@ -771,7 +759,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withOnDrawerListener(new Drawer.OnDrawerListener() {
         @Override
         public void onDrawerOpened(View drawerView) {
-          saveClickTime();
+          ClickTime.save( settings );
         }
 
         @Override
@@ -780,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         @Override
         public void onDrawerSlide(View drawerView, float slideOffset) {
-          if ( !timeBetweenClicksPassed() ) {
+          if ( !ClickTime.passed( settings ) ) {
             if ( navigationDrawer != null ) {
               navigationDrawer.closeDrawer();
             }
