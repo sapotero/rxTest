@@ -164,6 +164,7 @@ public final class EsdApplication extends Application {
 
     String[] array = new String[] {"1", "2", "2", "2", "222", "20"};
     ReduceTest.calculate(array);
+    
   }
 
   private void initComponents() {
