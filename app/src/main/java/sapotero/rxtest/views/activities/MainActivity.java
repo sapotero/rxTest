@@ -85,7 +85,7 @@ import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.utils.rxbinding.Bind;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;

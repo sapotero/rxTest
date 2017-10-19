@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.rxbinding;
+package sapotero.rxtest.utils.click;
 
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -11,9 +11,10 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Subscription;
 
+// Prevents multiple clicks on one view
 public class Bind {
   // Time period during which multiple clicks will be ignored
-  private static final int MULTIPLE_CLICK_IGNORE_WINDOW = 1000;
+  private static final int MIN_TIME_BETWEEN_CLICKS = 1000;
 
   public interface OnClickListener {
     void onClick();
@@ -26,7 +27,7 @@ public class Bind {
   public static Subscription click(View view, OnClickListener onClickListener) {
     return RxView
       .clicks( view )
-      .throttleFirst( MULTIPLE_CLICK_IGNORE_WINDOW, TimeUnit.MILLISECONDS )
+      .throttleFirst( MIN_TIME_BETWEEN_CLICKS, TimeUnit.MILLISECONDS )
       .subscribe(click -> {
         if ( onClickListener != null ) {
           onClickListener.onClick();
@@ -37,7 +38,7 @@ public class Bind {
   public static Subscription menuItemClick(Toolbar toolbar, OnMenuItemClickListener onMenuItemClickListener) {
     return RxToolbar
       .itemClicks( toolbar )
-      .throttleFirst( MULTIPLE_CLICK_IGNORE_WINDOW, TimeUnit.MILLISECONDS )
+      .throttleFirst( MIN_TIME_BETWEEN_CLICKS, TimeUnit.MILLISECONDS )
       .subscribe(item -> {
         if ( onMenuItemClickListener != null ) {
           onMenuItemClickListener.onClick( item );
@@ -48,7 +49,7 @@ public class Bind {
   public static Subscription menuNavigationClick(Toolbar toolbar, OnClickListener onClickListener) {
     return RxToolbar
       .navigationClicks( toolbar )
-      .throttleFirst( MULTIPLE_CLICK_IGNORE_WINDOW, TimeUnit.MILLISECONDS )
+      .throttleFirst( MIN_TIME_BETWEEN_CLICKS, TimeUnit.MILLISECONDS )
       .subscribe(click -> {
         if ( onClickListener != null ) {
           onClickListener.onClick();

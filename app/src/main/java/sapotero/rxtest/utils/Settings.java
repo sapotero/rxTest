@@ -57,6 +57,7 @@ public class Settings implements ISettings {
   private static final String UPDATE_AUTH_STARTED_KEY = "update.auth.started";
   private static final String TAB_CHANGED_KEY = "tab.changed";
   private static final String START_REGULAR_REFRESH_KEY = "start.regular.refresh";
+  private static final String LAST_CLICK_TIME_KEY = "last.click.time";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -163,6 +164,7 @@ public class Settings implements ISettings {
   private Preference<Boolean> isTabChanged;
   private Preference<String> updateTime;
   private Preference<Boolean> isStartRegularRefresh;
+  private Preference<Long> lastClickTime;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -272,6 +274,7 @@ public class Settings implements ISettings {
     isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
     isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
     isStartRegularRefresh          = settings.getBoolean(START_REGULAR_REFRESH_KEY);
+    lastClickTime                  = settings.getLong(LAST_CLICK_TIME_KEY);
   }
 
   @Override
@@ -1030,5 +1033,31 @@ public class Settings implements ISettings {
   @Override
   public void setStartRegularRefresh(boolean value) {
     setBoolean(isStartRegularRefresh, value);
+  }
+
+  private long getLong(Preference<Long> longPreference) {
+    Long value = longPreference.get();
+
+    if (value != null) {
+      return value;
+    } else {
+      return 0;
+    }
+  }
+
+  private void setLong(Preference<Long> longPreference, long value) {
+    if (longPreference != null) {
+      longPreference.set(value);
+    }
+  }
+
+  @Override
+  public long getLastClickTime() {
+    return getLong(lastClickTime);
+  }
+
+  @Override
+  public void setLastClickTime(long value) {
+    setLong(lastClickTime, value);
   }
 }

@@ -72,11 +72,12 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.padeg.Declension;
-import sapotero.rxtest.utils.rxbinding.Bind;
+import sapotero.rxtest.utils.click.Bind;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialog;
@@ -353,144 +354,156 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     // Approve current decision
     Bind.click( next_person_button, () -> {
-      Timber.tag(TAG).v("decision_preview_next start");
+      if ( ClickTime.passed( settings ) ) {
+        ClickTime.save( settings );
+        Timber.tag(TAG).v("decision_preview_next start");
 
-      if ( settings.isActionsConfirm() ){
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-        // выводить подтверждение при подписании резолюции
+        if ( settings.isActionsConfirm() ){
+          // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+          // выводить подтверждение при подписании резолюции
 
-        MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-          .content(R.string.decision_approve_body)
-          .cancelable(true)
-          .positiveText(R.string.yes)
-          .negativeText(R.string.no)
-          .onPositive((dialog1, which) -> {
-            CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
+          MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
+            .content(R.string.decision_approve_body)
+            .cancelable(true)
+            .positiveText(R.string.yes)
+            .negativeText(R.string.no)
+            .onPositive((dialog1, which) -> {
+              CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
 
-            CommandParams params = new CommandParams();
+              CommandParams params = new CommandParams();
 
-            params.setDecisionId( decision.getId() );
-            params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
+              params.setDecisionId( decision.getId() );
+              params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
 
-            operationManager.execute(operation, params);
-            updateAfterButtonPressed();
-            EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
-          })
-          .autoDismiss(true);
+              operationManager.execute(operation, params);
+              updateAfterButtonPressed();
+              EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+            })
+            .autoDismiss(true);
 
-        prev_dialog.build().show();
+          prev_dialog.build().show();
 
-      } else {
-        CommandFactory.Operation operation;
-        operation =CommandFactory.Operation.APPROVE_DECISION;
+        } else {
+          CommandFactory.Operation operation;
+          operation =CommandFactory.Operation.APPROVE_DECISION;
 
-        CommandParams params = new CommandParams();
+          CommandParams params = new CommandParams();
 
-        params.setDecisionId( decision.getId() );
-        params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
+          params.setDecisionId( decision.getId() );
+          params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
 
-        operationManager.execute(operation, params);
-        updateAfterButtonPressed();
-        EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+          operationManager.execute(operation, params);
+          updateAfterButtonPressed();
+          EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+        }
+
+        Timber.tag(TAG).v("decision_preview_next end");
       }
-
-      Timber.tag(TAG).v("decision_preview_next end");
     });
 
     // Reject current decision
     Bind.click( prev_person_button, () -> {
-      Timber.tag(TAG).v("decision_preview_prev");
+      if ( ClickTime.passed( settings ) ) {
+        ClickTime.save( settings );
+        Timber.tag(TAG).v("decision_preview_prev");
 
-      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-      // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+        // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
-      if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
-        showPrevDialog(null);
+        if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
+          showPrevDialog(null);
 
-      } else {
-        CommandFactory.Operation operation;
-        operation = CommandFactory.Operation.REJECT_DECISION;
+        } else {
+          CommandFactory.Operation operation;
+          operation = CommandFactory.Operation.REJECT_DECISION;
 
-        CommandParams params = new CommandParams();
-        params.setDecisionId( decision.getId() );
-        params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
+          CommandParams params = new CommandParams();
+          params.setDecisionId( decision.getId() );
+          params.setDecisionModel( new DecisionMapper().toFormattedModel(decision) );
 
-        operationManager.execute(operation, params);
-        updateAfterButtonPressed();
-        EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+          operationManager.execute(operation, params);
+          updateAfterButtonPressed();
+          EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
+        }
       }
     });
 
     Bind.click( comment_button, () -> {
-      Timber.tag(TAG).d("Comment press handle");
+      if ( ClickTime.passed( settings ) ) {
+        ClickTime.save( settings );
+        Timber.tag(TAG).d("Comment press handle");
 
-      MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
-        .title("Комментарий резолюции")
-        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
-        .input("Комментарий", decision.getComment(), (dialog, input) -> {})
+        MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
+          .title("Комментарий резолюции")
+          .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+          .input("Комментарий", decision.getComment(), (dialog, input) -> {})
 
-        .positiveText(R.string.constructor_save)
-        .negativeText(R.string.constructor_close)
-        .neutralText(R.string.constructor_clear)
+          .positiveText(R.string.constructor_save)
+          .negativeText(R.string.constructor_close)
+          .neutralText(R.string.constructor_clear)
 
-        .onPositive((dialog, which) -> {
-          if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
-            CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
-            CommandParams params = new CommandParams();
+          .onPositive((dialog, which) -> {
+            if ( dialog.getInputEditText()!= null && dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), decision.getComment()) ) {
+              CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
+              CommandParams params = new CommandParams();
 
-            Decision decision = new DecisionMapper().toFormattedModel(this.decision);
-            decision.setComment( dialog.getInputEditText().getText().toString() );
-            params.setDecisionModel( decision );
-            params.setDecisionId( this.decision.getId() );
+              Decision decision = new DecisionMapper().toFormattedModel(this.decision);
+              decision.setComment( dialog.getInputEditText().getText().toString() );
+              params.setDecisionModel( decision );
+              params.setDecisionId( this.decision.getId() );
 
-            Timber.e("DECISION %s", new Gson().toJson(decision));
+              Timber.e("DECISION %s", new Gson().toJson(decision));
 
-            operationManager.execute( operation, params );
+              operationManager.execute( operation, params );
 
-            updateAfterButtonPressed();
-          }
-          dialog.dismiss();
-        })
-        .onNegative((dialog, which) -> dialog.dismiss())
-        .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
-        .autoDismiss(false)
-        .cancelable(false)
-        .build();
-
-      MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
-        .title("Комментарий резолюции")
-        .content( decision.getComment() )
-        .positiveText(R.string.constructor_close)
-        .onPositive((dialog, which) -> dialog.dismiss())
-        .autoDismiss(false);
-
-      if ( buttonsEnabled ) {
-        materialDialogBuilder
-          .neutralText(R.string.decision_preview_edit)
-          .onNeutral((dialog, which) -> {
+              updateAfterButtonPressed();
+            }
             dialog.dismiss();
-            editDialog.show();
-          });
+          })
+          .onNegative((dialog, which) -> dialog.dismiss())
+          .onNeutral((dialog, which) -> { if (dialog.getInputEditText() != null) dialog.getInputEditText().setText(""); })
+          .autoDismiss(false)
+          .cancelable(false)
+          .build();
+
+        MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
+          .title("Комментарий резолюции")
+          .content( decision.getComment() )
+          .positiveText(R.string.constructor_close)
+          .onPositive((dialog, which) -> dialog.dismiss())
+          .autoDismiss(false);
+
+        if ( buttonsEnabled ) {
+          materialDialogBuilder
+            .neutralText(R.string.decision_preview_edit)
+            .onNeutral((dialog, which) -> {
+              dialog.dismiss();
+              editDialog.show();
+            });
+        }
+
+        MaterialDialog materialDialog = materialDialogBuilder.build();
+
+        materialDialog.show();
       }
-
-      MaterialDialog materialDialog = materialDialogBuilder.build();
-
-      materialDialog.show();
     });
 
     Bind.click( magnifer, () -> {
-      Timber.tag(TAG).d("Magnifier press handle");
+      if ( ClickTime.passed( settings ) ) {
+        ClickTime.save( settings );
+        Timber.tag(TAG).d("Magnifier press handle");
 
-      Decision decision;
-      DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
+        Decision decision;
+        DecisionPreviewFragment magnifier = new DecisionPreviewFragment().withIsMagnifier(true);
 
-      if ( decision_spinner_adapter.size() > 0 ) {
-        decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
-        magnifier.setDecision( decision );
-        magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
+        if ( decision_spinner_adapter.size() > 0 ) {
+          decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
+          magnifier.setDecision( decision );
+          magnifier.setRegNumber( doc == null ? settings.getRegNumber() : doc.getDocument().getRegistrationNumber() );
+        }
+
+        magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
       }
-
-      magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
     });
 
     return view;
