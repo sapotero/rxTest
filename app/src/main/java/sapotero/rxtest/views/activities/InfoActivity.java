@@ -297,18 +297,12 @@ public class InfoActivity extends AppCompatActivity {
 
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){
-    if ( ClickTime.passed( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_DOC ) ) {
-      ClickTime.save( settings );
-      showNextDocument();
-    }
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_DOC, this::showNextDocument );
   }
 
   @OnClick(R.id.activity_info_next_document)
   public void next_doc(){
-    if ( ClickTime.passed( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_DOC) ) {
-      ClickTime.save( settings );
-      showPrevDocument();
-    }
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_DOC, this::showPrevDocument );
   }
 
   @OnClick(R.id.activity_info_left_button)

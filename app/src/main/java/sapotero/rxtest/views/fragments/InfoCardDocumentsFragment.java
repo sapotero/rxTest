@@ -452,9 +452,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
   @OnClick(R.id.info_card_pdf_fullscreen_prev_document)
   public void getPrevImage() {
-    if ( ClickTime.passed( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE ) ) {
-      ClickTime.save( settings );
-
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE, () -> {
       Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
       if ( index <= 0 ){
         index = 0;
@@ -464,7 +462,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         showPdf();
       }
       Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
-    }
+    });
   }
 
   private void reloadImage(){
@@ -481,9 +479,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
   public void getNextImage() {
-    if ( ClickTime.passed( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE ) ) {
-      ClickTime.save( settings );
-
+    ClickTime.click( settings, ClickTime.TIME_BETWEEN_NEXT_PREV_IMAGE, () -> {
       Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
       if ( index >= adapter.getCount()-1 ){
         index = adapter.getCount()-1;
@@ -493,7 +489,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         showPdf();
       }
       Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
-    }
+    });
   }
 
   private void showPdf() {

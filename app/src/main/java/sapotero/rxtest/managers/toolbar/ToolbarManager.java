@@ -80,9 +80,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
     Bind.menuItemClick( toolbar,
       item -> {
-        if ( ClickTime.passed( settings ) ) {
-          ClickTime.save( settings );
-
+        ClickTime.click( settings, () -> {
           CommandFactory.Operation operation;
           CommandParams params = new CommandParams();
 
@@ -331,7 +329,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
           }
 
           operationManager.execute( operation, params );
-        }
+        });
       }
     );
   }

@@ -455,9 +455,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .subscribe(
         data -> {
           if (data.size() > 0){
-            if ( ClickTime.passed( settings ) ) {
-              ClickTime.save( settings );
-
+            ClickTime.click( settings, () -> {
               if ( navigationDrawer != null ) {
                 navigationDrawer.closeDrawer();
               }
@@ -469,7 +467,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               }
 
               searchView.onOptionsItemSelected(getFragmentManager(), data.get(0));
-            }
+            });
           }
         },
         Timber::e

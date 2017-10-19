@@ -1,7 +1,6 @@
 package sapotero.rxtest.utils.click;
 
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.jakewharton.rxbinding.view.RxView;
@@ -12,18 +11,7 @@ import java.util.concurrent.TimeUnit;
 import rx.Subscription;
 
 // Prevents multiple clicks on one view
-public class Bind {
-  // Time period during which multiple clicks will be ignored
-  private static final int MIN_TIME_BETWEEN_CLICKS = 1000;
-
-  public interface OnClickListener {
-    void onClick();
-  }
-
-  public interface OnMenuItemClickListener {
-    void onClick(MenuItem item);
-  }
-
+public class Bind extends Click {
   public static Subscription click(View view, OnClickListener onClickListener) {
     return RxView
       .clicks( view )

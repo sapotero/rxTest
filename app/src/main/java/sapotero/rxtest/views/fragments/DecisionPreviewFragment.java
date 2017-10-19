@@ -354,8 +354,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     // Approve current decision
     Bind.click( next_person_button, () -> {
-      if ( ClickTime.passed( settings ) ) {
-        ClickTime.save( settings );
+      ClickTime.click( settings, () -> {
         Timber.tag(TAG).v("decision_preview_next start");
 
         if ( settings.isActionsConfirm() ){
@@ -398,13 +397,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         }
 
         Timber.tag(TAG).v("decision_preview_next end");
-      }
+      });
     });
 
     // Reject current decision
     Bind.click( prev_person_button, () -> {
-      if ( ClickTime.passed( settings ) ) {
-        ClickTime.save( settings );
+      ClickTime.click( settings, () -> {
         Timber.tag(TAG).v("decision_preview_prev");
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-12765
@@ -425,12 +423,11 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           updateAfterButtonPressed();
           EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
         }
-      }
+      });
     });
 
     Bind.click( comment_button, () -> {
-      if ( ClickTime.passed( settings ) ) {
-        ClickTime.save( settings );
+      ClickTime.click( settings, () -> {
         Timber.tag(TAG).d("Comment press handle");
 
         MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
@@ -485,12 +482,11 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         MaterialDialog materialDialog = materialDialogBuilder.build();
 
         materialDialog.show();
-      }
+      });
     });
 
     Bind.click( magnifer, () -> {
-      if ( ClickTime.passed( settings ) ) {
-        ClickTime.save( settings );
+      ClickTime.click( settings, () -> {
         Timber.tag(TAG).d("Magnifier press handle");
 
         Decision decision;
@@ -503,7 +499,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         }
 
         magnifier.show( getFragmentManager(), "DecisionPreviewFragment_as_magnifier");
-      }
+      });
     });
 
     return view;
