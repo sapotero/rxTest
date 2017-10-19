@@ -37,6 +37,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.click.ClickTime;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.click.Bind;
@@ -79,254 +80,258 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
     Bind.menuItemClick( toolbar,
       item -> {
-        CommandFactory.Operation operation;
-        CommandParams params = new CommandParams();
+        if ( ClickTime.passed( settings ) ) {
+          ClickTime.save( settings );
 
-        switch ( item.getItemId() ){
-          case R.id.menu_info_to_the_primary_consideration:
-            Timber.v("primary_consideration");
+          CommandFactory.Operation operation;
+          CommandParams params = new CommandParams();
 
-            showPrimaryConsiderationDialog(activity);
+          switch ( item.getItemId() ){
+            case R.id.menu_info_to_the_primary_consideration:
+              Timber.v("primary_consideration");
 
-            operation = CommandFactory.Operation.INCORRECT;
+              showPrimaryConsiderationDialog(activity);
 
-            break;
-
-          // sent_to_the_report (отправлен на доклад)
-          case R.id.menu_info_delegate_performance:
-            operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
-            params.setPerson( settings.getCurrentUserId() );
-
-            break;
-
-          case R.id.menu_info_to_the_approval_performance:
-            // настройка
-            // Показывать подтверждения о действиях с документом
-            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
-              showFromTheReportDialog();
-            } else {
-              operation = CommandFactory.Operation.FROM_THE_REPORT;
+
+              break;
+
+            // sent_to_the_report (отправлен на доклад)
+            case R.id.menu_info_delegate_performance:
+              operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
               params.setPerson( settings.getCurrentUserId() );
-            }
 
-            break;
+              break;
 
-          // primary_consideration (первичное рассмотрение)
-          case R.id.menu_info_approval_next_person:
-            // настройка
-            // Показывать подтверждения о действиях с документом
-            Timber.tag(TAG).d("Approval next person press handle");
-            operation = CommandFactory.Operation.INCORRECT;
+            case R.id.menu_info_to_the_approval_performance:
+              // настройка
+              // Показывать подтверждения о действиях с документом
+              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+                operation = CommandFactory.Operation.INCORRECT;
+                showFromTheReportDialog();
+              } else {
+                operation = CommandFactory.Operation.FROM_THE_REPORT;
+                params.setPerson( settings.getCurrentUserId() );
+              }
 
-            if ( settings.isActionsConfirm() ){
-              showNextDialog(false);
-            } else {
-              operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-              params.setPerson( "" );
-            }
+              break;
 
-            break;
+            // primary_consideration (первичное рассмотрение)
+            case R.id.menu_info_approval_next_person:
+              // настройка
+              // Показывать подтверждения о действиях с документом
+              Timber.tag(TAG).d("Approval next person press handle");
+              operation = CommandFactory.Operation.INCORRECT;
 
-          case R.id.menu_info_approval_prev_person:
-            // настройка
-            // Показывать подтверждения о действиях с документом
-            Timber.tag(TAG).d("Approval prev person press handle");
-            operation = CommandFactory.Operation.INCORRECT;
+              if ( settings.isActionsConfirm() ){
+                showNextDialog(false);
+              } else {
+                operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
+                params.setPerson( "" );
+              }
 
-            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
-              showPrevDialog(true);
-            } else {
-              operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
-              params.setPerson( "" );
-            }
+              break;
 
-            break;
+            case R.id.menu_info_approval_prev_person:
+              // настройка
+              // Показывать подтверждения о действиях с документом
+              Timber.tag(TAG).d("Approval prev person press handle");
+              operation = CommandFactory.Operation.INCORRECT;
 
-          // approval (согласование проектов документов)
-          case R.id.menu_info_approval_change_person:
-            Timber.tag(TAG).d("Approval change person press handle");
-            operation = CommandFactory.Operation.INCORRECT;
+              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+                showPrevDialog(true);
+              } else {
+                operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
+                params.setPerson( "" );
+              }
 
-            SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
-            Bundle approveBundle = new Bundle();
-            approveBundle.putString("operation", "approve");
-            approveDialogFragment.setArguments(approveBundle);
-            approveDialogFragment.withSearch(true);
-            approveDialogFragment.withConfirm( true );
-            approveDialogFragment.withPrimaryConsideration(false);
-            approveDialogFragment.withChangePerson(true);
-            approveDialogFragment.registerCallBack( this );
-            approveDialogFragment.withDocumentUid( settings.getUid() );
-            approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+              break;
 
-            break;
+            // approval (согласование проектов документов)
+            case R.id.menu_info_approval_change_person:
+              Timber.tag(TAG).d("Approval change person press handle");
+              operation = CommandFactory.Operation.INCORRECT;
 
-          case R.id.menu_info_sign_change_person:
-            Timber.tag(TAG).d("Signing change person press handle");
-            operation = CommandFactory.Operation.INCORRECT;
+              SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
+              Bundle approveBundle = new Bundle();
+              approveBundle.putString("operation", "approve");
+              approveDialogFragment.setArguments(approveBundle);
+              approveDialogFragment.withSearch(true);
+              approveDialogFragment.withConfirm( true );
+              approveDialogFragment.withPrimaryConsideration(false);
+              approveDialogFragment.withChangePerson(true);
+              approveDialogFragment.registerCallBack( this );
+              approveDialogFragment.withDocumentUid( settings.getUid() );
+              approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
-            SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
-            Bundle signBundle = new Bundle();
-            signBundle.putString("operation", "sign");
-            sign.setArguments(signBundle);
-            sign.withSearch(true);
-            sign.withConfirm( true );
-            sign.withPrimaryConsideration(false);
-            sign.withChangePerson(true);
-            sign.registerCallBack( this );
-            sign.withDocumentUid( settings.getUid() );
-            sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+              break;
 
-            break;
+            case R.id.menu_info_sign_change_person:
+              Timber.tag(TAG).d("Signing change person press handle");
+              operation = CommandFactory.Operation.INCORRECT;
 
-          case R.id.menu_info_sign_next_person:
-            Timber.tag(TAG).d("Signing next person press handle");
-            operation = CommandFactory.Operation.INCORRECT;
+              SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
+              Bundle signBundle = new Bundle();
+              signBundle.putString("operation", "sign");
+              sign.setArguments(signBundle);
+              sign.withSearch(true);
+              sign.withConfirm( true );
+              sign.withPrimaryConsideration(false);
+              sign.withChangePerson(true);
+              sign.registerCallBack( this );
+              sign.withDocumentUid( settings.getUid() );
+              sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
-            //resolved https://tasks.n-core.ru/browse/MVDESD-13952
-            // при подписании проекта без ЭО не подписывать
-            // и не перемещать в обработанные
-            if ( hasImages() ){
-              //проверим что все образы меньше 25Мб
-              if ( checkImagesSize() ){
+              break;
 
-                // настройка
-                // Показывать подтверждения о действиях с документом
-                if ( settings.isActionsConfirm() ){
-                  showNextDialog(true);
+            case R.id.menu_info_sign_next_person:
+              Timber.tag(TAG).d("Signing next person press handle");
+              operation = CommandFactory.Operation.INCORRECT;
+
+              //resolved https://tasks.n-core.ru/browse/MVDESD-13952
+              // при подписании проекта без ЭО не подписывать
+              // и не перемещать в обработанные
+              if ( hasImages() ){
+                //проверим что все образы меньше 25Мб
+                if ( checkImagesSize() ){
+
+                  // настройка
+                  // Показывать подтверждения о действиях с документом
+                  if ( settings.isActionsConfirm() ){
+                    showNextDialog(true);
+                  } else {
+                    operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+                    params.setPerson( "" );
+                  }
+
                 } else {
-                  operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-                  params.setPerson( "" );
+                  new MaterialDialog.Builder(context)
+                    .title("Внимание!")
+                    .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                    .positiveText("Продолжить")
+                    .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                    .show();
                 }
 
               } else {
                 new MaterialDialog.Builder(context)
                   .title("Внимание!")
-                  .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                  .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
                   .positiveText("Продолжить")
                   .icon(ContextCompat.getDrawable(context, R.drawable.attention))
                   .show();
               }
 
-            } else {
-              new MaterialDialog.Builder(context)
-                .title("Внимание!")
-                .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
-                .positiveText("Продолжить")
-                .icon(ContextCompat.getDrawable(context, R.drawable.attention))
-                .show();
-            }
+              break;
 
-            break;
-
-          case R.id.menu_info_sign_prev_person:
-            // настройка
-            // Показывать подтверждения о действиях с документом
-            Timber.tag(TAG).d("Signing prev person press handle");
-            operation = CommandFactory.Operation.INCORRECT;
-
-            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
-              showPrevDialog(false);
-            } else {
-              operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
-              params.setPerson( "" );
-            }
-
-            break;
-
-          case R.id.menu_info_decision_create:
-            Timber.tag(TAG).d("Create decision press handle");
-            operation = CommandFactory.Operation.INCORRECT;
-
-            settings.setDecisionActiveUid("0");
-
-            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-            activity.startActivity(create_intent);
-
-            break;
-
-          case R.id.menu_info_decision_edit:
-            Timber.tag(TAG).d("Edit decision press handle");
-            operation = CommandFactory.Operation.INCORRECT;
-
-            EventBus.getDefault().post( new ShowDecisionConstructor() );
-
-            break;
-
-          case R.id.menu_info_shared_to_favorites:
-            operation = CommandFactory.Operation.ADD_TO_FOLDER;
-
-            if ( isFromFavorites() ){
-             operation = CommandFactory.Operation.REMOVE_FROM_FOLDER;
-            }
-
-            // resolved https://tasks.n-core.ru/browse/MPSED-2134
-            // Не работает добавление/удаление в избранное, если перезайти в режимы замещения.
-            // также не работает добавление в избранное в режиме замещения
-            // Ищем папку favorites по логину
-            String favorites = dataStore
-              .select(RFolderEntity.class)
-              .where(RFolderEntity.TYPE.eq("favorites"))
-              .and(RFolderEntity.USER.eq(settings.getLogin()))
-              .get().first().getUid();
-
-            params.setFolder( favorites );
-
-            break;
-
-          case R.id.menu_info_shared_to_control:
-            // настройка
-            // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
-            Timber.tag(TAG).d("Control press handle");
-            operation = CommandFactory.Operation.INCORRECT;
-
-            boolean isCitizenRequest = false;
-
-            if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
-              isCitizenRequest = true;
-            }
-
-            if ( settings.isControlConfirm() && isCitizenRequest ){
-              showToControlDialog();
-
-            } else {
-              operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
-            }
-
-            break;
-
-          case R.id.menu_info_decision_create_with_assignment:
-            // настройка
-            // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
-            Timber.tag(TAG).d("Create with assignment press handle");
-            operation = CommandFactory.Operation.INCORRECT;
-
-            settings.setDecisionWithAssignment(true);
-            settings.setDecisionActiveUid("0");
-            Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
-            activity.startActivity(create_assigment_intent);
-
-            break;
-
-          // resolved https://tasks.n-core.ru/browse/MVDESD-13368
-          // Кнопка "Отклонить" в документах "На рассмотрение" и "Первичное рассмотрение"
-          case R.id.menu_info_report_dismiss:
-            if ( settings.isActionsConfirm() ){
+            case R.id.menu_info_sign_prev_person:
+              // настройка
+              // Показывать подтверждения о действиях с документом
+              Timber.tag(TAG).d("Signing prev person press handle");
               operation = CommandFactory.Operation.INCORRECT;
-              showDismissDialog();
-            } else {
-              operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-            }
 
-            break;
+              if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
+                showPrevDialog(false);
+              } else {
+                operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
+                params.setPerson( "" );
+              }
 
-          default:
-            operation = CommandFactory.Operation.INCORRECT;
-            break;
+              break;
+
+            case R.id.menu_info_decision_create:
+              Timber.tag(TAG).d("Create decision press handle");
+              operation = CommandFactory.Operation.INCORRECT;
+
+              settings.setDecisionActiveUid("0");
+
+              Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+              activity.startActivity(create_intent);
+
+              break;
+
+            case R.id.menu_info_decision_edit:
+              Timber.tag(TAG).d("Edit decision press handle");
+              operation = CommandFactory.Operation.INCORRECT;
+
+              EventBus.getDefault().post( new ShowDecisionConstructor() );
+
+              break;
+
+            case R.id.menu_info_shared_to_favorites:
+              operation = CommandFactory.Operation.ADD_TO_FOLDER;
+
+              if ( isFromFavorites() ){
+                operation = CommandFactory.Operation.REMOVE_FROM_FOLDER;
+              }
+
+              // resolved https://tasks.n-core.ru/browse/MPSED-2134
+              // Не работает добавление/удаление в избранное, если перезайти в режимы замещения.
+              // также не работает добавление в избранное в режиме замещения
+              // Ищем папку favorites по логину
+              String favorites = dataStore
+                .select(RFolderEntity.class)
+                .where(RFolderEntity.TYPE.eq("favorites"))
+                .and(RFolderEntity.USER.eq(settings.getLogin()))
+                .get().first().getUid();
+
+              params.setFolder( favorites );
+
+              break;
+
+            case R.id.menu_info_shared_to_control:
+              // настройка
+              // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
+              Timber.tag(TAG).d("Control press handle");
+              operation = CommandFactory.Operation.INCORRECT;
+
+              boolean isCitizenRequest = false;
+
+              if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
+                isCitizenRequest = true;
+              }
+
+              if ( settings.isControlConfirm() && isCitizenRequest ){
+                showToControlDialog();
+
+              } else {
+                operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
+              }
+
+              break;
+
+            case R.id.menu_info_decision_create_with_assignment:
+              // настройка
+              // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
+              Timber.tag(TAG).d("Create with assignment press handle");
+              operation = CommandFactory.Operation.INCORRECT;
+
+              settings.setDecisionWithAssignment(true);
+              settings.setDecisionActiveUid("0");
+              Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
+              activity.startActivity(create_assigment_intent);
+
+              break;
+
+            // resolved https://tasks.n-core.ru/browse/MVDESD-13368
+            // Кнопка "Отклонить" в документах "На рассмотрение" и "Первичное рассмотрение"
+            case R.id.menu_info_report_dismiss:
+              if ( settings.isActionsConfirm() ){
+                operation = CommandFactory.Operation.INCORRECT;
+                showDismissDialog();
+              } else {
+                operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+              }
+
+              break;
+
+            default:
+              operation = CommandFactory.Operation.INCORRECT;
+              break;
+          }
+
+          operationManager.execute( operation, params );
         }
-
-        operationManager.execute( operation, params );
       }
     );
   }
