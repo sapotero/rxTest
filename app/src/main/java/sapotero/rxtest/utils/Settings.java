@@ -43,6 +43,7 @@ public class Settings implements ISettings {
   private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
   private static final String IMAGE_INDEX_KEY = "image.index";
+  private static final String CRYPTO_INDEX_KEY = "crypto.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
@@ -165,6 +166,7 @@ public class Settings implements ISettings {
   private Preference<String> updateTime;
   private Preference<Boolean> isStartRegularRefresh;
   private Preference<Long> lastClickTime;
+  private Preference<Integer> cryptoStoreIndex;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -259,6 +261,7 @@ public class Settings implements ISettings {
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
+    cryptoStoreIndex               = settings.getInteger(CRYPTO_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
@@ -275,6 +278,16 @@ public class Settings implements ISettings {
     isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
     isStartRegularRefresh          = settings.getBoolean(START_REGULAR_REFRESH_KEY);
     lastClickTime                  = settings.getLong(LAST_CLICK_TIME_KEY);
+  }
+
+  @Override
+  public int getCryptoStoreIndex() {
+    return getInteger(cryptoStoreIndex);
+  }
+
+  @Override
+  public void setCryptoStoreIndex(int index) {
+    setInteger( cryptoStoreIndex, index );
   }
 
   @Override
@@ -446,6 +459,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<String> getHostPreferences() {
+    return host;
+  }
+
+  @Override
   public void setHost(String value) {
     setString(host, value);
   }
@@ -495,6 +513,11 @@ public class Settings implements ISettings {
   @Override
   public String getUpdateTime() {
     return getString(updateTime);
+  }
+
+  @Override
+  public Preference<String> getUpdateTimePreference() {
+    return updateTime;
   }
 
   @Override
@@ -736,6 +759,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<String> getInfocardFontSizePreference() {
+    return infocard_fontSize;
+  }
+
+  @Override
   public void setInfocardFontSize(String value) {
     setString(infocard_fontSize, value);
   }
@@ -808,6 +836,11 @@ public class Settings implements ISettings {
   @Override
   public String getMaxImageSize() {
     return getString(maxImageSize);
+  }
+
+  @Override
+  public Preference<String> getMaxImageSizePreference() {
+    return maxImageSize;
   }
 
   @Override

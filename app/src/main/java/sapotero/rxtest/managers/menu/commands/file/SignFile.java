@@ -1,5 +1,6 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
@@ -15,6 +17,7 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.ImagesService;
+import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import timber.log.Timber;
 
@@ -81,7 +84,23 @@ public class SignFile extends AbstractCommand {
     Timber.tag(TAG).d("Generating sign");
 
 
-    String file_sign = getSign();
+//    String file_sign = getSign();
+    String file_sign = null;
+
+    File file = null;
+    try {
+      file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), getParams().getFilePath() );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+
+    try {
+      file_sign = MainService.getFakeSign( settings.getPin(), file );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
 
     if (file_sign != null) {
       Timber.tag(TAG).d("Sign generated");
@@ -97,6 +116,7 @@ public class SignFile extends AbstractCommand {
 
       Timber.tag(TAG).d("Sending image sign request");
 
+      String finalFile_sign = file_sign;
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
@@ -104,7 +124,7 @@ public class SignFile extends AbstractCommand {
             Timber.tag(TAG).i("signed: %s", data);
             queueManager.setExecutedRemote(this);
             setSignSuccess( getParams().getImageId() );
-            saveImageSign( file_sign );
+            saveImageSign(finalFile_sign);
             setUpdatedAt();
           },
           error -> onError()
