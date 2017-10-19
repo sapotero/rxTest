@@ -144,11 +144,11 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
 
-    Bind.click( fullscreen, this::fullscreen );
-    Bind.click( openPdf, this::openInAnotherApp );
-    Bind.click( openInAnotherApp, this::openInAnotherApp );
-    Bind.click( reloadImageButton, this::reloadImage );
-    Bind.click( reloadImageNoFreeSpace, this::reloadImage );
+    Bind.click( fullscreen, () -> ClickTime.click( settings, this::fullscreen ) );
+    Bind.click( openPdf, () -> ClickTime.click( settings, this::openInAnotherApp ) );
+    Bind.click( openInAnotherApp, () -> ClickTime.click( settings, this::openInAnotherApp ) );
+    Bind.click( reloadImageButton, () -> ClickTime.click( settings, this::reloadImage ) );
+    Bind.click( reloadImageNoFreeSpace, () -> ClickTime.click( settings, this::reloadImage ) );
 
     new Handler().postDelayed(this::updateDocument, 200);
 //    updateDocument();
