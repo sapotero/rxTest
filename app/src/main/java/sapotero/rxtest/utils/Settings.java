@@ -43,6 +43,7 @@ public class Settings implements ISettings {
   private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
   private static final String IMAGE_INDEX_KEY = "image.index";
+  private static final String CRYPTO_INDEX_KEY = "crypto.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
@@ -163,6 +164,7 @@ public class Settings implements ISettings {
   private Preference<Boolean> isTabChanged;
   private Preference<String> updateTime;
   private Preference<Boolean> isStartRegularRefresh;
+  private Preference<Integer> cryptoStoreIndex;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -257,6 +259,7 @@ public class Settings implements ISettings {
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
+    cryptoStoreIndex               = settings.getInteger(CRYPTO_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
@@ -272,6 +275,16 @@ public class Settings implements ISettings {
     isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
     isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
     isStartRegularRefresh          = settings.getBoolean(START_REGULAR_REFRESH_KEY);
+  }
+
+  @Override
+  public int getCryptoStoreIndex() {
+    return getInteger(cryptoStoreIndex);
+  }
+
+  @Override
+  public void setCryptoStoreIndex(int index) {
+    setInteger( cryptoStoreIndex, index );
   }
 
   @Override

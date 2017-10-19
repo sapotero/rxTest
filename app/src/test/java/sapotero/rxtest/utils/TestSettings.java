@@ -83,6 +83,16 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public int getCryptoStoreIndex() {
+    return 0;
+  }
+
+  @Override
+  public void setCryptoStoreIndex(int index) {
+
+  }
+
+  @Override
   public boolean isShowPrimaryConsideration() {
     return showPrimaryConsideration;
   }

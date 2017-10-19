@@ -123,7 +123,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 //          KeyStoreType.saveCurrentType(keyStoreTypeList.startTransactionFor(which));
 
           if ( which >= 0 && which < keyStoreTypeList.size() ) {
-            EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which)));
+            EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which), which));
           }
 
           return true;

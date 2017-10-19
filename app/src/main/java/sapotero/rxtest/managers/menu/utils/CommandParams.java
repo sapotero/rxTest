@@ -27,6 +27,7 @@ public class CommandParams implements Serializable {
   private String imageId;
   private String uuid;
   private String label;
+  private String filePath;
 
   private boolean returnedOldValue;
   private boolean againOldValue;
@@ -40,6 +41,15 @@ public class CommandParams implements Serializable {
     setDocument( settings.getUid() );
     setStatusCode( settings.getStatusCode() );
     setUuid( UUID.randomUUID().toString() );
+  }
+
+  public String getFilePath() {
+    return filePath;
+  }
+
+  public CommandParams setFilePath(String filePath) {
+    this.filePath = filePath;
+    return this;
   }
 
   public String getLogin() {
