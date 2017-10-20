@@ -435,6 +435,12 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         setControlMenuItemVisible( false );
       }
 
+      // resolved https://tasks.n-core.ru/browse/MPSED-2272
+      // Запретить подписывать проекты при входе по логину/паролю
+      if ( !settings.isSignedWithDc() ) {
+        setEnabled( R.id.menu_info_sign_next_person, false );
+      }
+
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
       // Если общие документы
       if ( isShared() ) {
