@@ -52,7 +52,6 @@ public class MemoryStore implements Processable{
   private boolean withDB = true;
 
   public MemoryStore() {
-    EventBus.getDefault().register(this);
   }
 
   public MemoryStore withDB(Boolean withDB){
@@ -76,6 +75,7 @@ public class MemoryStore implements Processable{
 
     if (withDB){
       loadFromDB();
+      EventBus.getDefault().register(this);
     }
     startSub();
 
