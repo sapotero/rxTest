@@ -302,6 +302,10 @@ public class UpdateDocumentJob extends DocumentJob {
             if ( !Objects.equals( existingImageEntity.getMd5(), newImageEntity.getMd5() ) ) {
               existingImageEntity.setToDeleteFile( true );
               newImageEntity.setToLoadFile( true );
+
+            } else if ( existingImageEntity.isNoFreeSpace() != null && existingImageEntity.isNoFreeSpace() ) {
+              // If MD5 not changed, but image file has not been loaded due to lack of free space, mark image file to be loaded
+              newImageEntity.setToLoadFile( true );
             }
 
           } else {
