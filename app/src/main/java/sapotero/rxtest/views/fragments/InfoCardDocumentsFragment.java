@@ -86,7 +86,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   @BindView(R.id.info_card_pdf_open) FrameLayout openPdf;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
-  @BindView(R.id.no_free_space) FrameLayout noFreeSpace;
+  @BindView(R.id.no_free_space_wrapper) LinearLayout noFreeSpace;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
@@ -427,13 +427,17 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   private void showNoFreeSpace() {
+    pdfView.setVisibility(View.GONE);
     noFreeSpace.setVisibility(View.VISIBLE);
+    page_counter.setVisibility(View.INVISIBLE);
+
+    updateDocumentCount();
+    updateVisibility();
   }
 
   private void updateVisibility() {
     hideZoom();
     deletedImage.setVisibility(View.GONE);
-    noFreeSpace.setVisibility(View.GONE);
   }
 
   private void hideZoom() {

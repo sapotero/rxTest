@@ -176,23 +176,25 @@ abstract class DocumentJob extends BaseJob {
       long totalSize = getTotalImagesSize( images );
       long usableSpace = getUsableSpace();
 
+      usableSpace = 1000;
+
       Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * totalSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * totalSize);
 
       for (RImage _image : images) {
         RImageEntity image = (RImageEntity) _image;
 
-        // resolved https://tasks.n-core.ru/browse/MPSED-2205
-        // Работа МП при нехватке места на планшете
-        // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х суммарный_размер_образов_в_документе
-        if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * totalSize ) {
-          // resolved https://tasks.n-core.ru/browse/MPSED-2213
-          // Сделать интерсект образов. Загружать только те образы, у которых поменялся MD5 (или которых раньше не было в документе)
-          if ( image.isToLoadFile() != null && image.isToLoadFile() ) {
+        // resolved https://tasks.n-core.ru/browse/MPSED-2213
+        // Сделать интерсект образов. Загружать только те образы, у которых поменялся MD5 (или которых раньше не было в документе)
+        if ( image.isToLoadFile() != null && image.isToLoadFile() ) {
+          // resolved https://tasks.n-core.ru/browse/MPSED-2205
+          // Работа МП при нехватке места на планшете
+          // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х суммарный_размер_образов_в_документе
+          if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * totalSize ) {
             settings.addTotalDocCount(1);
             jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+          } else {
+            setNoFreeSpace( image );
           }
-        } else {
-          setNoFreeSpace( image );
         }
       }
     }

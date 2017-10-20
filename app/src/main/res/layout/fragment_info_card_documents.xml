@@ -58,6 +58,32 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/no_free_space_wrapper"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:text="@string/no_free_space"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+            <Button
+                android:id="@+id/info_card_pdf_reload_no_free_space"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/deleted_image_load"
+                style="@style/Widget.AppCompat.Button.Borderless">
+            </Button>
+
+        </LinearLayout>
+
         <FrameLayout
             android:id="@+id/info_card_pdf_wrapper"
             android:layout_width="match_parent"
@@ -217,46 +243,6 @@
 
         <Button
             android:id="@+id/info_card_pdf_reload"
-            android:text="@string/deleted_image_load"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/date_offset"
-            />
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/no_free_space"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/md_grey_50"
-        android:visibility="gone"
-        android:layout_alignParentTop="true">
-
-        <TextView
-            android:text="@string/no_free_space"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="24dp"
-            android:paddingBottom="8sp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="@color/md_grey_800"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif"
-            android:textStyle="normal"
-            android:textSize="24sp"
-            android:padding="@dimen/date_offset"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_marginBottom="48sp"
-            />
-
-        <Button
-            android:id="@+id/info_card_pdf_reload_no_free_space"
             android:text="@string/deleted_image_load"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
