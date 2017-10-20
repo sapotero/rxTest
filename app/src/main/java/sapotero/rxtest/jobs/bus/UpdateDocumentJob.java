@@ -10,9 +10,12 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
+import java.util.Set;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -165,15 +168,17 @@ public class UpdateDocumentJob extends DocumentJob {
         copyDocumentState( documentNew, documentExisting );
         boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
 
-        // Delete existing entity and all linked data from DB
-        new Deleter().deleteDocument( documentExisting, TAG );
-
         // Update fields of the new entity with loaded data
         DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
         documentMapper.setBaseFields( documentNew, documentReceived );
         documentMapper.setJournal( documentNew, index );
         documentMapper.setFilter( documentNew, filter );
         documentMapper.setNestedFields( documentNew, documentReceived, isFromProcessedFolder );
+
+        intersectImages( documentExisting, documentNew );
+
+        // Delete existing entity and all linked data from DB
+        new Deleter().deleteDocument( documentExisting, false, TAG );
 
         boolean isSetProcessedFalse = true;
 
@@ -264,6 +269,63 @@ public class UpdateDocumentJob extends DocumentJob {
     documentNew.setFilter( documentExisting.getFilter() );
     documentNew.setDocumentType( documentExisting.getDocumentType() );
     documentNew.setAddressedToType( documentExisting.getAddressedToType() );
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2213
+  // Сделать интерсект образов. Загружать только те образы, у которых поменялся MD5 (или которых раньше не было в документе)
+  private void intersectImages(RDocumentEntity documentExisting, RDocumentEntity documentNew) {
+    if ( documentExisting.getImages() != null && documentNew.getImages() != null ) {
+
+      // Mark image files to be deleted
+      for ( RImage _image : documentExisting.getImages() ) {
+        RImageEntity existingImageEntity = (RImageEntity) _image;
+        if ( existingImageEntity.getImageId() != null ) {
+          // If existing image is not present in new document, mark it to be deleted
+          if ( getImageByUid( documentNew.getImages(), existingImageEntity.getImageId() ) == null ) {
+            existingImageEntity.setToDeleteFile( true );
+          }
+        }
+      }
+
+      // Mark image files to be loaded
+      for ( RImage _image : documentNew.getImages() ) {
+        RImageEntity newImageEntity = (RImageEntity) _image;
+        // At first mark new image file not to be loaded
+        newImageEntity.setToLoadFile( false );
+
+        if ( newImageEntity.getImageId() != null ) {
+          RImageEntity existingImageEntity = getImageByUid( documentExisting.getImages(), newImageEntity.getImageId() );
+
+          // If image file exists
+          if ( existingImageEntity != null ) {
+            // And MD5 changed, mark new image file to be loaded and old image file to be deleted
+            if ( !Objects.equals( existingImageEntity.getMd5(), newImageEntity.getMd5() ) ) {
+              existingImageEntity.setToDeleteFile( true );
+              newImageEntity.setToLoadFile( true );
+            }
+
+          } else {
+            // If image file does not exist, mark it to be loaded
+            newImageEntity.setToLoadFile( true );
+          }
+        }
+      }
+
+    }
+  }
+
+  private RImageEntity getImageByUid(Set<RImage> images, String imageId) {
+    RImageEntity result = null;
+
+    for ( RImage _image : images ) {
+      RImageEntity imageEntity = (RImageEntity) _image;
+      if ( Objects.equals( imageEntity.getImageId(), imageId ) ) {
+        result = imageEntity;
+        break;
+      }
+    }
+
+    return result;
   }
 
   private void setReturnedRejectedAgainLabel(RDocumentEntity document) {

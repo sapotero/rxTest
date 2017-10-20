@@ -489,7 +489,7 @@ public class Processor {
       store.getDocuments().remove( uid );
       Timber.tag("RecyclerViewRefresh").d("Processor updateAndDropFavorite: sending event to update MainActivity");
       EventBus.getDefault().post( new UpdateCountEvent() );
-      new Deleter().deleteDocument( uid, TAG );
+      new Deleter().deleteDocument( uid, true, TAG );
 
     } else {
       settings.addTotalDocCount(1);

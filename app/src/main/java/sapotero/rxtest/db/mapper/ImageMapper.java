@@ -25,6 +25,8 @@ public class ImageMapper extends AbstractMapper<Image, RImageEntity> {
     entity.setDeleted(false);
     entity.setFileName( String.format( "%s_%s", entity.getImageId(), entity.getTitle() ) );
     entity.setNoFreeSpace(false);
+    entity.setToDeleteFile(false);
+    entity.setToLoadFile(true);
 
     return entity;
   }

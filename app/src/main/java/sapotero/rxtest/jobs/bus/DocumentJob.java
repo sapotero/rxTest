@@ -138,7 +138,7 @@ abstract class DocumentJob extends BaseJob {
       } else {
         // If not link and exists and is from links, delete existing and insert new instead
         if ( existingDoc.isFromLinks() ) {
-          new Deleter().deleteDocument(existingDoc, TAG);
+          new Deleter().deleteDocument(existingDoc, true, TAG);
           insert(documentReceived, documentToSave, isLink, false, TAG);
         }
       }
@@ -185,8 +185,12 @@ abstract class DocumentJob extends BaseJob {
         // Работа МП при нехватке места на планшете
         // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х суммарный_размер_образов_в_документе
         if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * totalSize ) {
-          settings.addTotalDocCount(1);
-          jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+          // resolved https://tasks.n-core.ru/browse/MPSED-2213
+          // Сделать интерсект образов. Загружать только те образы, у которых поменялся MD5 (или которых раньше не было в документе)
+          if ( image.isToLoadFile() != null && image.isToLoadFile() ) {
+            settings.addTotalDocCount(1);
+            jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+          }
         } else {
           setNoFreeSpace( image );
         }
