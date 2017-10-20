@@ -24,7 +24,7 @@ import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
-import sapotero.rxtest.utils.transducers.ReduceTest;
+import sapotero.rxtest.utils.transducers.doc.TransducerGroup;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -117,7 +117,7 @@ public class DBQueryBuilder {
       List<InMemoryDocument> _filterd_docs = _docs.toList();
 
       long startTime = System.nanoTime();
-      HashMap<String, List<String>> result = ReduceTest.group(_filterd_docs);
+      HashMap<String, List<String>> result = TransducerGroup.group(_filterd_docs);
       long endTime = System.nanoTime();
       long duration = (endTime - startTime)/1000;
       Timber.tag(TAG).d("\nREDUCER\n%s\n  ** %sus **\n\n", new Gson().toJson(result), duration);
@@ -127,7 +127,7 @@ public class DBQueryBuilder {
       List<String> sq_map = _docs.map(InMemoryDocument::getUid).toList();
       endTime = System.nanoTime();
       duration = (endTime - startTime)/1000;
-      Timber.tag(TAG).d("\nMAP\n%s\n  ** %sus **\n\n", new Gson().toJson(sq_map), duration);
+      Timber.tag(TAG).d("\nMAP\n%s\n  ** %sus **\n\n", sq_map.size(), duration);
 
 
       startTime = System.nanoTime();

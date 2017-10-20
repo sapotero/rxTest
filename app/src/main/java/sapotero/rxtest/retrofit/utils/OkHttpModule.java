@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.ConnectionPool;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,7 +27,8 @@ public class OkHttpModule {
   OkHttpClient provideOkHttpModule(ISettings settings) {
     return  new OkHttpClient.Builder()
       .readTimeout(60,    TimeUnit.SECONDS)
-      .connectTimeout(60, TimeUnit.SECONDS)
+      .connectTimeout(10, TimeUnit.SECONDS)
+      .connectionPool( new ConnectionPool(1,5,TimeUnit.SECONDS))
       .addNetworkInterceptor(
         new HttpLoggingInterceptor().setLevel(
           HttpLoggingInterceptor.Level.BASIC

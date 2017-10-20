@@ -9,7 +9,7 @@ import java.util.List;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.transducers.Reducer;
 
-public class SortUid implements Reducer<Pair<String, InMemoryDocument>, HashMap<String, List<InMemoryDocument>>> {
+public class Sort implements Reducer<Pair<String, InMemoryDocument>, HashMap<String, List<InMemoryDocument>>> {
 
   public HashMap<String, List<InMemoryDocument>> init() {
     return new HashMap<>();

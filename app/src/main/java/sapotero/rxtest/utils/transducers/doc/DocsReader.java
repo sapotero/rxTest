@@ -1,15 +1,17 @@
-package sapotero.rxtest.utils.transducers;
+package sapotero.rxtest.utils.transducers.doc;
 
 import java.util.Iterator;
 import java.util.List;
 
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.transducers.Reducable;
+import sapotero.rxtest.utils.transducers.Reducer;
 
-class DocsReader implements Reducable<InMemoryDocument> {
+public class DocsReader implements Reducable<InMemoryDocument> {
 
   private final List<InMemoryDocument>  docs;
 
-  DocsReader(List<InMemoryDocument> docs) {
+  public DocsReader(List<InMemoryDocument> docs) {
     this.docs = docs;
   }
 
