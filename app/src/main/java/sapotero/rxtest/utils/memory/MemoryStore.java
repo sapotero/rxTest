@@ -245,7 +245,7 @@ public class MemoryStore implements Processable{
   }
 
 
-
+  // refactor
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateIMDEvent event) {
     if (event.doc != null){
