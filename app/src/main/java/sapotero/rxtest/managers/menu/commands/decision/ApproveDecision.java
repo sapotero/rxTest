@@ -92,7 +92,7 @@ public class ApproveDecision extends DecisionCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    String sign = getSign();
+    String sign = getSign(null);
 
     if ( sign != null ) {
       Decision _decision = getParams().getDecisionModel();

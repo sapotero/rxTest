@@ -82,7 +82,7 @@ public class AddAndApproveDecision extends DecisionCommand {
 
     decision.setApproved(true);
 
-    String sign = getSign();
+    String sign = getSign(null);
 
     if ( sign != null ) {
       decision.setSign(sign);

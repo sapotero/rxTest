@@ -88,7 +88,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     _decision.setDocumentUid( null );
     _decision.setApproved(true);
 
-    String sign = getSign();
+    String sign = getSign(null);
 
     if ( sign != null ) {
 //      _decision.setSign( sign );

@@ -17,7 +17,6 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.ImagesService;
-import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import timber.log.Timber;
 
@@ -83,10 +82,6 @@ public class SignFile extends AbstractCommand {
 
     Timber.tag(TAG).d("Generating sign");
 
-
-//    String file_sign = getSign();
-    String file_sign = null;
-
     File file = null;
     try {
       file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), getParams().getFilePath() );
@@ -94,13 +89,7 @@ public class SignFile extends AbstractCommand {
       e.printStackTrace();
     }
 
-
-    try {
-      file_sign = MainService.getFakeSign( settings.getPin(), file );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
+    String file_sign = getSign( file );
 
     if (file_sign != null) {
       Timber.tag(TAG).d("Sign generated");
@@ -116,7 +105,6 @@ public class SignFile extends AbstractCommand {
 
       Timber.tag(TAG).d("Sending image sign request");
 
-      String finalFile_sign = file_sign;
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
@@ -124,7 +112,7 @@ public class SignFile extends AbstractCommand {
             Timber.tag(TAG).i("signed: %s", data);
             queueManager.setExecutedRemote(this);
             setSignSuccess( getParams().getImageId() );
-            saveImageSign(finalFile_sign);
+            saveImageSign(file_sign);
             setUpdatedAt();
           },
           error -> onError()
@@ -162,7 +150,7 @@ public class SignFile extends AbstractCommand {
       .insert(task)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> Timber.tag(TAG).v("Saved image sign %s [ %s ]", data.getImageId(), data.getDocumentId() ),
         Timber::e

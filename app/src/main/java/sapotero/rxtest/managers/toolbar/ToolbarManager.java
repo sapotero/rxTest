@@ -373,7 +373,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         }
 
         Timber.tag(TAG).e("MAX: %s | CURRENT: %s", max_size, image.getSize() );
-        if (image.getSize() > max_size){
+        if ( image.getSize() != null && image.getSize() > max_size ) {
           result = false;
         }
       }
@@ -433,6 +433,12 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         // resolved https://tasks.n-core.ru/browse/MVDESD-12765
         // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
         setControlMenuItemVisible( false );
+      }
+
+      // resolved https://tasks.n-core.ru/browse/MPSED-2272
+      // Запретить подписывать проекты при входе по логину/паролю
+      if ( !settings.isSignedWithDc() ) {
+        setEnabled( R.id.menu_info_sign_next_person, false );
       }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
