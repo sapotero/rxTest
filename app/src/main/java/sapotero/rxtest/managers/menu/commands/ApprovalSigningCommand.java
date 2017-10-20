@@ -29,7 +29,7 @@ public abstract class ApprovalSigningCommand extends OperationResultCommand {
       comment = getParams().getComment();
     }
 
-    String sign = getSign();
+    String sign = getSign(null);
 
     Observable<OperationResult> info;
 

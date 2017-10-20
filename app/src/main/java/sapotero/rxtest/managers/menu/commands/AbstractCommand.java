@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.acra.ACRA;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
@@ -100,15 +101,14 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .build();
   }
 
-  public String getSign() {
+  public String getSign(File file) {
     String sign = null;
-
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-14117
     // При входе по логин/паролю давать возможность подписывать документы
     if ( settings.isSignedWithDc() ) {
       try {
-        sign = MainService.getFakeSign( getParams().getPin(), null );
+        sign = MainService.getFakeSign( getParams().getPin(), file );
       } catch (Exception e) {
         e.printStackTrace();
         ACRA.getErrorReporter().handleSilentException(e);
