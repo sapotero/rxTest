@@ -373,7 +373,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
         }
 
         Timber.tag(TAG).e("MAX: %s | CURRENT: %s", max_size, image.getSize() );
-        if (image.getSize() > max_size){
+        if ( image.getSize() != null && image.getSize() > max_size ) {
           result = false;
         }
       }
