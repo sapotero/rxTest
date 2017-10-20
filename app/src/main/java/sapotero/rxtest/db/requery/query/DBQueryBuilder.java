@@ -120,7 +120,8 @@ public class DBQueryBuilder {
       HashMap<String, List<String>> result = TransducerGroup.group(_filterd_docs);
       long endTime = System.nanoTime();
       long duration = (endTime - startTime)/1000;
-      Timber.tag(TAG).d("\nREDUCER\n%s\n  ** %sus **\n\n", new Gson().toJson(result), duration);
+//      Timber.tag(TAG).d("\nREDUCER\n%s\n  ** %sus **\n\n", new Gson().toJson(result), duration);
+      Timber.tag(TAG).d("\nREDUCER\n%s\n  ** %sus **\n\n", result.size(), duration);
 
 
       startTime = System.nanoTime();

@@ -2,6 +2,8 @@ package sapotero.rxtest.utils.memory;
 
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -19,6 +21,7 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.document.UpdateIMDEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -49,6 +52,7 @@ public class MemoryStore implements Processable{
   private boolean withDB = true;
 
   public MemoryStore() {
+    EventBus.getDefault().register(this);
   }
 
   public MemoryStore withDB(Boolean withDB){
@@ -238,5 +242,28 @@ public class MemoryStore implements Processable{
       .execute();
 
 //    counterRecreate();
+  }
+
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateIMDEvent event) {
+    if (event.doc != null){
+
+      if ( Objects.equals( event.doc.getUser(), settings.getLogin() ) ) {
+        documents.put( event.doc.getUid(), event.doc );
+        Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext() for %s", event.doc.getUid());
+        pub.onNext( event.doc );
+
+        if ( event.doc.isUpdatedFromDB() ) {
+          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( event.doc.getUid() ) );
+        }
+      }
+
+      Timber.tag("RecyclerViewRefresh").d("MemoryStore: sending event to update MainActivity");
+      EventBus.getDefault().post( new UpdateCountEvent() );
+
+    }
+
   }
 }
