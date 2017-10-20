@@ -131,7 +131,7 @@ public class NextPerson extends ApprovalSigningCommand {
           result = NOT_ALL_IMAGES_SIGNED;
           if ( !signImage.isSigning() ) {
             Timber.tag(TAG).e("Creating image sign task");
-            addImageSignTask( image, String.format( "%s_%s", image.getImageId(), image.getTitle() ) );
+            addImageSignTask( image );
             setSigning( image.getImageId() );
           }
         }
@@ -172,14 +172,15 @@ public class NextPerson extends ApprovalSigningCommand {
       .value();
   }
 
-  private void addImageSignTask(RImageEntity image, String filePath) {
+  private void addImageSignTask(RImageEntity image) {
     Timber.tag(TAG).e("addImageSignTask");
 
     CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
     CommandParams params = new CommandParams();
     params.setLabel( image.getTitle() );
     params.setImageId( image.getImageId() );
-    params.setFilePath( filePath );
+    params.setFilePath( image.getFileName() );
+    params.setDocument( getParams().getDocument() );
     Command command = operation.getCommand(null, params);
     Timber.tag(TAG).e("image: %s", getParams().getDocument());
     queueManager.add(command);
