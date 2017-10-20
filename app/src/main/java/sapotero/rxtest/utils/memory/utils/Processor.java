@@ -23,6 +23,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
+import sapotero.rxtest.events.document.UpdateIMDEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -200,7 +201,8 @@ public class Processor {
     }
 
     Timber.tag(TAG).d("Transaction sub.onNext() for %s", transaction.commit().getUid());
-    sub.onNext( transaction.commit() );
+//    sub.onNext( transaction.commit() );
+    EventBus.getDefault().post( new UpdateIMDEvent(transaction.commit()) );
   }
 
   private void validate(Document document) {

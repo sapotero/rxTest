@@ -157,6 +157,8 @@ public final class EsdApplication extends Application {
     initComponents();
 
     AnnotationTest.getInstance();
+
+
   }
 
   private void initComponents() {
