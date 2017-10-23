@@ -518,6 +518,8 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         resetNoFreeSpaceInDb( image.getImageId() );
         loadImage(image);
         showPdf();
+      } else {
+        Toast.makeText(getContext(), R.string.no_free_space, Toast.LENGTH_SHORT).show();
       }
     }
   }
