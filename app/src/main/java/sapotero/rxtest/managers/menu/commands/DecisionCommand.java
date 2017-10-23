@@ -51,8 +51,8 @@ public abstract class DecisionCommand extends AbstractCommand {
       json_m
     );
 
-    Timber.tag(TAG).e("DECISION");
-    Timber.tag(TAG).e("%s", json_m);
+//    Timber.tag(TAG).e("DECISION");
+//    Timber.tag(TAG).e("%s", json_m);
 
     Retrofit retrofit = getRetrofit();
     DocumentService operationService = retrofit.create( DocumentService.class );
@@ -69,7 +69,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     wrapper.setDecision(decision);
 
     String json_d = new Gson().toJson( wrapper );
-    Timber.w("decision_json: %s", json_d);
+//    Timber.w("decision_json: %s", json_d);
 
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),
@@ -233,7 +233,7 @@ public abstract class DecisionCommand extends AbstractCommand {
 
   protected void updateInDb() {
     Decision dec = getParams().getDecisionModel();
-    Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
+//    Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
 
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
