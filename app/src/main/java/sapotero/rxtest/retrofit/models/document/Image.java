@@ -36,6 +36,8 @@ public class Image implements Serializable {
     private transient boolean deleted = false;
     private transient String fileName = "";
     private transient boolean noFreeSpace = false;
+    private transient String imageId;
+    private transient int idInDb;
 
     public boolean isDeleted() {
         return deleted;
@@ -203,5 +205,21 @@ public class Image implements Serializable {
 
     public void setNoFreeSpace(boolean noFreeSpace) {
         this.noFreeSpace = noFreeSpace;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String id) {
+        this.imageId = id;
+    }
+
+    public int getIdInDb() {
+        return idInDb;
+    }
+
+    public void setIdInDb(int idInDb) {
+        this.idInDb = idInDb;
     }
 }
