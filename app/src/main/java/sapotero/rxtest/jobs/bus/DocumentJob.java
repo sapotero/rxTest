@@ -176,8 +176,6 @@ abstract class DocumentJob extends BaseJob {
       long totalSize = getTotalImagesSize( images );
       long usableSpace = getUsableSpace();
 
-      usableSpace = 1000;
-
       Timber.tag("DownloadFileJob").d("Usable space = %s, IMAGE_SIZE_MULTIPLIER * totalSize = %s", usableSpace, IMAGE_SIZE_MULTIPLIER * totalSize);
 
       for (RImage _image : images) {
@@ -191,7 +189,7 @@ abstract class DocumentJob extends BaseJob {
           // Свободное место должно быть не меньше, чем IMAGE_SIZE_MULTIPLIER х суммарный_размер_образов_в_документе
           if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * totalSize ) {
             settings.addTotalDocCount(1);
-            jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getId(), login ) );
+            jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getImageId(), login ) );
           } else {
             setNoFreeSpace( image );
           }
@@ -220,12 +218,10 @@ abstract class DocumentJob extends BaseJob {
   private void setNoFreeSpace(RImageEntity image) {
     // Set no free space flag in RImageEntity to update document in MemoryStore (in doAfterUpdate)
     image.setNoFreeSpace( true );
-    image.setError( true );
 
     // Set no free space flag in DB
     dataStore
       .update(RImageEntity.class)
-      .set(RImageEntity.ERROR, true)
       .set(RImageEntity.NO_FREE_SPACE, true)
       .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }

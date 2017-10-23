@@ -47,7 +47,6 @@ public class ImageMapper extends AbstractMapper<Image, RImageEntity> {
     model.setFileName(entity.getFileName());
     model.setNoFreeSpace(entity.isNoFreeSpace());
     model.setImageId(entity.getImageId());
-    model.setIdInDb(entity.getId());
 
     return model;
   }

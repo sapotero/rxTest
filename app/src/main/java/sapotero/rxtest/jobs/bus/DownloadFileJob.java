@@ -31,7 +31,7 @@ import timber.log.Timber;
 
 public class DownloadFileJob  extends BaseJob {
 
-  private final int rImageId;
+  private String imageId;
   private String TAG = this.getClass().getSimpleName();
   public static final int PRIORITY = 10;
 
@@ -40,12 +40,12 @@ public class DownloadFileJob  extends BaseJob {
   private String fileName;
   private RImageEntity image;
 
-  public DownloadFileJob(String host, String strUrl, String fileName, int id, String login) {
+  public DownloadFileJob(String host, String strUrl, String fileName, String imageId, String login) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
-    this.rImageId = id;
+    this.imageId = imageId;
     this.login = login;
   }
 
@@ -58,7 +58,7 @@ public class DownloadFileJob  extends BaseJob {
   public void onRun() throws Throwable {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Запускаем job только если логин не сменился (режим замещения)
-      Timber.tag(TAG).d("Login changed, quit onRun for image %s", rImageId);
+      Timber.tag(TAG).d("Login changed, quit onRun for image %s", imageId);
       EventBus.getDefault().post( new StepperLoadDocumentEvent("Quit load file: " + fileName) );
       return;
     }
@@ -100,7 +100,7 @@ public class DownloadFileJob  extends BaseJob {
   private RImageEntity getImage(){
     image = dataStore
       .select(RImageEntity.class)
-      .where(RImageEntity.ID.eq(rImageId))
+      .where(RImageEntity.IMAGE_ID.eq( imageId ))
       .get().firstOrNull();
     return image;
   }

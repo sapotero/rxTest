@@ -541,13 +541,12 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   private void resetNoFreeSpaceInDb(String imageId) {
     dataStore
       .update(RImageEntity.class)
-      .set(RImageEntity.ERROR, false)
       .set(RImageEntity.NO_FREE_SPACE, false)
       .where(RImageEntity.IMAGE_ID.eq( imageId )).get().value();
   }
 
   private void loadImage(Image image) {
-    jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getIdInDb(), settings.getLogin() ) );
+    jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getImageId(), settings.getLogin() ) );
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
