@@ -44,13 +44,17 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.jobs.bus.DownloadFileJob;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
@@ -70,10 +74,12 @@ import timber.log.Timber;
 public class InfoCardDocumentsFragment extends PreviewFragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   public static final int REQUEST_CODE_INDEX = 1;
+  private static final int IMAGE_SIZE_MULTIPLIER = 5;
 
   @Inject ISettings settings;
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.pdfView) PDFView pdfView;
 
@@ -86,7 +92,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   @BindView(R.id.info_card_pdf_open) FrameLayout openPdf;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
-  @BindView(R.id.no_free_space) FrameLayout noFreeSpace;
+  @BindView(R.id.no_free_space_wrapper) LinearLayout noFreeSpace;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
@@ -122,6 +128,8 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   private Subscription reload;
   private boolean canScroll = true;
 
+  private InMemoryDocument document;
+
   public InfoCardDocumentsFragment() {
     swipeUtil = new SwipeUtil();
   }
@@ -148,7 +156,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     Bind.click( openPdf, () -> ClickTime.click( settings, this::openInAnotherApp ) );
     Bind.click( openInAnotherApp, () -> ClickTime.click( settings, this::openInAnotherApp ) );
     Bind.click( reloadImageButton, () -> ClickTime.click( settings, this::reloadImage ) );
-    Bind.click( reloadImageNoFreeSpace, () -> ClickTime.click( settings, this::reloadImage ) );
+    Bind.click( reloadImageNoFreeSpace, () -> ClickTime.click( settings, this::reloadImageNoFreeSpace ) );
 
     new Handler().postDelayed(this::updateDocument, 200);
 //    updateDocument();
@@ -219,7 +227,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     ArrayList<Image> images = new ArrayList<>();
     adapter = new DocumentLinkAdapter(mContext, images);
 
-    InMemoryDocument document = store.getDocuments().get( uid == null ? settings.getUid() : uid );
+    document = store.getDocuments().get( uid == null ? settings.getUid() : uid );
 
     if ( document != null ) {
       //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
@@ -259,9 +267,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         no_files.setVisibility(View.VISIBLE);
         pdf_wrapper.setVisibility(View.GONE);
         open_in_another_app_wrapper.setVisibility(View.GONE);
+        noFreeSpace.setVisibility(View.GONE);
+        deletedImage.setVisibility(View.GONE);
+        loading_image.setVisibility(View.GONE);
+        hideBrokenImage();
       }
     }
   }
+
 
   private void setPdfPreview() throws FileNotFoundException {
     if (getContext() != null && getContext().getFilesDir() != null ){
@@ -278,14 +291,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         showDownloadButton();
 
       } else if ( image.isNoFreeSpace() ) {
-        showNoFreeSpace();
+        showNoFreeSpace( image );
 
       } else {
         // Проверяем что файл загружен полность,
         // иначе рисуем крутилку с окошком
         if (image.getSize() != null && file.length() == image.getSize()) {
           Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
-          showFileLoading(false);
+          showFileLoading(false, image);
 
           contentType = image.getContentType();
           document_title.setText( image.getTitle() );
@@ -328,12 +341,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
             page_counter.setVisibility(View.INVISIBLE);
           }
 
+          noFreeSpace.setVisibility(View.GONE);
+
           updateDocumentCount();
           updatePageCount();
           updateVisibility();
 
         } else {
-          showFileLoading(true);
+          showFileLoading(true, image);
         }
       }
 
@@ -341,12 +356,16 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     }
   }
 
-  private void showFileLoading(boolean show) {
+  private void showFileLoading(boolean show, Image image) {
     loading_image.setVisibility( show ? View.VISIBLE : View.GONE );
     pdfView.setEnabled(!show);
+    openPdf.setVisibility( show ? View.GONE : View.VISIBLE );
 
     if (show){
       startReloadSubscription();
+      updateDocumentCount();
+      page_counter.setVisibility(View.INVISIBLE);
+      document_title.setText( image.getTitle() );
     } else {
       stopReloadSubscription();
     }
@@ -426,14 +445,22 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     deletedImage.setVisibility(View.VISIBLE);
   }
 
-  private void showNoFreeSpace() {
+  private void showNoFreeSpace(Image image) {
+    pdfView.setVisibility(View.GONE);
+    open_in_another_app_wrapper.setVisibility(View.GONE);
     noFreeSpace.setVisibility(View.VISIBLE);
+    page_counter.setVisibility(View.INVISIBLE);
+    openPdf.setVisibility(View.GONE);
+    loading_image.setVisibility(View.GONE);
+
+    document_title.setText( image.getTitle() );
+    updateDocumentCount();
+    updateVisibility();
   }
 
   private void updateVisibility() {
     hideZoom();
     deletedImage.setVisibility(View.GONE);
-    noFreeSpace.setVisibility(View.GONE);
   }
 
   private void hideZoom() {
@@ -466,15 +493,62 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   private void reloadImage(){
+    setSyncLabel();
+    jobManager.addJobInBackground( new ReloadProcessedImageJob( settings.getUid() ) );
+    getActivity().finish();
+  }
+
+  private void setSyncLabel() {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get( settings.getUid() ) )
       .setLabel(LabelType.SYNC);
     store.process( transaction );
+  }
 
-    jobManager.addJobInBackground( new ReloadProcessedImageJob( settings.getUid() ) );
+  private void reloadImageNoFreeSpace() {
+    if ( adapter != null && adapter.getCount() > index && adapter.getItem(index) != null ) {
+      Image image = adapter.getItem(index);
 
-    getActivity().finish();
+      long usableSpace = getUsableSpace();
+      long imageSize = image.getSize() != null ? image.getSize() : 0;
+
+      if ( usableSpace >= IMAGE_SIZE_MULTIPLIER * imageSize ) {
+        resetNoFreeSpaceInMemory( document, image.getImageId() );
+        resetNoFreeSpaceInDb( image.getImageId() );
+        loadImage(image);
+        showPdf();
+      } else {
+        Toast.makeText(getContext(), R.string.no_free_space, Toast.LENGTH_SHORT).show();
+      }
+    }
+  }
+
+  private long getUsableSpace() {
+    File fileDir = new File(EsdApplication.getApplication().getApplicationContext().getFilesDir().getAbsolutePath());
+    return fileDir.getUsableSpace();
+  }
+
+  private void resetNoFreeSpaceInMemory(InMemoryDocument document, String imageId) {
+    if ( document != null && document.getImages() != null ) {
+      for ( Image image : document.getImages() ) {
+        if ( Objects.equals( image.getImageId(), imageId ) ) {
+          image.setNoFreeSpace( false );
+          break;
+        }
+      }
+    }
+  }
+
+  private void resetNoFreeSpaceInDb(String imageId) {
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.NO_FREE_SPACE, false)
+      .where(RImageEntity.IMAGE_ID.eq( imageId )).get().value();
+  }
+
+  private void loadImage(Image image) {
+    jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getFileName(), image.getImageId(), settings.getLogin() ) );
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)

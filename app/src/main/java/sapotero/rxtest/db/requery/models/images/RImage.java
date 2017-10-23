@@ -38,6 +38,8 @@ public abstract class RImage {
   Boolean error;
 
   Boolean noFreeSpace;
+  Boolean toDeleteFile;
+  Boolean toLoadFile;
 
   @ManyToOne
   RDocument document;

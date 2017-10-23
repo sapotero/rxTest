@@ -262,6 +262,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     settings.setUpdateAuthStarted( false );
     settings.setShowPrimaryConsideration( false );
+    settings.setLastClickTime( 0 );
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }
 

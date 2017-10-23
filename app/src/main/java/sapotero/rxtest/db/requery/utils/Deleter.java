@@ -40,21 +40,21 @@ public class Deleter {
     return collection != null && collection.size() > 0;
   }
 
-  public void deleteDocument(String uid, String TAG) {
+  public void deleteDocument(String uid, boolean deleteAllImageFiles, String TAG) {
     RDocumentEntity documentEntity = dataStore
       .select( RDocumentEntity.class )
       .where( RDocumentEntity.UID.eq( uid ) )
       .get().firstOrNull();
 
     if ( documentEntity != null ) {
-      deleteDocument( documentEntity, TAG );
+      deleteDocument( documentEntity, deleteAllImageFiles, TAG );
     }
   }
 
-  public void deleteDocument(RDocumentEntity document, String TAG) {
+  public void deleteDocument(RDocumentEntity document, boolean deleteAllImageFiles, String TAG) {
     deleteDecisions( document, TAG );
     deleteExemplars( document, TAG );
-    deleteImages( document, TAG );
+    deleteImages( document, deleteAllImageFiles, TAG );
     deleteControlLabels( document, TAG );
     deleteActions( document, TAG );
     deleteLinks( document, TAG );
@@ -125,7 +125,7 @@ public class Deleter {
     }
   }
 
-  public void deleteImages(RDocumentEntity document, String TAG) {
+  public void deleteImages(RDocumentEntity document, boolean deleteAllImageFiles, String TAG) {
     if ( notEmpty( document.getImages() ) ) {
       int deletedFilesCounter = 0;
       File file;
@@ -134,10 +134,12 @@ public class Deleter {
       // Удаляем файлы образов
       for ( RImage _image : document.getImages() ) {
         RImageEntity imageEntity = (RImageEntity) _image;
-        file = new File(context.getApplicationContext().getFilesDir(), imageEntity.getFileName() );
-        result = file.delete();
-        if ( result ) {
-          deletedFilesCounter++;
+        if ( deleteAllImageFiles || ( imageEntity.isToDeleteFile() != null && imageEntity.isToDeleteFile() ) ) {
+          file = new File(context.getApplicationContext().getFilesDir(), imageEntity.getFileName() );
+          result = file.delete();
+          if ( result ) {
+            deletedFilesCounter++;
+          }
         }
       }
 

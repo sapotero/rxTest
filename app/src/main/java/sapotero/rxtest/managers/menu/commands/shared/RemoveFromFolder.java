@@ -85,7 +85,7 @@ public class RemoveFromFolder extends SharedCommand {
       store.getDocuments().remove( getParams().getDocument() );
       Timber.tag("RecyclerViewRefresh").d("RemoveFromFolder: sending event to update MainActivity");
       EventBus.getDefault().post( new UpdateCountEvent() );
-      new Deleter().deleteDocument( documentEntity, TAG );
+      new Deleter().deleteDocument( documentEntity, true, TAG );
 
     } else {
       Transaction transaction = new Transaction();
