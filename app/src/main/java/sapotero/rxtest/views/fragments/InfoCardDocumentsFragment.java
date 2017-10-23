@@ -267,9 +267,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         no_files.setVisibility(View.VISIBLE);
         pdf_wrapper.setVisibility(View.GONE);
         open_in_another_app_wrapper.setVisibility(View.GONE);
+        noFreeSpace.setVisibility(View.GONE);
+        deletedImage.setVisibility(View.GONE);
+        loading_image.setVisibility(View.GONE);
+        hideBrokenImage();
       }
     }
   }
+
 
   private void setPdfPreview() throws FileNotFoundException {
     if (getContext() != null && getContext().getFilesDir() != null ){
@@ -286,14 +291,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
         showDownloadButton();
 
       } else if ( image.isNoFreeSpace() ) {
-        showNoFreeSpace();
+        showNoFreeSpace( image );
 
       } else {
         // Проверяем что файл загружен полность,
         // иначе рисуем крутилку с окошком
         if (image.getSize() != null && file.length() == image.getSize()) {
           Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
-          showFileLoading(false);
+          showFileLoading(false, image);
 
           contentType = image.getContentType();
           document_title.setText( image.getTitle() );
@@ -336,12 +341,14 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
             page_counter.setVisibility(View.INVISIBLE);
           }
 
+          noFreeSpace.setVisibility(View.GONE);
+
           updateDocumentCount();
           updatePageCount();
           updateVisibility();
 
         } else {
-          showFileLoading(true);
+          showFileLoading(true, image);
         }
       }
 
@@ -349,12 +356,16 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     }
   }
 
-  private void showFileLoading(boolean show) {
+  private void showFileLoading(boolean show, Image image) {
     loading_image.setVisibility( show ? View.VISIBLE : View.GONE );
     pdfView.setEnabled(!show);
+    openPdf.setVisibility( show ? View.GONE : View.VISIBLE );
 
     if (show){
       startReloadSubscription();
+      updateDocumentCount();
+      page_counter.setVisibility(View.INVISIBLE);
+      document_title.setText( image.getTitle() );
     } else {
       stopReloadSubscription();
     }
@@ -434,11 +445,15 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     deletedImage.setVisibility(View.VISIBLE);
   }
 
-  private void showNoFreeSpace() {
+  private void showNoFreeSpace(Image image) {
     pdfView.setVisibility(View.GONE);
+    open_in_another_app_wrapper.setVisibility(View.GONE);
     noFreeSpace.setVisibility(View.VISIBLE);
     page_counter.setVisibility(View.INVISIBLE);
+    openPdf.setVisibility(View.GONE);
+    loading_image.setVisibility(View.GONE);
 
+    document_title.setText( image.getTitle() );
     updateDocumentCount();
     updateVisibility();
   }
