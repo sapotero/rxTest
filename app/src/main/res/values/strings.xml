@@ -493,6 +493,7 @@
     <string name="sign">sign</string>
     <string name="crashed">crash!</string>
     <string name="menu_info_decision_create_and_sign">СОХРАНИТЬ И ПОДПИСАТЬ</string>
+    <string name="menu_info_decision_create_and_approve">СОХРАНИТЬ И СОГЛАСОВАТЬ</string>
 
     <string name="fragment_decision_template_add">Добавление шаблона</string>
     <string name="fragment_decision_template_edit">Редактирование шаблона</string>

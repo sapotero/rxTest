@@ -264,6 +264,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       }
     }
 
+    updateCreateAndSignMenuItem( raw_decision.getSignerId() );
+
     manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
     manager.build();
 
@@ -937,8 +939,29 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
       signer_oshs_selector.setText(name);
 
+      // resolved https://tasks.n-core.ru/browse/MPSED-2207
+      // Создать новую кнопку и операцию "Сохранить и согласовать" для новых и имеющихся резолюций
+      updateCreateAndSignMenuItem( signerId );
+
 //    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
       manager.update();
+    }
+
+    private boolean signerIsCurrentUser(String signerId) {
+      return Objects.equals( signerId, settings.getCurrentUserId() );
+    }
+
+    private void updateCreateAndSignMenuItem(String signerId) {
+      String title = getResources().getString( signerIsCurrentUser( signerId ) ? R.string.menu_info_decision_create_and_sign : R.string.menu_info_decision_create_and_approve );
+      setMenuItemTitle( R.id.action_constructor_create_and_sign, title );
+    }
+
+    private void setMenuItemTitle(int item, String title) {
+      if (toolbar.getMenu() != null) {
+        if (toolbar.getMenu().findItem(item) != null) {
+          toolbar.getMenu().findItem(item).setTitle( title );
+        }
+      }
     }
 
     private String makeSignerWithOrganizationText (String signerName, String signerOrganization, String signerPosition) {
