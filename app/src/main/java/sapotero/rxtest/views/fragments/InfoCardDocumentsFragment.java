@@ -506,6 +506,8 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     store.process( transaction );
   }
 
+  // resolved https://tasks.n-core.ru/browse/MPSED-2205
+  // По кнопке "Загрузить" загружать только данный образ, а не все.
   private void reloadImageNoFreeSpace() {
     if ( adapter != null && adapter.getCount() > index && adapter.getItem(index) != null ) {
       Image image = adapter.getItem(index);

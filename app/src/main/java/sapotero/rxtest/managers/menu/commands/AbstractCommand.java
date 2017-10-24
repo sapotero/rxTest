@@ -427,9 +427,24 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     sendErrorCallback( errorMessage );
 
-    if ( settings.isOnline() ) {
+    if ( isOnline( error ) ) {
       finishOnOperationError( Collections.singletonList( errorMessage ) );
     }
+
+//    if ( settings.isOnline() ) {
+//      finishOnOperationError( Collections.singletonList( errorMessage ) );
+//    }
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2273
+  // 1) Подписание с потерей сети.
+  // If error is instance of IOException, network error occurred,
+  // do not finish operation on error even if settings.isOnline() is true.
+  protected boolean isOnline(Throwable error) {
+    Timber.tag(TAG).d("settings.isOnline() ? %s", settings.isOnline());
+    Timber.tag(TAG).d("error instanceof IOException ? %s", error instanceof IOException);
+
+    return settings.isOnline() && !(error instanceof IOException);
   }
 
   public abstract void finishOnOperationError(List<String> errors);
