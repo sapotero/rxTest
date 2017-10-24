@@ -91,11 +91,10 @@ public class SaveAndApproveDecision extends DecisionCommand {
     String sign = getSign(null);
 
     if ( sign != null ) {
-//      _decision.setSign( sign );
-
       // resolved https://tasks.n-core.ru/browse/MVDESD-14141
       // при нажатии кнопки согласовать - не отправляем подпись
-      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), JournalStatus.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      InMemoryDocument document = store.getDocuments().get(getParams().getDocument());
+      Boolean equals = document != null && Objects.equals(document.getFilter(), JournalStatus.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId());
       _decision.setSign( equals? null : sign );
 
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
