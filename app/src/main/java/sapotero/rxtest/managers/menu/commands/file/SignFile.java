@@ -119,7 +119,7 @@ public class SignFile extends AbstractCommand {
         );
 
     } else {
-      onError( new Throwable() );
+      onError( new Throwable( "Ошибка подписания электронного образа" ) );
     }
   }
 
@@ -129,7 +129,7 @@ public class SignFile extends AbstractCommand {
     sendErrorCallback( getType() );
 
     if ( isOnline( error ) ) {
-      String errorMessage = "Ошибка подписания электронного образа";
+      String errorMessage = error.getLocalizedMessage();
       queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
       setSignError( getParams().getImageId() );
     }
