@@ -115,21 +115,21 @@ public class SignFile extends AbstractCommand {
             saveImageSign(file_sign);
             setUpdatedAt();
           },
-          error -> onError()
+          this::onError
         );
 
     } else {
-      onError();
+      onError( new Throwable( "Ошибка подписания электронного образа" ) );
     }
   }
 
-  private void onError() {
+  private void onError(Throwable error) {
     Timber.tag(TAG).i("Sign error");
 
     sendErrorCallback( getType() );
 
-    if ( settings.isOnline() ) {
-      String errorMessage = "Ошибка подписания электронного образа";
+    if ( isOnline( error ) ) {
+      String errorMessage = error.getLocalizedMessage();
       queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
       setSignError( getParams().getImageId() );
     }
