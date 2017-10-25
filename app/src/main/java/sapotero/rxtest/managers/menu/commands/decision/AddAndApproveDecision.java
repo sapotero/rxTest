@@ -39,8 +39,6 @@ public class AddAndApproveDecision extends DecisionCommand {
     queueManager.add(this);
     updateLocal();
     setAsProcessed();
-
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ) );
   }
 
   private void updateLocal() {
@@ -54,6 +52,8 @@ public class AddAndApproveDecision extends DecisionCommand {
     if ( isActiveOrRed() ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
+
+      EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ) );
     }
 
 //    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));

@@ -53,6 +53,8 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.click.Bind;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
@@ -66,6 +68,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject MemoryStore store;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.activity_decision_constructor_wrapper) RelativeLayout wrapper;
@@ -939,8 +942,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
       signer_oshs_selector.setText(name);
 
-      // resolved https://tasks.n-core.ru/browse/MPSED-2207
-      // Создать новую кнопку и операцию "Сохранить и согласовать" для новых и имеющихся резолюций
       updateCreateAndSignMenuItem( signerId );
 
 //    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
@@ -951,9 +952,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       return Objects.equals( signerId, settings.getCurrentUserId() );
     }
 
+    // resolved https://tasks.n-core.ru/browse/MPSED-2207
+    // На первичке переименовываем кнопку "Сохранить и подписать" в "Сохранить и согласовать", если подписант не равен текущему пользователю
     private void updateCreateAndSignMenuItem(String signerId) {
-      String title = getResources().getString( signerIsCurrentUser( signerId ) ? R.string.menu_info_decision_create_and_sign : R.string.menu_info_decision_create_and_approve );
-      setMenuItemTitle( R.id.action_constructor_create_and_sign, title );
+      InMemoryDocument document = store.getDocuments().get( settings.getUid() );
+      boolean isPrimaryConsideration = document != null && Objects.equals( document.getFilter(), JournalStatus.PRIMARY.getName() );
+
+      if ( isPrimaryConsideration ) {
+        String title = getResources().getString( signerIsCurrentUser( signerId ) ? R.string.menu_info_decision_create_and_sign : R.string.menu_info_decision_create_and_approve );
+        setMenuItemTitle( R.id.action_constructor_create_and_sign, title );
+      }
     }
 
     private void setMenuItemTitle(int item, String title) {
