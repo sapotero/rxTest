@@ -131,6 +131,7 @@ public class QueueDBManager implements JobCountInterface {
       .where(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.decision.SaveDecision"))
       .and( QueueEntity.PARAMS.like("%\"decisionId\":\""+decision_id+"\"%") )
       .and(QueueEntity.WITH_ERROR.ne(true))
+      .and(QueueEntity.REMOTE.ne(true))
       .get().value();
     Timber.tag(TAG).i( "setAsCanceled %s", count );
   }
