@@ -133,10 +133,8 @@ public abstract class DecisionCommand extends AbstractCommand {
   }
 
   protected boolean isActiveOrRed() {
-    Tuple red = dataStore
-      .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
-      .get().firstOrNull();
+    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+    boolean red = inMemoryDocument != null && inMemoryDocument.getDocument() != null && inMemoryDocument.getDocument().isRed();
 
     Tuple manager = dataStore
       .select(RManagerEntity.UID)
@@ -151,7 +149,7 @@ public abstract class DecisionCommand extends AbstractCommand {
       || manager != null && manager.get(0).equals( getParams().getDecisionModel().getSignerId() )
 
       // или если подписывающий министр
-      || red != null && red.get(0).equals(true);
+      || red;
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258
