@@ -6,13 +6,16 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class AddAndApproveDecision extends DecisionCommand {
@@ -36,8 +39,6 @@ public class AddAndApproveDecision extends DecisionCommand {
     queueManager.add(this);
     updateLocal();
     setAsProcessed();
-
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ) );
   }
 
   private void updateLocal() {
@@ -51,6 +52,8 @@ public class AddAndApproveDecision extends DecisionCommand {
     if ( isActiveOrRed() ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
+
+      EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ) );
     }
 
 //    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
@@ -85,7 +88,12 @@ public class AddAndApproveDecision extends DecisionCommand {
     String sign = getSign(null);
 
     if ( sign != null ) {
-      decision.setSign(sign);
+      // resolved https://tasks.n-core.ru/browse/MPSED-1965
+      // если при создании нового проекта резолюции в редакторе нажать "сохранить и подписать", то такая резолюция подписывается, а должна согласовываться и штамп подписи не проставляться
+      InMemoryDocument document = store.getDocuments().get(getParams().getDocument());
+      Boolean equals = document != null && Objects.equals(document.getFilter(), JournalStatus.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId());
+      decision.setSign( equals ? null : sign );
+
       Observable<DecisionError> info = getDecisionCreateOperationObservable(decision);
       sendDecisionOperationRequest( info );
 
