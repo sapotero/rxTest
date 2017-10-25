@@ -76,8 +76,9 @@ public class QueueDBManager implements JobCountInterface {
       CommandParams params = command.getParams();
       String commandClass = command.getClass().getCanonicalName();
 
-      // обновим все резолюции и пометим их как отменённые
-      if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision")) ){
+      // Если поступила новая операция SaveDecision или SaveAndApproveDecision, то отменить все невыполненные
+      // операции SaveDecision для данной резолюции
+      if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
         Decision decision = params.getDecisionModel();
         setAsCanceled( decision.getId()  );
       }
