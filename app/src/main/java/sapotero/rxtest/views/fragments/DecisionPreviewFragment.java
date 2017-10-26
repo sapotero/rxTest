@@ -262,34 +262,26 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
         if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
-          if ( !decision.isTemporary() ) {
-            if ( settings.isOnline() ) {
-              if ( decision.isChanged() ) {
-                // resolved https://tasks.n-core.ru/browse/MVDESD-13727
-                // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
-                // как по кнопке, так и по двойному тапу
-                Toast.makeText( getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT ).show();
-
-              } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
-                Timber.tag("GestureListener").w("2");
-                edit();
-
-              } else {
-                Timber.tag("GestureListener").w("-2");
-              }
+          if ( settings.isOnline() ) {
+            if ( decision.isChanged() ) {
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
+              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
+              // как по кнопке, так и по двойному тапу
+              Toast.makeText( getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT ).show();
 
             } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
-              Timber.tag("GestureListener").w("1");
+              Timber.tag("GestureListener").w("2");
               edit();
+
             } else {
-              Timber.tag("GestureListener").w("-1");
+              Timber.tag("GestureListener").w("-2");
             }
 
+          } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
+            Timber.tag("GestureListener").w("1");
+            edit();
           } else {
-            // resolved https://tasks.n-core.ru/browse/MPSED-2255
-            // Если в документе без резолюций создать и сохранить в МП новую резолюцию и она будет в статусе: "Ожидает синхронизации",
-            // то при двойном тапе не появляется предупреждение, что резолюцию нельзя редактировать.
-            Toast.makeText( getContext(), R.string.decision_temporary_edit_denied, Toast.LENGTH_SHORT ).show();
+            Timber.tag("GestureListener").w("-1");
           }
 
         } else {

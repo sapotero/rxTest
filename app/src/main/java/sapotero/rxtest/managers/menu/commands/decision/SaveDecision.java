@@ -57,7 +57,7 @@ public class SaveDecision extends DecisionCommand {
     Decision _decision = getParams().getDecisionModel();
     _decision.setDocumentUid( null );
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
+    Observable<DecisionError> info = getDecisionCreateOrUpdateOperationObservable( _decision );
     sendDecisionOperationRequest( info );
   }
 

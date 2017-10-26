@@ -767,6 +767,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
       raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
       raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
+      raw_decision.setTemporary(rDecisionEntity.isTemporary());
       if (rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1) {
         ArrayList<Block> list = new ArrayList<>();
         for (RBlock _block : rDecisionEntity.getBlocks()) {

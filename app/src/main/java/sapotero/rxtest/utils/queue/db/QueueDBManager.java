@@ -3,6 +3,7 @@ package sapotero.rxtest.utils.queue.db;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class QueueDBManager implements JobCountInterface {
       String commandClass = command.getClass().getCanonicalName();
 
       // Если поступила новая операция SaveDecision или SaveAndApproveDecision, то отменить все невыполненные
-      // операции SaveDecision для данной резолюции
+      // операции SaveDecision и AddDecision для данной резолюции
       if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
         Decision decision = params.getDecisionModel();
         setAsCanceled( decision.getId()  );
@@ -123,13 +124,17 @@ public class QueueDBManager implements JobCountInterface {
 
     Timber.tag(TAG).i( "decision_id %s", decision_id);
 
+    List<String> commandTypesToCancel = new ArrayList<>();
+    commandTypesToCancel.add("sapotero.rxtest.managers.menu.commands.decision.SaveDecision");
+    commandTypesToCancel.add("sapotero.rxtest.managers.menu.commands.decision.AddDecision");
+
     int count = dataStore
       .update(QueueEntity.class)
       .set(QueueEntity.RUNNING, false)
       .set(QueueEntity.LOCAL, true)
       .set(QueueEntity.REMOTE, true)
       .set(QueueEntity.CANCELED, true)
-      .where(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.decision.SaveDecision"))
+      .where(QueueEntity.COMMAND.in( commandTypesToCancel ))
       .and( QueueEntity.PARAMS.like("%\"decisionId\":\""+decision_id+"\"%") )
       .and(QueueEntity.WITH_ERROR.ne(true))
       .and(QueueEntity.REMOTE.ne(true))
