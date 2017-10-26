@@ -262,14 +262,16 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
         if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
-          if ( settings.isOnline() ) {
-            if ( decision.isChanged() ) {
+          Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+
+          if (settings.isOnline()) {
+            if (decision.isChanged()) {
               // resolved https://tasks.n-core.ru/browse/MVDESD-13727
               // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
               // как по кнопке, так и по двойному тапу
-              Toast.makeText( getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT ).show();
+              Toast.makeText(getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT).show();
 
-            } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
+            } else if (decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && showDecisionButtons) {
               Timber.tag("GestureListener").w("2");
               edit();
 
@@ -277,7 +279,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
               Timber.tag("GestureListener").w("-2");
             }
 
-          } else if ( decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && isActiveOrRed() ) {
+          } else if (decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && showDecisionButtons) {
             Timber.tag("GestureListener").w("1");
             edit();
           } else {
@@ -625,7 +627,11 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     //resolved https://tasks.n-core.ru/browse/MVDESD-14142
     // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
     // если подписант не текущий пользователь (или министр)
-    buttons_wrapper.setVisibility( isActiveOrRed() && buttonsEnabled ? View.VISIBLE : View.GONE);
+
+    // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
+    Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+
+    buttons_wrapper.setVisibility( showDecisionButtons ? View.VISIBLE : View.GONE);
     bottom_line.setVisibility( ( approved || isActiveOrRed() && buttonsEnabled ) ? View.VISIBLE : View.GONE);
   }
 
