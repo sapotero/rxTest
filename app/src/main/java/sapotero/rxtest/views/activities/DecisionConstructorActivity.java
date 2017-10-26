@@ -157,7 +157,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
             operationManager.execute( operation, commandParams );
 
             finish();
-            return;
           }
 
           break;
@@ -196,7 +195,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
             operationManager.execute( operation, commandParams );
 
             finish();
-            return;
           }
 
           break;
@@ -573,7 +571,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               operationManager.execute( operation, params );
 
               finish();
-              return;
             }
           )
           .neutralText("выход")
@@ -597,7 +594,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               }
 
               finish();
-              return;
 //              activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
             }
           )
@@ -612,7 +608,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
     } else {
       finish();
-      return;
 //      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
   }
@@ -685,10 +680,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           .positiveText("Ок")
           .negativeText("Выход")
           .onPositive( (dialog, which) -> dialog.dismiss() )
-          .onNegative( (dialog, which) -> {
-            finish();
-            return;
-          } )
+          .onNegative( (dialog, which) -> finish() )
           .show();
       }
 

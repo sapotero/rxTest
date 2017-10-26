@@ -267,6 +267,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
             if (settings.isOnline()) {
 
+
               if (decision.isChanged()) {
                 // resolved https://tasks.n-core.ru/browse/MVDESD-13727
                 // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
