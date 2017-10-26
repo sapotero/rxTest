@@ -846,9 +846,16 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
               Decision decision = getDecision( decisionActiveUid );
 
               // resolved https://tasks.n-core.ru/browse/MPSED-2154
-              if ( decision != null && isActiveOrRed( decision ) && decision.getApproved() != null && !decision.getApproved() && !isProcessed() && !decision.isTemporary()
-                // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
-                || decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() ) {
+              if (
+                  decision != null
+                  // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
+                  && ( isActiveOrRed( decision ) || Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) )
+
+                    && decision.getApproved() != null
+                  && !decision.getApproved()
+                  && !isProcessed()
+                  && !decision.isTemporary()
+                ) {
                 setEditDecisionMenuItemVisible( true );
               } else {
                 setEditDecisionMenuItemVisible( false );

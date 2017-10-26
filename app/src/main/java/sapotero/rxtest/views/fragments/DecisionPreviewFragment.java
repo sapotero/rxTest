@@ -263,10 +263,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
       if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
         if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
           if ( !decision.isTemporary() ) {
-            Boolean showDecisionButtons = null;
-            if (settings.isOnline()) {
+            Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
 
-              showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+            if (settings.isOnline()) {
 
               if (decision.isChanged()) {
                 // resolved https://tasks.n-core.ru/browse/MVDESD-13727
