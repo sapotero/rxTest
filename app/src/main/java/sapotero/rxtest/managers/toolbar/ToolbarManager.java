@@ -508,6 +508,8 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     }
 
     toolbar.inflateMenu(menu);
+
+    setAllItemsEnabled( toolbar );
   }
 
   private void safeSetVisibility(int item, boolean value) {
@@ -521,18 +523,30 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   private void setEnabled(int item, boolean enabled) {
     if ( toolbar.getMenu() != null ) {
       MenuItem menuItem = toolbar.getMenu().findItem( item );
+      setItemEnabled( menuItem, enabled );
+    }
+  }
 
-      if ( menuItem != null ) {
-        menuItem.setEnabled( enabled );
+  private static void setItemEnabled(MenuItem menuItem, boolean enabled) {
+    if ( menuItem != null ) {
+      menuItem.setEnabled( enabled );
 
-        menuItem.getIcon().setAlpha( enabled ? ICON_TRANSPARENT_0 : ICON_TRANSPARENT_50 );
+      menuItem.getIcon().setAlpha( enabled ? ICON_TRANSPARENT_0 : ICON_TRANSPARENT_50 );
 
-        // This will work only if we add line <item name="android:textAllCaps">false</item>
-        // into toolbar style theme inside styles.xml
-        final ForegroundColorSpan color = new ForegroundColorSpan( enabled ? TITLE_TRANSPARENT_0 : TITLE_TRANSPARENT_50 );
-        final SpannableStringBuilder title = new SpannableStringBuilder( menuItem.getTitle().toString() );
-        title.setSpan(color, 0, menuItem.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        menuItem.setTitle(title);
+      // This will work only if we add line <item name="android:textAllCaps">false</item>
+      // into toolbar style theme inside styles.xml
+      final ForegroundColorSpan color = new ForegroundColorSpan( enabled ? TITLE_TRANSPARENT_0 : TITLE_TRANSPARENT_50 );
+      final SpannableStringBuilder title = new SpannableStringBuilder( menuItem.getTitle().toString() );
+      title.setSpan(color, 0, menuItem.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+      menuItem.setTitle(title);
+    }
+  }
+
+  public static void setAllItemsEnabled(Toolbar toolbar) {
+    if ( toolbar != null && toolbar.getMenu() != null ) {
+      for ( int i = 0; i < toolbar.getMenu().size(); i++ ) {
+        MenuItem menuItem = toolbar.getMenu().getItem( i );
+        setItemEnabled( menuItem, true );
       }
     }
   }
