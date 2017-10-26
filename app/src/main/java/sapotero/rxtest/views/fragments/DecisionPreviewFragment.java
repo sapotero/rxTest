@@ -262,7 +262,7 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
         if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
-          Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+          Boolean showDecisionButtons = showDecisionButtons();
 
           if (settings.isOnline()) {
             if (decision.isChanged()) {
@@ -629,10 +629,15 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     // если подписант не текущий пользователь (или министр)
 
     // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
-    Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+    Boolean showDecisionButtons = showDecisionButtons();
 
     buttons_wrapper.setVisibility( showDecisionButtons ? View.VISIBLE : View.GONE);
-    bottom_line.setVisibility( ( approved || isActiveOrRed() && buttonsEnabled ) ? View.VISIBLE : View.GONE);
+    bottom_line.setVisibility( ( approved || showDecisionButtons ) ? View.VISIBLE : View.GONE);
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
+  private boolean showDecisionButtons() {
+    return decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
   }
 
   private boolean isActiveOrRed() {
