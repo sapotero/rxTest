@@ -630,6 +630,7 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     this.toolbar.setNavigationOnClickListener(v ->{
       Activity activity = (Activity) context;
       activity.finish();
+      return;
       }
     );
 
