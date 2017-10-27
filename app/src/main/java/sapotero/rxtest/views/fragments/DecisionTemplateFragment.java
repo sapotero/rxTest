@@ -218,6 +218,8 @@ public class DecisionTemplateFragment extends Fragment {
           Timber.tag(TAG).e("%s templates: %s", templateType.getType(), templates);
           if (templates.size() > 0) {
             adapter.addList( templates );
+          } else {
+            adapter.clear();
           }
         },
         error -> Timber.tag(TAG).e(error)
