@@ -61,7 +61,7 @@ public class DecisionTemplateFragment extends Fragment {
 
   public enum TemplateType {
     DECISION( "decision", null, "Шаблоны резолюции", "Введите текст резолюции"),
-    REJECTION( "rejection", "rejection", "Шаблоны отклоненния", "Введите текст отклонения");
+    REJECTION( "rejection", "rejection", "Шаблоны отклонения", "Введите текст отклонения");
 
     private String type;
     private String typeForApi;
