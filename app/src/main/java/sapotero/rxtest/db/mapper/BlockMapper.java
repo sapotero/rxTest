@@ -75,6 +75,8 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     model.setAppealText( entity.getAppealText() );
     model.setTextBefore( entity.isTextBefore() );
     model.setHidePerformers( entity.isHidePerformers() );
+    model.setAskToReport( entity.getAppealText() != null && entity.getAppealText().contains("дол") );
+    model.setAskToAcquaint( entity.getAppealText() != null && entity.getAppealText().contains("озн") );
   }
 
   private void setPerformers(Block model, RBlockEntity entity, boolean formatted) {
