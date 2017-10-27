@@ -22,6 +22,7 @@ import sapotero.rxtest.managers.menu.commands.shared.UncheckControlLabel;
 import sapotero.rxtest.managers.menu.commands.templates.CreateTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.UpdateTemplate;
+import sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
@@ -428,6 +429,20 @@ public class CommandFactory implements AbstractCommand.Callback{
       public String getRussianName() {
         return "Удаление шаблона резолюции";
       }
+    },
+
+    UPDATE_DOCUMENT {
+      @Override
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        UpdateDocumentCommand command = new UpdateDocumentCommand(params);
+        command.registerCallBack(instance);
+        return command;
+      }
+
+      @Override
+      public String getRussianName() {
+        return "Обновление документа";
+      }
     };
 
     public static Operation getOperation(String operation_type){
@@ -530,6 +545,9 @@ public class CommandFactory implements AbstractCommand.Callback{
           operation = Operation.UPDATE_DECISION_TEMPLATE;
           break;
         case "sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate":
+          operation = Operation.DELETE_DECISION_TEMPLATE;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand":
           operation = Operation.DELETE_DECISION_TEMPLATE;
           break;
       }
