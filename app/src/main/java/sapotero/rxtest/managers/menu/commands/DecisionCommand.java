@@ -7,6 +7,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import io.requery.query.Tuple;
 import okhttp3.MediaType;
@@ -88,6 +89,22 @@ public abstract class DecisionCommand extends AbstractCommand {
       settings.getToken(),
       json
     );
+  }
+
+  protected Observable<DecisionError> getDecisionCreateOrUpdateOperationObservable(Decision decision) {
+    Observable<DecisionError> result;
+
+    // If decision is temporary, then this operation canceled previously added AddDecision operation, and we must send CREATE decision request.
+    if ( getParams().isTemporaryDecision() ) {
+      decision.setDocumentUid( getParams().getDocument() ); // in this case we must send document UID
+      result = getDecisionCreateOperationObservable(decision);
+    } else {
+      // Otherwise decision already exists on the server and we just have to update it.
+      decision.setDocumentUid( null ); // in this case we don't send document UID
+      result = getDecisionUpdateOperationObservable(decision);
+    }
+
+    return result;
   }
 
   protected void sendDecisionOperationRequest(Observable<DecisionError> info) {
@@ -204,6 +221,8 @@ public abstract class DecisionCommand extends AbstractCommand {
   }
 
   protected void createTemporaryDecision() {
+    generateTemporaryDecisionId();
+
     CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
     CommandParams _params = new CommandParams();
     _params.setDecisionId( getParams().getDecisionModel().getId() );
@@ -212,6 +231,14 @@ public abstract class DecisionCommand extends AbstractCommand {
     _params.setAssignment( getParams().isAssignment() );
     Command command = operation.getCommand(null, _params);
     command.execute();
+  }
+
+  private void generateTemporaryDecisionId() {
+    // Generated temporary decision ID must be stored in CommandParams, so that it would be possible
+    // to cancel this operation in case SaveDecision or SaveAndApproveDecision is added (in offline) for this decision
+    String tempDecisionId = UUID.randomUUID().toString();
+    getParams().setDecisionId( tempDecisionId );
+    getParams().getDecisionModel().setId( tempDecisionId );
   }
 
   protected void updateInMemory() {

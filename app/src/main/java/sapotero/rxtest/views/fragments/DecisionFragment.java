@@ -237,7 +237,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     Bind.click( getTemplate, () -> {
       Timber.tag("ADD template").e("CLICKED");
-      templates = new SelectTemplateDialog( getContext(), this, SelectTemplateDialog.DECISION );
+      templates = new SelectTemplateDialog( getContext(), this, SelectTemplateDialog.DECISION, "" );
       templates.show();
     });
 
@@ -595,10 +595,11 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   @Override
-  public void onSelectTemplate(String template) {
+  public void onSelectTemplate(String template, boolean cancel, String oldText) {
     Timber.tag("ADD template").e("onSelectTemplate %s", template);
-    decision_text.setText( template );
-
+    if ( !cancel ) {
+      decision_text.setText( template );
+    }
   }
 
   public void withScrollTo(boolean scrollTo) {

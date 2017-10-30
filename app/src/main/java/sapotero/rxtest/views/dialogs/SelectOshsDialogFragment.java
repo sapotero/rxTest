@@ -182,7 +182,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
         dismiss();
 
       } else {
-        Toast.makeText( getContext(), "Выберете исполнителя!", Toast.LENGTH_SHORT ).show();
+        Toast.makeText( getContext(), "Выберите сотрудника", Toast.LENGTH_SHORT ).show();
       }
     });
 

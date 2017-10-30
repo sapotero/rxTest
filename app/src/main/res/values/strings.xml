@@ -242,6 +242,8 @@
     <string name="to_favorites">В ИЗБРАННОЕ</string>
     <string name="to_control">НА КОНТРОЛЬ</string>
     <string name="dialog_template_title">Шаблоны резолюции</string>
+    <string name="dialog_decision_template_empty">Шаблоны резолюции отсутствуют</string>
+    <string name="dialog_rejection_template_empty">Шаблоны отклонения отсутствуют</string>
     <string name="no_files">Нет электронных образов</string>
     <string name="deleted_image">Срок хранения ЭО истёк.</string>
     <string name="deleted_image_load">Загрузить повторно</string>

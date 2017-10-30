@@ -61,7 +61,7 @@ public class DecisionTemplateFragment extends Fragment {
 
   public enum TemplateType {
     DECISION( "decision", null, "Шаблоны резолюции", "Введите текст резолюции"),
-    REJECTION( "rejection", "rejection", "Шаблоны отклоненния", "Введите текст отклонения");
+    REJECTION( "rejection", "rejection", "Шаблоны отклонения", "Введите текст отклонения");
 
     private String type;
     private String typeForApi;
@@ -218,6 +218,8 @@ public class DecisionTemplateFragment extends Fragment {
           Timber.tag(TAG).e("%s templates: %s", templateType.getType(), templates);
           if (templates.size() > 0) {
             adapter.addList( templates );
+          } else {
+            adapter.clear();
           }
         },
         error -> Timber.tag(TAG).e(error)
