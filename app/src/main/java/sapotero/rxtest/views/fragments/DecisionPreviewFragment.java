@@ -153,8 +153,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(getContext())
       .content(R.string.decision_reject_body)
       .cancelable(true)
-      .positiveText(R.string.yes)
       .negativeText(R.string.no)
+      .onNegative((dialog, which) -> dialog.dismiss())
+      .positiveText(R.string.yes)
       .onPositive((dialog1, which) -> {
         CommandFactory.Operation operation = CommandFactory.Operation.REJECT_DECISION;
 
@@ -169,8 +170,10 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         operationManager.execute(operation, commandParams);
         updateAfterButtonPressed();
         EventBus.getDefault().post(new ShowNextDocumentEvent(settings.getUid()));
+
+        dialog1.dismiss();
       })
-      .autoDismiss(true);
+      .autoDismiss(false);
 
     // настройка
     // Показывать комментарий при отклонении
@@ -181,8 +184,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
         .neutralText("Шаблон")
         .onNeutral((dialog, which) -> {
-          templates = new SelectTemplateDialog( getContext(), fragment, SelectTemplateDialog.REJECTION );
-          templates.show();
+          String oldText = dialog.getInputEditText() != null ? dialog.getInputEditText().getText().toString() : "";
+          templates = new SelectTemplateDialog( getContext(), fragment, SelectTemplateDialog.REJECTION, oldText );
+          boolean isShown = templates.show();
+          if ( isShown ) {
+            dialog.dismiss();
+          }
         });
     }
 
@@ -246,8 +253,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   @Override
-  public void onSelectTemplate(String template) {
-    showPrevDialog(template);
+  public void onSelectTemplate(String template, boolean cancel, String oldText) {
+    showPrevDialog( cancel ? oldText : template );
   }
 
   private class GestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -262,38 +269,28 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
       if ( doc != null && !doc.getDocument().isFromLinks() && Objects.equals( doc.getDocument().getAddressedToType(), "" ) ) {
         if ( decision != null && !Objects.equals( decision.getSignerBlankText(), NO_DECISIONS ) ) {
-          if ( !decision.isTemporary() ) {
-            Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+          Boolean showDecisionButtons = showDecisionButtons();
 
-            if (settings.isOnline()) {
-
-
-              if (decision.isChanged()) {
-                // resolved https://tasks.n-core.ru/browse/MVDESD-13727
-                // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
-                // как по кнопке, так и по двойному тапу
-                Toast.makeText(getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT).show();
-
-              } else if (decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && showDecisionButtons) {
-                Timber.tag("GestureListener").w("2");
-                edit();
-
-              } else {
-                Timber.tag("GestureListener").w("-2");
-              }
+          if (settings.isOnline()) {
+            if (decision.isChanged()) {
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
+              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
+              // как по кнопке, так и по двойному тапу
+              Toast.makeText(getContext(), R.string.decision_on_sync_edit_denied, Toast.LENGTH_SHORT).show();
 
             } else if (decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && showDecisionButtons) {
-              Timber.tag("GestureListener").w("1");
+              Timber.tag("GestureListener").w("2");
               edit();
+
             } else {
-              Timber.tag("GestureListener").w("-1");
+              Timber.tag("GestureListener").w("-2");
             }
 
+          } else if (decision.getApproved() != null && !decision.getApproved() && !doc.isProcessed() && showDecisionButtons) {
+            Timber.tag("GestureListener").w("1");
+            edit();
           } else {
-            // resolved https://tasks.n-core.ru/browse/MPSED-2255
-            // Если в документе без резолюций создать и сохранить в МП новую резолюцию и она будет в статусе: "Ожидает синхронизации",
-            // то при двойном тапе не появляется предупреждение, что резолюцию нельзя редактировать.
-            Toast.makeText( getContext(), R.string.decision_temporary_edit_denied, Toast.LENGTH_SHORT ).show();
+            Timber.tag("GestureListener").w("-1");
           }
 
         } else {
@@ -639,10 +636,15 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     // если подписант не текущий пользователь (или министр)
 
     // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
-    Boolean showDecisionButtons = decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
+    Boolean showDecisionButtons = showDecisionButtons();
 
     buttons_wrapper.setVisibility( showDecisionButtons ? View.VISIBLE : View.GONE);
-    bottom_line.setVisibility( ( approved || isActiveOrRed() && buttonsEnabled ) ? View.VISIBLE : View.GONE);
+    bottom_line.setVisibility( ( approved || showDecisionButtons ) ? View.VISIBLE : View.GONE);
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2292 хотфикс
+  private boolean showDecisionButtons() {
+    return decision != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && decision.getApproved() != null && !decision.getApproved() || isActiveOrRed() && buttonsEnabled;
   }
 
   private boolean isActiveOrRed() {
