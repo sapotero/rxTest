@@ -1,6 +1,8 @@
 package sapotero.rxtest.utils.queue.db;
 
 
+import com.google.gson.Gson;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +53,7 @@ public class QueueMemoryManager implements QueueRepository{
   }
 
   private void executeMock(Command command) {
+    logInfo();
     if ( commands.containsKey(command.getParams().getUuid()) ){
       List<Command> commandList = commands.get(command.getParams().getUuid());
       if ( commandList.size() > 0 ){
@@ -59,5 +62,9 @@ public class QueueMemoryManager implements QueueRepository{
         remove((AbstractCommand) command);
       }
     }
+  }
+
+  private void logInfo() {
+    Timber.tag(TAG).d("\n --- QueueMemoryStore ---\n\n%s\n\n", new Gson().toJson(commands));
   }
 }

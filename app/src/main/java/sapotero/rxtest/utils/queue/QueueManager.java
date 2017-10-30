@@ -30,6 +30,7 @@ public class QueueManager implements QueueRepository {
   @Override
   public void add(Command command){
     dBManager.add( command );
+    memoryManager.add( command );
   }
 
   @Override
@@ -40,22 +41,25 @@ public class QueueManager implements QueueRepository {
   @Override
   public void setExecutedLocal(Command command) {
     dBManager.setExecutedLocal(command);
+    memoryManager.setExecutedLocal(command);
   }
 
   @Override
   public void setExecutedRemote(Command command) {
     dBManager.setExecutedRemote(command);
+    memoryManager.setExecutedRemote(command);
   }
 
   @Override
   public void setExecutedWithError(Command command, List<String> errors) {
     dBManager.setExecutedWithError(command, errors);
+    memoryManager.setExecutedWithError(command, errors);
   }
 
   @Override
   public void setAsRunning(Command command) {
-    dBManager
-      .setAsRunning(command);
+    dBManager.setAsRunning(command);
+    memoryManager.setAsRunning(command);
   }
 
   public void getUncompleteTasks(){
