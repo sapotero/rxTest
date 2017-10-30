@@ -78,6 +78,7 @@ import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
+import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
@@ -505,6 +506,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     createUpdateSub();
     startUpdateSub();
+
+    ToolbarManager.setAllItemsEnabled( toolbar );
   }
 
   private void startNetworkCheck() {

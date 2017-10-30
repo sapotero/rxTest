@@ -4,7 +4,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -51,7 +50,6 @@ public class AddTemporaryDecision extends DecisionCommand {
   }
 
   private void addDecision() {
-    getParams().getDecisionModel().setId( UUID.randomUUID().toString() );
     getParams().getDecisionModel().setTemporary( true );
     updateInMemory();
 
