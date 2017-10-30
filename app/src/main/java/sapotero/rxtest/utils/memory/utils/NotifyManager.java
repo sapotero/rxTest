@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -13,7 +14,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -40,11 +40,29 @@ public class NotifyManager {
   private Context appContext = EsdApplication.getApplication();
   private NotificationManagerCompat notificationManagerCompat = MainService.getNotificationManagerCompat();
   private int notViewedDocumentQuantity = 0;
+  /*ограничитель для буфера уведомлений. Вызывает flush буффера при каждом эмите. Эмитится, с разной периодичностью в зависимости от SubstituteMode */
+  private PublishSubject<Boolean> bufferBoundary = PublishSubject.create();
+  private Handler Handler = new  Handler();
 
   public NotifyManager() {
     EsdApplication.getManagerComponent().inject(this);
     EventBus.getDefault().register(this);
+    Handler.postDelayed(updateTimerThread, 0);
   }
+
+  private Runnable updateTimerThread = new Runnable() {
+    public void run() {
+      int timeSpan;
+      if(settings.getSubstituteModePreference().get()){
+       timeSpan = 30_000;
+      } else {
+        timeSpan = 5_000;
+      }
+
+      bufferBoundary.onNext(true);
+      Handler.postDelayed(this, timeSpan);
+    }
+  };
 
   public void subscribeOnNotifyEvents(PublishSubject<NotifyMessageModel> notifyPubSubject) {
     if (!notifyPubSubject.hasObservers()) {
@@ -57,7 +75,7 @@ public class NotifyManager {
           JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
           return checkAllowedJournal(itemJournalStatus);
         })
-        .buffer(5 ,TimeUnit.SECONDS)
+        .buffer(bufferBoundary)
         .filter(notifyMessageModels -> !notifyMessageModels.isEmpty())
         .subscribe(notifyMessageModels -> {
           if(notifyMessageModels.size() > 1) {
