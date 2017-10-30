@@ -41,12 +41,14 @@ public class UpdateDocumentJob extends DocumentJob {
 
   private boolean fromLinks = false;
 
-  public UpdateDocumentJob(String uid, String login, String currentUserId, boolean ignoreSyncLabel) {
+  public UpdateDocumentJob(String uid, String login, String currentUserId, boolean ignoreSyncLabel, boolean forceUpdate) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.login = login;
     this.currentUserId = currentUserId;
+
     this.ignoreSyncLabel = ignoreSyncLabel;
+    this.forceUpdate = forceUpdate;
   }
 
   public UpdateDocumentJob(String uid, String index, String filter, String login, String currentUserId) {

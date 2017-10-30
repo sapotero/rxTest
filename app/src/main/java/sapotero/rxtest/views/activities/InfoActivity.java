@@ -577,7 +577,7 @@ public class InfoActivity extends AppCompatActivity {
         // или он из папки Обработанное
         || ( doc != null && doc.getDocument() != null && doc.getDocument().isFromProcessedFolder() )
     ){
-      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid(), settings.getLogin(), settings.getCurrentUserId(), false ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid(), settings.getLogin(), settings.getCurrentUserId(), false, false ) );
     }
   }
 

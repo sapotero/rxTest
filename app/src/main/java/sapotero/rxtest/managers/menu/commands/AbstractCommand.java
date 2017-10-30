@@ -33,6 +33,7 @@ import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -393,6 +394,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
 
     queueManager.setExecutedWithError( this, errors );
+
+    addUpdateDocumentTask();
   }
 
   protected void startProcessedOperationInMemory() {
@@ -422,6 +425,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     removeSyncChanged(true);
     setDocumentCondition( DocumentCondition.PROCESSED );
     queueManager.setExecutedRemote(this);
+    addUpdateDocumentTask();
   }
 
   protected void onOperationError(Throwable error) {
@@ -449,4 +453,15 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   public abstract void finishOnOperationError(List<String> errors);
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2286
+  // В конце каждой операции ставить задачу на обновление документа.
+  private void addUpdateDocumentTask() {
+    Timber.tag(TAG).e("addUpdateDocumentTask");
+
+    CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DOCUMENT;
+    CommandParams params = new CommandParams();
+    params.setDocument( getParams().getDocument() );
+    operationManager.execute(operation, params);
+  }
 }
