@@ -81,7 +81,13 @@ public class QueueDBManager implements JobCountInterface {
       // операции SaveDecision и AddDecision для данной резолюции
       if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
         Decision decision = params.getDecisionModel();
-        setAsCanceled( decision.getId()  );
+        setDecisionCommandAsCanceled( decision.getId()  );
+      }
+
+      // Если поступила новая операция UpdateDocumentCommand, то отменить все невыполненные
+      // операции UpdateDocumentCommand для данного документа (чтобы не порождать лишних запросов на загрузку документа)
+      if ( params.getUuid() != null && commandClass.endsWith("UpdateDocumentCommand") ) {
+        setUpdateDocumentCommandExecuted( params.getDocument(), true );
       }
 
       if (
@@ -120,7 +126,7 @@ public class QueueDBManager implements JobCountInterface {
     }
   }
 
-  private void setAsCanceled(String decision_id) {
+  private void setDecisionCommandAsCanceled(String decision_id) {
 
     Timber.tag(TAG).i( "decision_id %s", decision_id);
 
@@ -139,7 +145,7 @@ public class QueueDBManager implements JobCountInterface {
       .and(QueueEntity.WITH_ERROR.ne(true))
       .and(QueueEntity.REMOTE.ne(true))
       .get().value();
-    Timber.tag(TAG).i( "setAsCanceled %s", count );
+    Timber.tag(TAG).i( "setDecisionCommandAsCanceled %s", count );
   }
 
   private Boolean exist(String uuid) {
@@ -313,20 +319,22 @@ public class QueueDBManager implements JobCountInterface {
     return uncompleteLocalTask == null && uncompleteRemoteTask == null;
   }
 
-  public void setUpdateDocumentCommandExecuted(String documentUid) {
+  public void setUpdateDocumentCommandExecuted(String documentUid, boolean canceled) {
     if ( documentUid != null ) {
       int count = dataStore
         .update(QueueEntity.class)
+        .set( QueueEntity.RUNNING, false )
         .set( QueueEntity.LOCAL, true )
         .set( QueueEntity.REMOTE, true )
-        .set( QueueEntity.RUNNING, false )
+        .set( QueueEntity.CANCELED, canceled )
         .where( QueueEntity.COMMAND.eq( "sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand" ) )
         .and( QueueEntity.PARAMS.like( "%\"document\":\""+documentUid+"\"%" ) )
+        .and( QueueEntity.WITH_ERROR.ne( true ) )
         .and( QueueEntity.REMOTE.ne( true ) )
         .get()
         .value();
 
-      Timber.tag(TAG).d("Set %s UpdateDocumentCommands as executed for doc %s", count, documentUid);
+      Timber.tag(TAG).d("Set %s UpdateDocumentCommands as executed, canceled ? %s, for doc %s", count, canceled, documentUid);
     }
   }
 }

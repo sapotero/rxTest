@@ -118,6 +118,6 @@ public class QueueManager {
   }
 
   public void setUpdateDocumentCommandExecuted(String documentUid) {
-    dBManager.setUpdateDocumentCommandExecuted( documentUid );
+    dBManager.setUpdateDocumentCommandExecuted( documentUid, false );
   }
 }
