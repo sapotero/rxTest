@@ -36,6 +36,8 @@ public class QueueManager implements QueueRepository {
   @Override
   public void remove(AbstractCommand command) {
     Timber.tag(TAG).e("remove %s", command);
+    dBManager.remove( command );
+    memoryManager.remove( command );
   }
 
   @Override
