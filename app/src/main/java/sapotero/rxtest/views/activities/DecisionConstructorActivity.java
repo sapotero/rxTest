@@ -141,6 +141,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           Timber.tag(TAG).d("Primary consideration press handle");
 
           if (rDecisionEntity != null) {
+            settings.setShowPrimaryConsideration(true);
             Decision primary_decision = manager.getDecision();
             if( manager.allSignersSet() ) {
               Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -152,9 +153,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
               commandParams.setDecisionId( rDecisionEntity.getUid() );
               commandParams.setDecisionModel( manager.getDecision() );
               operationManager.execute( operation, commandParams );
-
-              /*Не показывать модальное окно "выбор сотрудника"*/
-              settings.setShowPrimaryConsideration(false);
               finish();
             } else {
               new MaterialDialog.Builder(this)
