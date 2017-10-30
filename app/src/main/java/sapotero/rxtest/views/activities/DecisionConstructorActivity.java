@@ -142,21 +142,26 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
           if (rDecisionEntity != null) {
             settings.setShowPrimaryConsideration(true);
-
             Decision primary_decision = manager.getDecision();
+            if( manager.allSignersSet() ) {
+              Gson gson = new GsonBuilder().setPrettyPrinting().create();
+              String json = gson.toJson( primary_decision );
+              Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String json = gson.toJson( primary_decision );
-            Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
-
-            operation = CommandFactory.Operation.SAVE_DECISION;
-
-            commandParams = new CommandParams();
-            commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( manager.getDecision() );
-            operationManager.execute( operation, commandParams );
-
-            finish();
+              operation = CommandFactory.Operation.SAVE_DECISION;
+              commandParams = new CommandParams();
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              commandParams.setDecisionModel( manager.getDecision() );
+              operationManager.execute( operation, commandParams );
+              finish();
+            } else {
+              new MaterialDialog.Builder(this)
+                .title("Внимание")
+                .content("Укажите хотя бы одного исполнителя")
+                .positiveText("Ок")
+                .onPositive( (dialog, which) -> dialog.dismiss() )
+                .show();
+            }
           }
 
           break;
