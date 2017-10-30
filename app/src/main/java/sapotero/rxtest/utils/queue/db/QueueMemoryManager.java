@@ -53,6 +53,7 @@ public class QueueMemoryManager implements QueueRepository{
 
   private void executeMock(Command command) {
     Timber.tag(TAG).d("\n --- QueueMemoryStore ---\n\n%s\n\n", commands.keySet() );
+    
   }
 
 }
