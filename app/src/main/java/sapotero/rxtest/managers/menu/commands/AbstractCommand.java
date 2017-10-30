@@ -220,6 +220,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
 
     removeChangedInDb( setUpdatedAt );
+
+    addUpdateDocumentTask();
   }
 
   protected void removeChangedInDb(boolean setUpdatedAt) {
@@ -425,7 +427,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     removeSyncChanged(true);
     setDocumentCondition( DocumentCondition.PROCESSED );
     queueManager.setExecutedRemote(this);
-    addUpdateDocumentTask();
   }
 
   protected void onOperationError(Throwable error) {
@@ -456,7 +457,13 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   // resolved https://tasks.n-core.ru/browse/MPSED-2286
   // В конце каждой операции ставить задачу на обновление документа.
-  private void addUpdateDocumentTask() {
+  // Метод вызывается во всех операциях, кроме:
+  // AddTemporaryDecision (так как не меняет документ на сервере),
+  // SignFile (так как после нее всегда отрабатывает Signing NextPerson),
+  // AddToFolder, RemoveFromFolder (так как не меняют документа),
+  // DoNothing (так как пустая операция),
+  // CreateTemplate, RemoveTemplate, UpdateTemplate (так как не меняют документов)
+  protected void addUpdateDocumentTask() {
     Timber.tag(TAG).e("addUpdateDocumentTask");
 
     CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DOCUMENT;

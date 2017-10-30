@@ -80,6 +80,8 @@ public class CheckControlLabel extends SharedCommand {
       .value();
 
     queueManager.setExecutedRemote(this);
+
+    addUpdateDocumentTask();
   }
 
   @Override
@@ -99,5 +101,7 @@ public class CheckControlLabel extends SharedCommand {
       .value();
 
     queueManager.setExecutedWithError( this, errors );
+
+    addUpdateDocumentTask();
   }
 }
