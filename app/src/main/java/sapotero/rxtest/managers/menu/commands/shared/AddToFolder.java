@@ -72,7 +72,13 @@ public class AddToFolder extends SharedCommand {
       .setLabel(LabelType.FAVORITES);
     store.process( transaction );
 
-    removeChangedInDb( false );
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .set( RDocumentEntity.FAVORITES, true )
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+      .get()
+      .value();
 
     queueManager.setExecutedRemote(this);
   }

@@ -206,16 +206,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( setUpdatedAt ) {
       store.process(
         store.startTransactionFor( getParams().getDocument() )
-          .removeLabel(LabelType.SYNC)
           .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
-          .setState(InMemoryState.READY)
-      );
-
-    } else {
-      store.process(
-        store.startTransactionFor( getParams().getDocument() )
-          .removeLabel(LabelType.SYNC)
-          .setState(InMemoryState.READY)
       );
     }
 
@@ -228,16 +219,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( setUpdatedAt ) {
       dataStore
         .update(RDocumentEntity.class)
-        .set( RDocumentEntity.CHANGED, false)
         .set( RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp() )
-        .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-        .get()
-        .value();
-
-    } else {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.CHANGED, false)
         .where(RDocumentEntity.UID.eq(getParams().getDocument()))
         .get()
         .value();
@@ -366,10 +348,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   protected void finishRejectedProcessedOperationOnError(List<String> errors) {
     Transaction transaction = store.startTransactionFor( getParams().getDocument() )
-      .removeLabel(LabelType.SYNC)
       .removeLabel(LabelType.REJECTED)
-      .setField(FieldType.PROCESSED, false)
-      .setState(InMemoryState.READY);
+      .setField(FieldType.PROCESSED, false);
 
     boolean returnedOldValue = getParams().getReturnedOldValue();
     boolean againOldValue = getParams().getAgainOldValue();
@@ -386,7 +366,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CHANGED, false)
       .set( RDocumentEntity.REJECTED, false)
       .set( RDocumentEntity.RETURNED, returnedOldValue)
       .set( RDocumentEntity.AGAIN, againOldValue)

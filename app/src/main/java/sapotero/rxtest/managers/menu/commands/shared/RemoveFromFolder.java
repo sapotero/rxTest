@@ -95,7 +95,13 @@ public class RemoveFromFolder extends SharedCommand {
         .removeLabel(LabelType.FAVORITES);
       store.process( transaction );
 
-      removeChangedInDb( false );
+      dataStore
+        .update( RDocumentEntity.class )
+        .set( RDocumentEntity.CHANGED, false )
+        .set( RDocumentEntity.FAVORITES, false )
+        .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
+        .get()
+        .value();
     }
 
     queueManager.setExecutedRemote(this);
