@@ -1,58 +1,60 @@
 package sapotero.rxtest.utils.queue;
 
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
-
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
+import sapotero.rxtest.utils.queue.interfaces.QueueRepository;
 import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
 import timber.log.Timber;
 
 import static sapotero.rxtest.utils.queue.threads.QueueSupervisor.THREAD_POOL_SIZE;
 
-public class QueueManager {
+public class QueueManager implements QueueRepository {
 
   private final QueueDBManager dBManager;
-  private QueueSupervisor supervisor;
+  private final QueueSupervisor supervisor;
   private final String TAG = this.getClass().getSimpleName();
 
-
-  private Boolean isConnectedToInternet = false;
-
   public QueueManager() {
-
-    isConnectedToInternet();
 
     supervisor = new QueueSupervisor();
     dBManager  = new QueueDBManager();
   }
 
+  @Override
   public void add(Command command){
     dBManager.add( command );
   }
 
-
+  @Override
   public void remove(AbstractCommand command) {
     Timber.tag(TAG).e("remove %s", command);
   }
 
-  private void isConnectedToInternet() {
-    ReactiveNetwork.observeInternetConnectivity()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-        this.isConnectedToInternet = isConnectedToInternet;
-      }, Timber::e);
+  @Override
+  public void setExecutedLocal(Command command) {
+    dBManager.setExecutedLocal(command);
   }
 
-  public Boolean getConnected() {
-    return isConnectedToInternet;
+  @Override
+  public void setExecutedRemote(Command command) {
+    dBManager.setExecutedRemote(command);
   }
+
+  @Override
+  public void setExecutedWithError(Command command, List<String> errors) {
+    dBManager.setExecutedWithError(command, errors);
+  }
+
+  @Override
+  public void setAsRunning(Command command) {
+    dBManager
+      .setAsRunning(command);
+  }
+
 
   public void getUncompleteTasks(){
 
@@ -90,23 +92,6 @@ public class QueueManager {
       dBManager.dropRunningJobs();
     }
 
-  }
-
-  public void setExecutedLocal(Command command) {
-    dBManager.setExecutedLocal(command);
-  }
-
-  public void setExecutedRemote(Command command) {
-    dBManager.setExecutedRemote(command);
-  }
-
-  public void setExecutedWithError(Command command, List<String> errors) {
-    dBManager.setExecutedWithError(command, errors);
-  }
-
-  public void setAsRunning(Command command) {
-    dBManager
-      .setAsRunning(command.getParams().getUuid());
   }
 
   public void removeAll() {
