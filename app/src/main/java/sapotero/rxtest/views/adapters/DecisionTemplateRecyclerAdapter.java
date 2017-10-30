@@ -64,12 +64,15 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
   }
 
   public void addList(List<RTemplateEntity> list) {
-    mValues.clear();
-    notifyDataSetChanged();
+    clear();
     for (RTemplateEntity tmp: list) {
       addItem(tmp);
     }
+  }
 
+  public void clear() {
+    mValues.clear();
+    notifyDataSetChanged();
   }
 
   public class ViewHolder extends RecyclerView.ViewHolder {

@@ -153,8 +153,9 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(getContext())
       .content(R.string.decision_reject_body)
       .cancelable(true)
-      .positiveText(R.string.yes)
       .negativeText(R.string.no)
+      .onNegative((dialog, which) -> dialog.dismiss())
+      .positiveText(R.string.yes)
       .onPositive((dialog1, which) -> {
         CommandFactory.Operation operation = CommandFactory.Operation.REJECT_DECISION;
 
@@ -169,8 +170,10 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         operationManager.execute(operation, commandParams);
         updateAfterButtonPressed();
         EventBus.getDefault().post(new ShowNextDocumentEvent(settings.getUid()));
+
+        dialog1.dismiss();
       })
-      .autoDismiss(true);
+      .autoDismiss(false);
 
     // настройка
     // Показывать комментарий при отклонении
@@ -181,8 +184,12 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
         .neutralText("Шаблон")
         .onNeutral((dialog, which) -> {
-          templates = new SelectTemplateDialog( getContext(), fragment, SelectTemplateDialog.REJECTION );
-          templates.show();
+          String oldText = dialog.getInputEditText() != null ? dialog.getInputEditText().getText().toString() : "";
+          templates = new SelectTemplateDialog( getContext(), fragment, SelectTemplateDialog.REJECTION, oldText );
+          boolean isShown = templates.show();
+          if ( isShown ) {
+            dialog.dismiss();
+          }
         });
     }
 
@@ -246,8 +253,8 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
   }
 
   @Override
-  public void onSelectTemplate(String template) {
-    showPrevDialog(template);
+  public void onSelectTemplate(String template, boolean cancel, String oldText) {
+    showPrevDialog( cancel ? oldText : template );
   }
 
   private class GestureListener extends GestureDetector.SimpleOnGestureListener {
