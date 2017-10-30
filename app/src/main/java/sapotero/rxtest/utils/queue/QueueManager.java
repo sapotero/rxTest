@@ -55,7 +55,6 @@ public class QueueManager implements QueueRepository {
       .setAsRunning(command);
   }
 
-
   public void getUncompleteTasks(){
 
     if (supervisor.getRunningJobsCount() < THREAD_POOL_SIZE){
@@ -64,34 +63,43 @@ public class QueueManager implements QueueRepository {
       List<QueueEntity> uncompleteSignTasks  = dBManager.getUncompleteSignTasks(8);
       if ( uncompleteSignTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteSignTasks ) {
-          dBManager.setAsRunning(command.getUuid());
-          supervisor.addLocal(command);
+          push(command, false);
         }
       }
 
       List<QueueEntity> uncompleteLocalTasks  = dBManager.getUncompleteLocalTasks(THREAD_POOL_SIZE - supervisor.getRunningJobsCount());
       if ( uncompleteLocalTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteLocalTasks ) {
-          dBManager.setAsRunning(command.getUuid());
-          supervisor.addLocal(command);
+          push(command, false);
         }
       }
 
       List<QueueEntity> uncompleteRemoteTasks = dBManager.getUncompleteRemoteTasks(THREAD_POOL_SIZE - uncompleteLocalTasks.size());
       if ( uncompleteRemoteTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteRemoteTasks ) {
-          dBManager.setAsRunning(command.getUuid());
-          supervisor.addRemote(command);
+          push(command, true);
         }
       }
 
-//      Timber.tag(TAG).e("getUncompleteTasks\nlocal: %s\nremote: %s\n", uncompleteLocalTasks.size(), uncompleteRemoteTasks.size() );
     }
 
     if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
       dBManager.dropRunningJobs();
     }
 
+  }
+
+  private void push(QueueEntity command, Boolean remote) {
+    Command cmd = supervisor.create(command);
+    if (cmd != null) {
+      dBManager.setAsRunning( cmd );
+
+      if (remote){
+        supervisor.addRemote(command);
+      } else {
+        supervisor.addLocal(command);
+      }
+    }
   }
 
   public void removeAll() {
