@@ -116,4 +116,8 @@ public class QueueManager {
   public boolean isAllTasksComplete() {
     return dBManager.isAllTasksComplete();
   }
+
+  public void setUpdateDocumentCommandExecuted(String documentUid) {
+    dBManager.setUpdateDocumentCommandExecuted( documentUid );
+  }
 }

@@ -312,4 +312,21 @@ public class QueueDBManager implements JobCountInterface {
 
     return uncompleteLocalTask == null && uncompleteRemoteTask == null;
   }
+
+  public void setUpdateDocumentCommandExecuted(String documentUid) {
+    if ( documentUid != null ) {
+      int count = dataStore
+        .update(QueueEntity.class)
+        .set( QueueEntity.LOCAL, true )
+        .set( QueueEntity.REMOTE, true )
+        .set( QueueEntity.RUNNING, false )
+        .where( QueueEntity.COMMAND.eq( "sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand" ) )
+        .and( QueueEntity.PARAMS.like( "%\"document\":\""+documentUid+"\"%" ) )
+        .and( QueueEntity.REMOTE.ne( true ) )
+        .get()
+        .value();
+
+      Timber.tag(TAG).d("Set %s UpdateDocumentCommands as executed for doc %s", count, documentUid);
+    }
+  }
 }
