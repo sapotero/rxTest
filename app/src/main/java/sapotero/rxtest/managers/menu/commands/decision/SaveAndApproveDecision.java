@@ -97,7 +97,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
       Boolean equals = document != null && Objects.equals(document.getFilter(), JournalStatus.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId());
       _decision.setSign( equals? null : sign );
 
-      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
+      Observable<DecisionError> info = getDecisionCreateOrUpdateOperationObservable( _decision );
       sendDecisionOperationRequest( info );
 
     } else {

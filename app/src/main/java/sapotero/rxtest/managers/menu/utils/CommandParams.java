@@ -32,6 +32,8 @@ public class CommandParams implements Serializable {
   private boolean returnedOldValue;
   private boolean againOldValue;
 
+  private boolean temporaryDecision = false;
+
   public CommandParams() {
     EsdApplication.getDataComponent().inject(this);
 
@@ -110,6 +112,7 @@ public class CommandParams implements Serializable {
 
   public void setDecisionModel(Decision decisionModel) {
     this.decisionModel = decisionModel;
+    setTemporaryDecision( decisionModel.isTemporary() );
   }
 
   public Decision getDecisionModel() {
@@ -178,5 +181,13 @@ public class CommandParams implements Serializable {
 
   public void setAgainOldValue(boolean againOldValue) {
     this.againOldValue = againOldValue;
+  }
+
+  public boolean isTemporaryDecision() {
+    return temporaryDecision;
+  }
+
+  public void setTemporaryDecision(boolean temporaryDecision) {
+    this.temporaryDecision = temporaryDecision;
   }
 }
