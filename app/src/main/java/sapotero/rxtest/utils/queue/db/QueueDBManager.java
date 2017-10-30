@@ -17,20 +17,21 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
+import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
+import sapotero.rxtest.utils.queue.interfaces.QueueRepository;
 import timber.log.Timber;
 
-public class QueueDBManager implements JobCountInterface {
+public class QueueDBManager implements JobCountInterface, QueueRepository {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 
   public QueueDBManager() {
     EsdApplication.getDataComponent().inject(this);
-
     dropRunningTasks();
   }
 
@@ -69,7 +70,142 @@ public class QueueDBManager implements JobCountInterface {
 
   }
 
+  private void setDecisionCommandAsCanceled(String decision_id) {
 
+    Timber.tag(TAG).i( "decision_id %s", decision_id);
+
+    List<String> commandTypesToCancel = new ArrayList<>();
+    commandTypesToCancel.add("sapotero.rxtest.managers.menu.commands.decision.SaveDecision");
+    commandTypesToCancel.add("sapotero.rxtest.managers.menu.commands.decision.AddDecision");
+
+    int count = dataStore
+      .update(QueueEntity.class)
+      .set(QueueEntity.RUNNING, false)
+      .set(QueueEntity.LOCAL, true)
+      .set(QueueEntity.REMOTE, true)
+      .set(QueueEntity.CANCELED, true)
+      .where(QueueEntity.COMMAND.in( commandTypesToCancel ))
+      .and( QueueEntity.PARAMS.like("%\"decisionId\":\""+decision_id+"\"%") )
+      .and(QueueEntity.WITH_ERROR.ne(true))
+      .and(QueueEntity.REMOTE.ne(true))
+      .get().value();
+    Timber.tag(TAG).i( "setDecisionCommandAsCanceled %s", count );
+  }
+
+  private Boolean exist(String uuid) {
+    return dataStore
+      .count(QueueEntity.class)
+      .where(QueueEntity.UUID.eq( uuid ) )
+      .get().value() > 0;
+  }
+
+  public List<QueueEntity> getUncompleteSignTasks(int limit) {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .and(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.file.SignFile"))
+      .limit(limit)
+      .get()
+      .toList();
+  }
+
+  public List<QueueEntity> getUncompleteLocalTasks(int limit) {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .limit(limit)
+      .get()
+      .toList();
+  }
+
+  public List<QueueEntity> getUncompleteRemoteTasks(int limit) {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.REMOTE.eq(false))
+      .and( QueueEntity.LOCAL.eq(true) )
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .limit(limit)
+      .get()
+      .toList();
+  }
+
+  public void removeAll() {
+    int count = dataStore
+      .delete(QueueEntity.class)
+      .where(QueueEntity.UUID.ne(""))
+      .get().value();
+    Timber.tag(TAG).i("DELETED: %s", count);
+  }
+
+  public void dropRunningJobs() {
+    dataStore
+      .update(QueueEntity.class)
+      .set(QueueEntity.RUNNING, false)
+      .where(QueueEntity.RUNNING.eq(true))
+      .get()
+      .value();
+  }
+
+  private void updateRunningStatus(String uuid, Boolean running){
+    Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
+
+    if ( uuid != null ) {
+      int count = dataStore
+        .update(QueueEntity.class)
+        .set(   QueueEntity.RUNNING, running )
+        .where( QueueEntity.UUID.eq( uuid ) )
+        .get()
+        .value();
+
+      if ( count > 0 ){
+        Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
+      }
+    }
+  }
+
+  public boolean isAllTasksComplete() {
+    QueueEntity uncompleteLocalTask = dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .get().firstOrNull();
+
+    QueueEntity uncompleteRemoteTask = dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.REMOTE.eq(false))
+      .and( QueueEntity.LOCAL.eq(true) )
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .get().firstOrNull();
+
+    return uncompleteLocalTask == null && uncompleteRemoteTask == null;
+  }
+
+  public void setUpdateDocumentCommandExecuted(String documentUid, boolean canceled) {
+    if ( documentUid != null ) {
+      int count = dataStore
+        .update(QueueEntity.class)
+        .set( QueueEntity.RUNNING, false )
+        .set( QueueEntity.LOCAL, true )
+        .set( QueueEntity.REMOTE, true )
+        .set( QueueEntity.CANCELED, canceled )
+        .where( QueueEntity.COMMAND.eq( "sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand" ) )
+        .and( QueueEntity.PARAMS.like( "%\"document\":\""+documentUid+"\"%" ) )
+        .and( QueueEntity.WITH_ERROR.ne( true ) )
+        .and( QueueEntity.REMOTE.ne( true ) )
+        .get()
+        .value();
+
+      Timber.tag(TAG).d("Set %s UpdateDocumentCommands as executed, canceled ? %s, for doc %s", count, canceled, documentUid);
+    }
+  }
+
+  /* QueueRepository */
+  @Override
   public void add(Command command){
     if (command != null && command.getParams() != null) {
       Timber.tag(TAG).i( "\n----------- ADD ------------\n%s\n Params: %s", command, command.getParams() );
@@ -81,7 +217,7 @@ public class QueueDBManager implements JobCountInterface {
       // операции SaveDecision и AddDecision для данной резолюции
       if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
         Decision decision = params.getDecisionModel();
-        setDecisionCommandAsCanceled( decision.getId()  );
+        setDecisionCommandAsCanceled( decision.getId() );
       }
 
       // Если поступила новая операция UpdateDocumentCommand, то отменить все невыполненные
@@ -126,70 +262,12 @@ public class QueueDBManager implements JobCountInterface {
     }
   }
 
-  private void setDecisionCommandAsCanceled(String decision_id) {
+  @Override
+  public void remove(AbstractCommand command) {
 
-    Timber.tag(TAG).i( "decision_id %s", decision_id);
-
-    List<String> commandTypesToCancel = new ArrayList<>();
-    commandTypesToCancel.add("sapotero.rxtest.managers.menu.commands.decision.SaveDecision");
-    commandTypesToCancel.add("sapotero.rxtest.managers.menu.commands.decision.AddDecision");
-
-    int count = dataStore
-      .update(QueueEntity.class)
-      .set(QueueEntity.RUNNING, false)
-      .set(QueueEntity.LOCAL, true)
-      .set(QueueEntity.REMOTE, true)
-      .set(QueueEntity.CANCELED, true)
-      .where(QueueEntity.COMMAND.in( commandTypesToCancel ))
-      .and( QueueEntity.PARAMS.like("%\"decisionId\":\""+decision_id+"\"%") )
-      .and(QueueEntity.WITH_ERROR.ne(true))
-      .and(QueueEntity.REMOTE.ne(true))
-      .get().value();
-    Timber.tag(TAG).i( "setDecisionCommandAsCanceled %s", count );
   }
 
-  private Boolean exist(String uuid) {
-    return dataStore
-          .count(QueueEntity.class)
-          .where(QueueEntity.UUID.eq( uuid ) )
-          .get().value() > 0;
-  }
-
-  public List<QueueEntity> getUncompleteSignTasks(int limit) {
-    return dataStore
-      .select(QueueEntity.class)
-      .where(QueueEntity.LOCAL.eq(false))
-      .and(QueueEntity.RUNNING.eq(false))
-      .and(QueueEntity.WITH_ERROR.eq(false))
-      .and(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.file.SignFile"))
-      .limit(limit)
-      .get()
-      .toList();
-  }
-
-  public List<QueueEntity> getUncompleteLocalTasks(int limit) {
-    return dataStore
-      .select(QueueEntity.class)
-      .where(QueueEntity.LOCAL.eq(false))
-      .and(QueueEntity.RUNNING.eq(false))
-      .and(QueueEntity.WITH_ERROR.eq(false))
-      .limit(limit)
-      .get()
-      .toList();
-  }
-
-  public List<QueueEntity> getUncompleteRemoteTasks(int limit) {
-    return dataStore
-      .select(QueueEntity.class)
-      .where(QueueEntity.REMOTE.eq(false))
-      .and( QueueEntity.LOCAL.eq(true) )
-      .and(QueueEntity.RUNNING.eq(false))
-      .and(QueueEntity.WITH_ERROR.eq(false))
-      .limit(limit)
-      .get()
-      .toList();
-  }
-
+  @Override
   public void setExecutedLocal(Command command) {
     if (command != null && command.getParams() != null) {
       CommandParams params = command.getParams();
@@ -210,6 +288,7 @@ public class QueueDBManager implements JobCountInterface {
     }
   }
 
+  @Override
   public void setExecutedRemote(Command command) {
     if (command != null && command.getParams() != null) {
       CommandParams params = command.getParams();
@@ -233,52 +312,12 @@ public class QueueDBManager implements JobCountInterface {
     }
   }
 
-  public void removeAll() {
-    int count = dataStore
-      .delete(QueueEntity.class)
-      .where(QueueEntity.UUID.ne(""))
-      .get().value();
-    Timber.tag(TAG).i("DELETED: %s", count);
-  }
-
-
-
-  public void setAsRunning(String uuid) {
-    updateRunningStatus(uuid, true);
-  }
-
-  private void updateRunningStatus(String uuid, Boolean running){
-    Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
-
-    if ( uuid != null ) {
-      int count = dataStore
-        .update(QueueEntity.class)
-        .set(   QueueEntity.RUNNING, running )
-        .where( QueueEntity.UUID.eq( uuid ) )
-        .get()
-        .value();
-
-      if ( count > 0 ){
-        Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
-      }
-    }
-  }
-
-  public void dropRunningJobs() {
-    dataStore
-      .update(QueueEntity.class)
-      .set(QueueEntity.RUNNING, false)
-      .where(QueueEntity.RUNNING.eq(true))
-      .get()
-      .value();
-  }
-
-  /* JobCountInterface */
   @Override
-  public int getRunningJobsCount(){
-    return dataStore.count(QueueEntity.class).where(QueueEntity.RUNNING.eq(true)).get().value();
+  public void setAsRunning(Command command) {
+    updateRunningStatus(command.getParams().getUuid(), true);
   }
 
+  @Override
   public void setExecutedWithError(Command command, List<String> errors) {
     if (command != null && command.getParams() != null) {
       CommandParams params = command.getParams();
@@ -302,39 +341,9 @@ public class QueueDBManager implements JobCountInterface {
     }
   }
 
-  public boolean isAllTasksComplete() {
-    QueueEntity uncompleteLocalTask = dataStore
-      .select(QueueEntity.class)
-      .where(QueueEntity.LOCAL.eq(false))
-      .and(QueueEntity.WITH_ERROR.eq(false))
-      .get().firstOrNull();
-
-    QueueEntity uncompleteRemoteTask = dataStore
-      .select(QueueEntity.class)
-      .where(QueueEntity.REMOTE.eq(false))
-      .and( QueueEntity.LOCAL.eq(true) )
-      .and(QueueEntity.WITH_ERROR.eq(false))
-      .get().firstOrNull();
-
-    return uncompleteLocalTask == null && uncompleteRemoteTask == null;
-  }
-
-  public void setUpdateDocumentCommandExecuted(String documentUid, boolean canceled) {
-    if ( documentUid != null ) {
-      int count = dataStore
-        .update(QueueEntity.class)
-        .set( QueueEntity.RUNNING, false )
-        .set( QueueEntity.LOCAL, true )
-        .set( QueueEntity.REMOTE, true )
-        .set( QueueEntity.CANCELED, canceled )
-        .where( QueueEntity.COMMAND.eq( "sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand" ) )
-        .and( QueueEntity.PARAMS.like( "%\"document\":\""+documentUid+"\"%" ) )
-        .and( QueueEntity.WITH_ERROR.ne( true ) )
-        .and( QueueEntity.REMOTE.ne( true ) )
-        .get()
-        .value();
-
-      Timber.tag(TAG).d("Set %s UpdateDocumentCommands as executed, canceled ? %s, for doc %s", count, canceled, documentUid);
-    }
+  /* JobCountInterface */
+  @Override
+  public int getRunningJobsCount(){
+    return dataStore.count(QueueEntity.class).where(QueueEntity.RUNNING.eq(true)).get().value();
   }
 }
