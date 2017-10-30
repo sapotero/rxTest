@@ -1,5 +1,6 @@
 package sapotero.rxtest.managers.menu.commands;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.google.gson.Gson;
 
 import org.acra.ACRA;
@@ -31,6 +32,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
+import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -56,7 +58,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   @Inject public ISettings settings;
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
+  @Inject public OperationManager operationManager;
   @Inject public MemoryStore store;
+  @Inject public JobManager jobManager;
 
   protected static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
 

@@ -6,6 +6,7 @@ package sapotero.rxtest.managers.menu.commands.update;
 
 import java.util.List;
 
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 
@@ -22,6 +23,7 @@ public class UpdateDocumentCommand extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true ) );
   }
 
   @Override
@@ -37,7 +39,8 @@ public class UpdateDocumentCommand extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-
+    queueManager.setExecutedRemote(this);
+    // TODO: if (enough time passed) {call UpdateDocJob with force update}
   }
 
   @Override

@@ -548,7 +548,7 @@ public class CommandFactory implements AbstractCommand.Callback{
           operation = Operation.DELETE_DECISION_TEMPLATE;
           break;
         case "sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand":
-          operation = Operation.DELETE_DECISION_TEMPLATE;
+          operation = Operation.UPDATE_DOCUMENT;
           break;
       }
 

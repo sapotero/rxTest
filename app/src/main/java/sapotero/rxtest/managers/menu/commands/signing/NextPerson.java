@@ -207,10 +207,21 @@ public class NextPerson extends ApprovalSigningCommand {
   @Override
   public void finishOnOperationSuccess() {
     finishProcessedOperationOnSuccess();
+    addUpdateDocumentTask();
   }
 
   @Override
   public void finishOnOperationError(List<String> errors) {
     finishRejectedProcessedOperationOnError( errors );
+    addUpdateDocumentTask();
+  }
+
+  private void addUpdateDocumentTask() {
+    Timber.tag(TAG).e("addUpdateDocumentTask");
+
+    CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DOCUMENT;
+    CommandParams params = new CommandParams();
+    params.setDocument( getParams().getDocument() );
+    operationManager.execute(operation, params);
   }
 }

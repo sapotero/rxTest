@@ -33,18 +33,20 @@ public class UpdateDocumentJob extends DocumentJob {
   private String uid;
   private String index  = null;
   private String filter = null;
-  private Boolean forceUpdate       = false;
+  private Boolean forceUpdate       = false;  // if true, document will be updated even if MD5 didn't change
   private Boolean forceProcessed    = false;
   private Boolean forceDropFavorite = false;
+  private Boolean ignoreSyncLabel   = false;  // if true, document will be loaded even if it has sync label (isChanged() returns true) (and updated only if MD5 changed)
   private DocumentType documentType = DocumentType.DOCUMENT;
 
   private boolean fromLinks = false;
 
-  public UpdateDocumentJob(String uid, String login, String currentUserId) {
+  public UpdateDocumentJob(String uid, String login, String currentUserId, boolean ignoreSyncLabel) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.login = login;
     this.currentUserId = currentUserId;
+    this.ignoreSyncLabel = ignoreSyncLabel;
   }
 
   public UpdateDocumentJob(String uid, String index, String filter, String login, String currentUserId) {
@@ -122,7 +124,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     RDocumentEntity documentExisting = getDocumentExisting();
 
-    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() || ignoreSyncLabel ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Loading document");
       loadDocument(uid, TAG);
     } else {
@@ -151,7 +153,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     RDocumentEntity documentExisting = getDocumentExisting();
 
-    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() || ignoreSyncLabel ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting update");
 
       // Force update, if document exists and it must be favorite, because it is from favorites folder
