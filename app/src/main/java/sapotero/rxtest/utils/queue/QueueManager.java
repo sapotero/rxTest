@@ -6,6 +6,7 @@ import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
+import sapotero.rxtest.utils.queue.db.QueueMemoryManager;
 import sapotero.rxtest.utils.queue.interfaces.QueueRepository;
 import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
 import timber.log.Timber;
@@ -14,14 +15,16 @@ import static sapotero.rxtest.utils.queue.threads.QueueSupervisor.THREAD_POOL_SI
 
 public class QueueManager implements QueueRepository {
 
-  private final QueueDBManager dBManager;
+  private final QueueDBManager     dBManager;
+  private final QueueMemoryManager memoryManager;
   private final QueueSupervisor supervisor;
   private final String TAG = this.getClass().getSimpleName();
 
   public QueueManager() {
 
-    supervisor = new QueueSupervisor();
-    dBManager  = new QueueDBManager();
+    supervisor    = new QueueSupervisor();
+    dBManager     = new QueueDBManager();
+    memoryManager = new QueueMemoryManager();
   }
 
   @Override
