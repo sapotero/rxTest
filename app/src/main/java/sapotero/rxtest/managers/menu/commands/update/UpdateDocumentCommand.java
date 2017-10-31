@@ -6,7 +6,6 @@ import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
-import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 
@@ -44,8 +43,6 @@ public class UpdateDocumentCommand extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    InMemoryDocument doc = store.getDocuments().get( getParams().getDocument() );
-
     int time = DEFAULT_UPDATE_DELAY;
     try {
       time = Integer.parseInt(settings.getUpdateTime());
@@ -53,7 +50,7 @@ public class UpdateDocumentCommand extends AbstractCommand {
       Timber.e(e);
     }
 
-    if ( doc != null && doc.getUpdatedAt() != null && DateUtil.isSomeTimePassed( doc.getUpdatedAt(), time ) ) {
+    if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), time ) ) {
       jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, true ) );
       queueManager.setExecutedRemote(this);
     }

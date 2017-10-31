@@ -448,6 +448,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DOCUMENT;
     CommandParams params = new CommandParams();
     params.setDocument( getParams().getDocument() );
+    params.setUpdatedAt( DateUtil.getTimestamp() );
     operationManager.execute(operation, params);
   }
 }
