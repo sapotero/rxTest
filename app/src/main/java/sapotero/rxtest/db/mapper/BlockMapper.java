@@ -89,9 +89,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
         model.getPerformers().add(performerModel);
       }
 
-//      if ( !formatted ) {
-        Collections.sort(model.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-//      }
+      Collections.sort(model.getPerformers(), (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0);
     }
   }
 }
