@@ -91,6 +91,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     model.setUrgencyText( entity.getUrgencyText() );
     model.setShowPosition( entity.isShowPosition() );
     model.setSignBase64( entity.getSignBase64() );
+    model.setTemporary( entity.isTemporary() );
   }
 
   private void setBlocks(Decision model, RDecisionEntity entity, boolean formatted) {
