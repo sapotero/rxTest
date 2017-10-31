@@ -108,7 +108,7 @@ public class PerformerMapperTest {
     assertEquals( expected.getIsOriginal(), actual.getIsOriginal() );
     assertEquals( expected.getIsResponsible(), actual.getIsResponsible() );
     assertEquals( expected.getOrganization(), actual.getOrganization() );
-    assertEquals( null, actual.getNumber() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
     assertEquals( null, actual.getPerformerType() );
     assertEquals( null, actual.getPerformerText() );
     assertEquals( null, actual.getPerformerGender() );
@@ -173,7 +173,7 @@ public class PerformerMapperTest {
     assertNotNull( destination );
     assertTrue( destination instanceof PrimaryConsiderationPeople);
     assertEquals( dummyPerformer.getId(), destination.getIPerformerUid() );
-    assertEquals( null, destination.getIPerformerNumber() );
+    assertEquals( dummyPerformer.getNumber(), destination.getIPerformerNumber() );
     assertEquals( dummyPerformer.getPerformerId(), destination.getIPerformerId() );
     assertEquals( null, destination.getIPerformerType() );
     assertEquals( dummyPerformer.getPerformerText(), destination.getIPerformerName() );
