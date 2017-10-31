@@ -40,9 +40,13 @@ public class NotifyManager {
   private Context appContext = EsdApplication.getApplication();
   private NotificationManagerCompat notificationManagerCompat = MainService.getNotificationManagerCompat();
   private int notViewedDocumentQuantity = 0;
+
   /*ограничитель для буфера уведомлений. Вызывает flush буффера при каждом эмите. Эмитится, с разной периодичностью в зависимости от SubstituteMode */
   private PublishSubject<Boolean> bufferBoundary = PublishSubject.create();
   private Handler Handler = new  Handler();
+  /*дефолтное значение размера буфера уведомлений */
+  private long bufferTimeSpan = 5_000;
+  private long tmp = 0;
 
   public NotifyManager() {
     EsdApplication.getManagerComponent().inject(this);
@@ -52,15 +56,19 @@ public class NotifyManager {
 
   private Runnable updateTimerThread = new Runnable() {
     public void run() {
-      int timeSpan;
-      if(settings.getSubstituteModePreference().get()){
-       timeSpan = 30_000;
-      } else {
-        timeSpan = 5_000;
+      if( !settings.getSubstituteModePreference().get() ){
+        bufferTimeSpan = 5_000;
+        bufferBoundary.onNext(true);
+        tmp = 0;
+      } else if ( settings.getSubstituteModePreference().get() ) {
+        bufferTimeSpan = 30_000;
+        tmp += 30_000;
+        if (tmp > 60_000) {
+          bufferBoundary.onNext(true);
+          bufferTimeSpan = 5_000;
+        }
       }
-
-      bufferBoundary.onNext(true);
-      Handler.postDelayed(this, timeSpan);
+      Handler.postDelayed(this, bufferTimeSpan);
     }
   };
 
