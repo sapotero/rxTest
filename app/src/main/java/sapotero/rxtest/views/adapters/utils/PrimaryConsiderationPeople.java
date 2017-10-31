@@ -11,6 +11,7 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private String id;
   private String name;
   private String position;
+  private Integer number;
   private String image;
   private String organization;
   private String gender;
@@ -37,6 +38,8 @@ public class PrimaryConsiderationPeople implements IPerformer {
     this.forInformation = forInformation;
     return this;
   }
+
+
 
   private boolean getBooleanValue(Boolean value) {
     if (value != null) {
@@ -152,6 +155,10 @@ public class PrimaryConsiderationPeople implements IPerformer {
     this.sortIndex = sortIndex;
   }
 
+  public void setNumber(Integer number) {
+    this.number = number;
+  }
+
   @Override
   public String getIPerformerUid() {
     return getUid();
@@ -164,11 +171,12 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   @Override
   public Integer getIPerformerNumber() {
-    return null;
+    return number;
   }
 
   @Override
   public void setIPerformerNumber(Integer number) {
+    setNumber(number);
   }
 
   @Override

@@ -58,6 +58,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
     formattedModel.setGroup( false );
     formattedModel.setIForInformation(entity.isForInformation());
 
+
     return formattedModel;
   }
 
@@ -69,6 +70,10 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
     model.setOrganization( entity.isIsOrganization() );
     model.setIImage(entity.getImage());
     model.setIForInformation(entity.isForInformation());
+
+    if ( entity.getNumber() != null ){
+      model.setNumber( entity.getNumber() );
+    }
   }
 
   // Returns IPerformer of destinationType, converted from IPerformer source
