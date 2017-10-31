@@ -1,57 +1,67 @@
 package sapotero.rxtest.utils.queue;
 
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
-
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
+import sapotero.rxtest.utils.queue.db.QueueMemoryManager;
+import sapotero.rxtest.utils.queue.interfaces.QueueRepository;
 import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
 import timber.log.Timber;
 
 import static sapotero.rxtest.utils.queue.threads.QueueSupervisor.THREAD_POOL_SIZE;
 
-public class QueueManager {
+public class QueueManager implements QueueRepository {
 
-  private final QueueDBManager dBManager;
-  private QueueSupervisor supervisor;
+  private final QueueDBManager     dBManager;
+  private final QueueMemoryManager memoryManager;
+  private final QueueSupervisor supervisor;
   private final String TAG = this.getClass().getSimpleName();
-
-
-  private Boolean isConnectedToInternet = false;
 
   public QueueManager() {
 
-    isConnectedToInternet();
-
-    supervisor = new QueueSupervisor();
-    dBManager  = new QueueDBManager();
+    supervisor    = new QueueSupervisor();
+    dBManager     = new QueueDBManager();
+    memoryManager = new QueueMemoryManager();
   }
 
+  @Override
   public void add(Command command){
     dBManager.add( command );
+    memoryManager.add( command );
   }
 
-
+  @Override
   public void remove(AbstractCommand command) {
     Timber.tag(TAG).e("remove %s", command);
+    dBManager.remove( command );
+    memoryManager.remove( command );
   }
 
-  private void isConnectedToInternet() {
-    ReactiveNetwork.observeInternetConnectivity()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-        this.isConnectedToInternet = isConnectedToInternet;
-      }, Timber::e);
+  @Override
+  public void setExecutedLocal(Command command) {
+    dBManager.setExecutedLocal(command);
+    memoryManager.setExecutedLocal(command);
   }
 
-  public Boolean getConnected() {
-    return isConnectedToInternet;
+  @Override
+  public void setExecutedRemote(Command command) {
+    dBManager.setExecutedRemote(command);
+    memoryManager.setExecutedRemote(command);
+  }
+
+  @Override
+  public void setExecutedWithError(Command command, List<String> errors) {
+    dBManager.setExecutedWithError(command, errors);
+    memoryManager.setExecutedWithError(command, errors);
+  }
+
+  @Override
+  public void setAsRunning(Command command) {
+    dBManager.setAsRunning(command);
+    memoryManager.setAsRunning(command);
   }
 
   public void getUncompleteTasks(){
@@ -62,28 +72,24 @@ public class QueueManager {
       List<QueueEntity> uncompleteSignTasks  = dBManager.getUncompleteSignTasks(8);
       if ( uncompleteSignTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteSignTasks ) {
-          dBManager.setAsRunning(command.getUuid());
-          supervisor.addLocal(command);
+          push(command, false);
         }
       }
 
       List<QueueEntity> uncompleteLocalTasks  = dBManager.getUncompleteLocalTasks(THREAD_POOL_SIZE - supervisor.getRunningJobsCount());
       if ( uncompleteLocalTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteLocalTasks ) {
-          dBManager.setAsRunning(command.getUuid());
-          supervisor.addLocal(command);
+          push(command, false);
         }
       }
 
       List<QueueEntity> uncompleteRemoteTasks = dBManager.getUncompleteRemoteTasks(THREAD_POOL_SIZE - uncompleteLocalTasks.size());
       if ( uncompleteRemoteTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteRemoteTasks ) {
-          dBManager.setAsRunning(command.getUuid());
-          supervisor.addRemote(command);
+          push(command, true);
         }
       }
 
-//      Timber.tag(TAG).e("getUncompleteTasks\nlocal: %s\nremote: %s\n", uncompleteLocalTasks.size(), uncompleteRemoteTasks.size() );
     }
 
     if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
@@ -92,21 +98,17 @@ public class QueueManager {
 
   }
 
-  public void setExecutedLocal(Command command) {
-    dBManager.setExecutedLocal(command);
-  }
+  private void push(QueueEntity command, Boolean remote) {
+    Command cmd = supervisor.create(command);
+    if (cmd != null) {
+      dBManager.setAsRunning( cmd );
 
-  public void setExecutedRemote(Command command) {
-    dBManager.setExecutedRemote(command);
-  }
-
-  public void setExecutedWithError(Command command, List<String> errors) {
-    dBManager.setExecutedWithError(command, errors);
-  }
-
-  public void setAsRunning(Command command) {
-    dBManager
-      .setAsRunning(command.getParams().getUuid());
+      if (remote){
+        supervisor.addRemote(command);
+      } else {
+        supervisor.addLocal(command);
+      }
+    }
   }
 
   public void removeAll() {
