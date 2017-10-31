@@ -60,8 +60,10 @@ public class UpdateDocumentCommand extends AbstractCommand {
     if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getSecondUpdateDelay() ) ) {
       Timber.tag(TAG).d("executeRemote - force updating document");
       jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, true ) );
-      queueManager.setExecutedRemote(this);
     }
+
+    // UpdateDocumentCommand is set executed remote only from inside UpdateDocumentJob in case of document update success.
+    // Here we do not call setExecutedRemote(), because at this moment we don't know, whether the document has been updated or not, yet.
   }
 
   private int getSecondUpdateDelay() {
