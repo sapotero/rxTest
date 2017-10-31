@@ -114,6 +114,10 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
     recalculate();
   }
 
+  public int size(){
+    return blocks.size();
+  }
+
   private void recalculate() {
     for (int i = 0; i < blocks.size(); i++) {
       blocks.get(i).setNumber(i+1);
