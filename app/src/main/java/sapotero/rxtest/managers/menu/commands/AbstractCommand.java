@@ -32,7 +32,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
-import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
@@ -59,7 +58,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   @Inject public ISettings settings;
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
-  @Inject public OperationManager operationManager;
   @Inject public MemoryStore store;
   @Inject public JobManager jobManager;
 
@@ -449,6 +447,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     CommandParams params = new CommandParams();
     params.setDocument( getParams().getDocument() );
     params.setUpdatedAt( DateUtil.getTimestamp() );
-    operationManager.execute(operation, params);
+    Command command = operation.getCommand(null, params);
+    queueManager.add(command);
   }
 }

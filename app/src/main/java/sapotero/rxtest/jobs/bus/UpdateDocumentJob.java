@@ -370,8 +370,8 @@ public class UpdateDocumentJob extends DocumentJob {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, filter, index );
       store.process( document, filter, index );
 
-      // if MD5 changed and document has been updated, set UpdateDocumentCommand for this document as executed,
-      // so that it will not start UpdateDocumentJob again after update delay
+      // if MD5 changed and document has been updated after first update delay, set UpdateDocumentCommand for this document as executed,
+      // so that it will not start UpdateDocumentJob again after second update delay
       queueManager.setUpdateDocumentCommandExecuted( document.getUid() );
     }
   }

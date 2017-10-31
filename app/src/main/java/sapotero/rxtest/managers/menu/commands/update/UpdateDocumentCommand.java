@@ -14,7 +14,8 @@ import timber.log.Timber;
 // Плашку ожидает синхронизации снимать после того, как отработает операция и документ будет обновлён.
 public class UpdateDocumentCommand extends AbstractCommand {
 
-  private static final int DEFAULT_UPDATE_DELAY = 30;
+  private static final int FIRST_UPDATE_DELAY = 5;
+  private static final int DEFAULT_SECOND_UPDATE_DELAY = 15;
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
@@ -26,8 +27,7 @@ public class UpdateDocumentCommand extends AbstractCommand {
 
   @Override
   public void execute() {
-    queueManager.add(this);
-    jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, false ) );
+    // Not used in this command
   }
 
   @Override
@@ -37,23 +37,43 @@ public class UpdateDocumentCommand extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    sendSuccessCallback();
-    queueManager.setExecutedLocal(this);
+    // After first delay time has passed, update document if MD5 has changed
+    Timber.tag(TAG).d("executeLocal - start");
+
+    if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getFirstUpdateDelay() ) ) {
+      Timber.tag(TAG).d("executeLocal - updating document");
+      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, false ) );
+      sendSuccessCallback();
+      queueManager.setExecutedLocal(this);
+    }
+  }
+
+  private int getFirstUpdateDelay() {
+    return FIRST_UPDATE_DELAY;
   }
 
   @Override
   public void executeRemote() {
-    int time = DEFAULT_UPDATE_DELAY;
+    // After second delay time has passed, force update document even if MD5 hasn't changed
+    Timber.tag(TAG).d("executeRemote - start");
+
+    if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getSecondUpdateDelay() ) ) {
+      Timber.tag(TAG).d("executeRemote - force updating document");
+      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, true ) );
+      queueManager.setExecutedRemote(this);
+    }
+  }
+
+  private int getSecondUpdateDelay() {
+    int secondUpdateDelay = DEFAULT_SECOND_UPDATE_DELAY;
+
     try {
-      time = Integer.parseInt(settings.getUpdateTime());
+      secondUpdateDelay = Integer.parseInt( settings.getUpdateTime() );
     } catch (NumberFormatException e) {
       Timber.e(e);
     }
 
-    if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), time ) ) {
-      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, true ) );
-      queueManager.setExecutedRemote(this);
-    }
+    return secondUpdateDelay;
   }
 
   @Override
