@@ -8,6 +8,7 @@ import org.acra.ACRA;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.HttpException;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
@@ -425,9 +427,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   protected boolean isOnline(Throwable error) {
     Timber.tag(TAG).d("settings.isOnline() ? %s", settings.isOnline());
     Timber.tag(TAG).d("error instanceof IOException ? %s", error instanceof IOException);
-    Timber.tag(TAG).d("settings.isUnauthorized() ? %s", settings.isUnauthorized());
 
-    return settings.isOnline() && !(error instanceof IOException) && !settings.isUnauthorized();
+    boolean isUnauthorized = ( error instanceof HttpException ) && ((HttpException) error).code() == HttpURLConnection.HTTP_UNAUTHORIZED;
+
+    Timber.tag(TAG).d("isUnauthorized ? %s", isUnauthorized);
+
+    return settings.isOnline() && !(error instanceof IOException) && !isUnauthorized;
   }
 
   public abstract void finishOnOperationError(List<String> errors);
