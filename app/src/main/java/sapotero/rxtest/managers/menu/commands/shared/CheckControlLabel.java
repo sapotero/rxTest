@@ -67,14 +67,12 @@ public class CheckControlLabel extends SharedCommand {
 
     store.process(
       store.startTransactionFor(getParams().getDocument())
-        .removeLabel(LabelType.SYNC)
         .setLabel(LabelType.CONTROL)
     );
 
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CONTROL, true )
-      .set( RDocumentEntity.CHANGED, false )
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
@@ -88,14 +86,12 @@ public class CheckControlLabel extends SharedCommand {
   public void finishOnOperationError(List<String> errors) {
     store.process(
       store.startTransactionFor(getParams().getDocument())
-        .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
     );
 
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CONTROL, false )
-      .set( RDocumentEntity.CHANGED, false )
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
