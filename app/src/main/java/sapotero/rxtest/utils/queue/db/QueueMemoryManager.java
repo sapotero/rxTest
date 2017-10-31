@@ -8,10 +8,11 @@ import java.util.List;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.utils.queue.interfaces.QueueRepository;
+import sapotero.rxtest.utils.queue.models.CommandInfo;
 import timber.log.Timber;
 
 public class QueueMemoryManager implements QueueRepository{
-  private final HashMap<String, List<Command>> commands;
+  private final HashMap<String, List<CommandInfo>> commands;
   private String TAG = this.getClass().getSimpleName();
 
   public QueueMemoryManager() {
@@ -20,7 +21,7 @@ public class QueueMemoryManager implements QueueRepository{
 
   @Override
   public void add(Command command) {
-    commands.put( command.getParams().getUuid(), Collections.singletonList(command));
+    commands.put( command.getParams().getUuid(), Collections.singletonList( new CommandInfo(command) ));
   }
 
   @Override
@@ -32,13 +33,12 @@ public class QueueMemoryManager implements QueueRepository{
 
   @Override
   public void setExecutedLocal(Command command) {
-    executeMock(command);
+    setExecuted(command, false);
   }
 
   @Override
   public void setExecutedRemote(Command command) {
-    remove((AbstractCommand) command);
-    executeMock(command);
+    setExecuted(command, true);
   }
 
   @Override
@@ -51,8 +51,28 @@ public class QueueMemoryManager implements QueueRepository{
     executeMock(command);
   }
 
+  private void setExecuted(Command command, Boolean remote) {
+    if ( commands.containsKey(command.getParams().getUuid()) ){
+      List<CommandInfo> commandInfoList = commands.get(command.getParams().getUuid());
+      if (commandInfoList.size() > 0) {
+
+        if (remote){
+          commandInfoList.get(0).setExecutedRemote(true);
+//          remove((AbstractCommand) command);
+        } else {
+          commandInfoList.get(0).setExecutedLocal(true);
+        }
+        executeMock(command);
+
+      } else {
+        remove((AbstractCommand) command);
+      }
+    }
+  }
+
+
   private void executeMock(Command command) {
-    Timber.tag(TAG).d("\n --- QueueMemoryStore ---\n\n%s\n\n", commands.keySet() );
+    Timber.tag(TAG).d("\n --- QueueMemoryStore ---\n\n%s\n\n", commands.values() );
     
   }
 

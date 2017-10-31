@@ -100,8 +100,10 @@ public class QueueManager implements QueueRepository {
 
   private void push(QueueEntity command, Boolean remote) {
     Command cmd = supervisor.create(command);
+
     if (cmd != null) {
-      dBManager.setAsRunning( cmd );
+      dBManager.setAsRunning(cmd);
+      memoryManager.setAsRunning(cmd);
 
       if (remote){
         supervisor.addRemote(command);
