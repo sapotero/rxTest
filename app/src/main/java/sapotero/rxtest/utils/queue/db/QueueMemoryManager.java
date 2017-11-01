@@ -9,11 +9,12 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.utils.queue.interfaces.QueueRepository;
 import sapotero.rxtest.utils.queue.models.CommandInfo;
+import sapotero.rxtest.utils.transducers.queue.QueueTransduce;
 import timber.log.Timber;
 
 public class QueueMemoryManager implements QueueRepository{
   private final HashMap<String, List<CommandInfo>> commands;
-  private String TAG = this.getClass().getSimpleName();
+  private final String TAG = this.getClass().getSimpleName();
 
   public QueueMemoryManager() {
     this.commands = new HashMap<>();
@@ -48,8 +49,16 @@ public class QueueMemoryManager implements QueueRepository{
 
   @Override
   public void setAsRunning(Command command) {
-    executeMock(command);
+    if ( commands.containsKey(command.getParams().getUuid()) ){
+      List<CommandInfo> commandInfoList = commands.get(command.getParams().getUuid());
+
+      if (commandInfoList.size() > 0) {
+        commandInfoList.get(0).setState(CommandInfo.STATE.RUNNING);
+        executeMock(command);
+      }
+    }
   }
+
 
   private void setExecuted(Command command, Boolean remote) {
     if ( commands.containsKey(command.getParams().getUuid()) ){
@@ -58,10 +67,11 @@ public class QueueMemoryManager implements QueueRepository{
 
         if (remote){
           commandInfoList.get(0).setExecutedRemote(true);
-//          remove((AbstractCommand) command);
+//          delayedRemove(command);
         } else {
           commandInfoList.get(0).setExecutedLocal(true);
         }
+        commandInfoList.get(0).setState(CommandInfo.STATE.READY);
         executeMock(command);
 
       } else {
@@ -70,10 +80,20 @@ public class QueueMemoryManager implements QueueRepository{
     }
   }
 
-
   private void executeMock(Command command) {
     Timber.tag(TAG).d("\n --- QueueMemoryStore ---\n\n%s\n\n", commands.values() );
-    
+
+    List<CommandInfo> availableCommands = QueueTransduce.sortByState(commands.values(), CommandInfo.STATE.READY);
+    Timber.tag(TAG).d("\n --- sort by state --- \n\n%s\n\n", availableCommands );
+
+    if (availableCommands.size() > 0){
+      List<CommandInfo> notExecutedLocal  = QueueTransduce.sort(
+        Collections.singletonList(availableCommands),
+        true,
+        false);
+
+      Timber.tag(TAG).d("\n --- notExecutedRemote --- \n\n%s\n\n", notExecutedLocal );
+    }
   }
 
 }

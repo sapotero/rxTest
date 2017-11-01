@@ -3,7 +3,7 @@ package sapotero.rxtest.utils.queue.models;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 
 public class CommandInfo {
-  protected enum STATE {
+  public enum STATE {
     READY,
     RUNNING
   }
