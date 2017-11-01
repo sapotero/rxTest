@@ -362,12 +362,21 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     openPdf.setVisibility( show ? View.GONE : View.VISIBLE );
 
     if (show){
+      tryToReloadImage();
       startReloadSubscription();
       updateDocumentCount();
       page_counter.setVisibility(View.INVISIBLE);
       document_title.setText( image.getTitle() );
     } else {
       stopReloadSubscription();
+    }
+  }
+
+  private void tryToReloadImage() {
+    if ( adapter != null && adapter.getCount() > index && adapter.getItem(index) != null ) {
+      Image image = adapter.getItem(index);
+      resetErrorInDb( image.getImageId() );
+      loadImage( image );
     }
   }
 
@@ -546,6 +555,13 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
     dataStore
       .update(RImageEntity.class)
       .set(RImageEntity.NO_FREE_SPACE, false)
+      .where(RImageEntity.IMAGE_ID.eq( imageId )).get().value();
+  }
+
+  private void resetErrorInDb(String imageId) {
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.ERROR, false)
       .where(RImageEntity.IMAGE_ID.eq( imageId )).get().value();
   }
 
