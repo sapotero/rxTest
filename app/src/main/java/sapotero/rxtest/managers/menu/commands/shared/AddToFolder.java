@@ -1,9 +1,12 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -15,10 +18,6 @@ public class AddToFolder extends SharedCommand {
 
   public AddToFolder(CommandParams params) {
     super(params);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
   }
 
   @Override
@@ -49,8 +48,7 @@ public class AddToFolder extends SharedCommand {
     Timber.tag(TAG).w( "updated: %s", count );
 
     queueManager.setExecutedLocal(this);
-
-    sendSuccessCallback();
+    EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
   }
 
   @Override

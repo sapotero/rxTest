@@ -118,7 +118,6 @@ public abstract class DecisionCommand extends AbstractCommand {
 
   private void onDecisionSuccess(DecisionError data) {
     if ( notEmpty( data.getErrors() ) ) {
-      sendErrorCallback( "error" );
       finishOnOperationError( data.getErrors() );
 
       Transaction transaction = new Transaction();

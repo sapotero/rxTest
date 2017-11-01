@@ -24,10 +24,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "save_and_approve_decision";
@@ -42,7 +38,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
     updateLocal();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -98,7 +93,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
       sendDecisionOperationRequest( info );
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }

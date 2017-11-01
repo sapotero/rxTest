@@ -63,7 +63,6 @@ public abstract class ApprovalSigningCommand extends OperationResultCommand {
       sendOperationRequest(info);
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }

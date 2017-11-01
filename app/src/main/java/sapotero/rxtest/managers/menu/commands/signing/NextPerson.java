@@ -28,10 +28,6 @@ public class NextPerson extends ApprovalSigningCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   private void resetSignImageError() {
     Timber.tag(TAG).e("Resetting sign image errors");
     RDocumentEntity doc = getDocument( getParams().getDocument() );
@@ -64,7 +60,6 @@ public class NextPerson extends ApprovalSigningCommand {
     resetSignImageError();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -81,8 +76,6 @@ public class NextPerson extends ApprovalSigningCommand {
     if ( result == IMAGE_SIGN_ERROR ) {
       String errorMessage = "Электронные образы не были подписаны";
       Timber.tag(TAG).i("error: %s", errorMessage);
-
-      sendErrorCallback( errorMessage );
 
       finishOnOperationError( Collections.singletonList( errorMessage ) );
     }

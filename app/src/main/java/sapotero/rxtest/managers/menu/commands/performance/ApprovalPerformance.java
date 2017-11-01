@@ -27,10 +27,6 @@ public class ApprovalPerformance extends AbstractCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
@@ -70,7 +66,6 @@ public class ApprovalPerformance extends AbstractCommand {
           queueManager.setExecutedRemote(this);
         },
         error -> {
-          sendErrorCallback( getType() );
         }
       );
   }
@@ -88,8 +83,6 @@ public class ApprovalPerformance extends AbstractCommand {
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
-
-    sendErrorCallback( getType() );
 
     queueManager.setExecutedLocal(this);
   }

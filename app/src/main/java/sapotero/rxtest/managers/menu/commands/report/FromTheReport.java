@@ -20,10 +20,6 @@ public class FromTheReport extends OperationResultCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "from_the_report";
@@ -39,7 +35,6 @@ public class FromTheReport extends OperationResultCommand {
     startProcessedOperationInDb();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

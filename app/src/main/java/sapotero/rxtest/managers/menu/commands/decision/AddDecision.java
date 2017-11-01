@@ -18,10 +18,6 @@ public class AddDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "add_decision";
@@ -45,7 +41,6 @@ public class AddDecision extends DecisionCommand {
     // ставим плашку всегда
     setChangedInDb();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

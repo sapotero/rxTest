@@ -82,12 +82,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return TAG;
   }
 
-  public Callback callback;
-  public interface Callback {
-    void onCommandExecuteSuccess(String command);
-    void onCommandExecuteError(String type);
-  }
-
   protected Retrofit getOperationsRetrofit() {
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -257,18 +251,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
   }
 
-  protected void sendSuccessCallback() {
-    if ( callback != null ) {
-      callback.onCommandExecuteSuccess( getType() );
-    }
-  }
-
-  protected void sendErrorCallback(String errorMessage) {
-    if ( callback != null ) {
-      callback.onCommandExecuteError( errorMessage );
-    }
-  }
-
   protected void saveOldLabelValues() {
     InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
     getParams().setReturnedOldValue( inMemoryDocument.getDocument().isReturned() );
@@ -412,8 +394,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     String errorMessage = error.getLocalizedMessage();
 
     Timber.tag(TAG).i("error: %s", errorMessage);
-
-    sendErrorCallback( errorMessage );
 
     if ( isOnline( error ) ) {
       finishOnOperationError( Collections.singletonList( errorMessage ) );

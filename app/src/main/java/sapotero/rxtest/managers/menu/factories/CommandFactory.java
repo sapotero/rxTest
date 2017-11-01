@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.factories;
 
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddTemporaryDecision;
@@ -27,13 +26,11 @@ import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class CommandFactory implements AbstractCommand.Callback{
+public class CommandFactory {
   private static CommandFactory instance;
   private final String TAG = this.getClass().getSimpleName();
 
   private CommandParams params;
-
-  Callback callback;
 
   public static CommandFactory getInstance() {
     if (instance == null){
@@ -42,22 +39,11 @@ public class CommandFactory implements AbstractCommand.Callback{
     return instance;
   }
 
-  public interface Callback {
-    void onCommandSuccess(String command);
-    void onCommandError();
-  }
-
-  public CommandFactory registerCallBack(Callback callback){
-    this.callback = callback;
-    return this;
-  }
-
   public enum Operation {
     FILE_SIGN {
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         SignFile command = new SignFile(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -71,7 +57,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         FromTheReport command = new FromTheReport(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -85,7 +70,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         ReturnToPrimaryConsideration command = new ReturnToPrimaryConsideration(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -99,7 +83,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         DelegatePerformance command = new DelegatePerformance(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -113,7 +96,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         ApprovalPerformance command = new ApprovalPerformance(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -127,7 +109,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         PrimaryConsideration command = new PrimaryConsideration(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -141,7 +122,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         sapotero.rxtest.managers.menu.commands.approval.ChangePerson command = new sapotero.rxtest.managers.menu.commands.approval.ChangePerson(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -155,7 +135,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         sapotero.rxtest.managers.menu.commands.approval.NextPerson command = new sapotero.rxtest.managers.menu.commands.approval.NextPerson(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -169,7 +148,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         sapotero.rxtest.managers.menu.commands.approval.PrevPerson command = new sapotero.rxtest.managers.menu.commands.approval.PrevPerson(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -183,7 +161,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         sapotero.rxtest.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -197,7 +174,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         sapotero.rxtest.managers.menu.commands.signing.NextPerson command = new sapotero.rxtest.managers.menu.commands.signing.NextPerson(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -211,7 +187,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         sapotero.rxtest.managers.menu.commands.signing.PrevPerson command = new sapotero.rxtest.managers.menu.commands.signing.PrevPerson(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -225,7 +200,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         AddToFolder command = new AddToFolder(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -239,7 +213,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         RemoveFromFolder command = new RemoveFromFolder(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -253,7 +226,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         CheckControlLabel command = new CheckControlLabel(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -267,7 +239,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         UncheckControlLabel command = new UncheckControlLabel(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -281,7 +252,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         DoNothing command = new DoNothing(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -295,7 +265,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         SaveDecision command = new SaveDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -309,7 +278,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         AddDecision command = new AddDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -323,7 +291,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         AddTemporaryDecision command = new AddTemporaryDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -337,7 +304,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         SaveAndApproveDecision command = new SaveAndApproveDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -351,7 +317,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         AddAndApproveDecision command = new AddAndApproveDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -365,7 +330,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         ApproveDecision command = new ApproveDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -379,7 +343,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         RejectDecision command = new RejectDecision(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -393,7 +356,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         CreateTemplate command = new CreateTemplate(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -407,7 +369,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         UpdateTemplate command = new UpdateTemplate(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -421,7 +382,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         RemoveTemplate command = new RemoveTemplate(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -435,7 +395,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         UpdateDocumentCommand command = new UpdateDocumentCommand(params);
-        command.registerCallBack(instance);
         return command;
       }
 
@@ -576,23 +535,4 @@ public class CommandFactory implements AbstractCommand.Callback{
     Timber.tag("CommandFactory").w("after build" );
     return command;
   }
-
-  @Override
-  public void onCommandExecuteSuccess(String command) {
-    Timber.tag(TAG).w("onCommandExecuteSuccess" );
-
-    if (callback != null){
-      callback.onCommandSuccess(command);
-    }
-  }
-
-  @Override
-  public void onCommandExecuteError(String type) {
-    Timber.tag(TAG).w("onCommandExecuteError");
-
-    if (callback != null){
-      callback.onCommandError();
-    }
-  }
-
 }

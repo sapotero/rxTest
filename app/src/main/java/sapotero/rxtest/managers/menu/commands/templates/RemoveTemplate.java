@@ -21,10 +21,6 @@ public class RemoveTemplate extends AbstractCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "remove_template";
@@ -34,7 +30,6 @@ public class RemoveTemplate extends AbstractCommand {
   public void executeLocal() {
     queueManager.add(this);
     queueManager.setExecutedLocal(this);
-    sendSuccessCallback();
   }
 
   @Override

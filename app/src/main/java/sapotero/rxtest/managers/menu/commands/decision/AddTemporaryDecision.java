@@ -26,10 +26,6 @@ public class AddTemporaryDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "add_temporary_decision";

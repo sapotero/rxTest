@@ -1,8 +1,11 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -12,10 +15,6 @@ public class UncheckControlLabel extends SharedCommand {
 
   public UncheckControlLabel(CommandParams params) {
     super(params);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
   }
 
   @Override
@@ -49,8 +48,7 @@ public class UncheckControlLabel extends SharedCommand {
       .value();
 
     queueManager.setExecutedLocal(this);
-
-    sendSuccessCallback();
+    EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
   }
 
   @Override

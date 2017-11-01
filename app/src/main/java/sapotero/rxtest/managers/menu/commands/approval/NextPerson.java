@@ -21,10 +21,6 @@ public class NextPerson extends ApprovalSigningCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "next_person";
@@ -42,7 +38,6 @@ public class NextPerson extends ApprovalSigningCommand {
     setTaskStarted( getParams().getDocument(), false );
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -77,7 +72,6 @@ public class NextPerson extends ApprovalSigningCommand {
         );
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }

@@ -20,10 +20,6 @@ public class PrimaryConsideration extends OperationResultCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "to_the_primary_consideration";
@@ -39,7 +35,6 @@ public class PrimaryConsideration extends OperationResultCommand {
     startProcessedOperationInDb();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

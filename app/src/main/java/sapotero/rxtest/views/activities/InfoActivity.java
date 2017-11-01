@@ -395,6 +395,7 @@ public class InfoActivity extends AppCompatActivity {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowSnackEvent event) throws Exception {
     Snackbar.make( wrapper, event.message, Snackbar.LENGTH_LONG ).show();
+    toolbarManager.invalidate();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

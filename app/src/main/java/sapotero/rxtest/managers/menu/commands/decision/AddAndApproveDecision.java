@@ -24,10 +24,6 @@ public class AddAndApproveDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
@@ -63,7 +59,6 @@ public class AddAndApproveDecision extends DecisionCommand {
     updateLocal();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -95,7 +90,6 @@ public class AddAndApproveDecision extends DecisionCommand {
       sendDecisionOperationRequest( info );
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }

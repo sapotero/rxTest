@@ -27,10 +27,6 @@ public class RejectDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   private void updateLocal() {
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson(getParams()));
 
@@ -67,7 +63,6 @@ public class RejectDecision extends DecisionCommand {
     updateLocal();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

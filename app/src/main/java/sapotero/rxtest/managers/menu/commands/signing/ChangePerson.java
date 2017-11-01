@@ -14,10 +14,6 @@ public class ChangePerson extends ApprovalSigningCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "change_person";
@@ -33,7 +29,6 @@ public class ChangePerson extends ApprovalSigningCommand {
     startProcessedOperationInDb();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

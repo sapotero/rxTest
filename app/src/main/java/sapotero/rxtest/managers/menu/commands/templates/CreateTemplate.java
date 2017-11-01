@@ -26,10 +26,6 @@ public class CreateTemplate extends AbstractCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "create_template";

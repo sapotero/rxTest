@@ -17,10 +17,6 @@ public class UpdateDocumentCommand extends AbstractCommand {
   private static final int FIRST_UPDATE_DELAY = 5;
   private static final int DEFAULT_SECOND_UPDATE_DELAY = 15;
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   public UpdateDocumentCommand(CommandParams params) {
     super(params);
   }
@@ -39,8 +35,6 @@ public class UpdateDocumentCommand extends AbstractCommand {
       Timber.tag(TAG).d("executeLocal - updating document");
       jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, false ) );
       queueManager.setExecutedLocal(this);
-
-      // From UpdateDocumentCommand we don't call sendSuccessCallback(), because it is not needed in this command
     }
   }
 

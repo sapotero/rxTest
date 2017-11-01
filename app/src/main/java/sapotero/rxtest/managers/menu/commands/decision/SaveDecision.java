@@ -18,10 +18,6 @@ public class SaveDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "save_decision";
@@ -43,7 +39,6 @@ public class SaveDecision extends DecisionCommand {
     queueManager.add(this);
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

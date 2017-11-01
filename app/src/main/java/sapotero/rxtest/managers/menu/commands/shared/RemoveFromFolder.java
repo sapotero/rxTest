@@ -8,6 +8,7 @@ import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
@@ -20,10 +21,6 @@ public class RemoveFromFolder extends SharedCommand {
 
   public RemoveFromFolder(CommandParams params) {
     super(params);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
   }
 
   @Override
@@ -52,7 +49,7 @@ public class RemoveFromFolder extends SharedCommand {
     setAsProcessed();
 
     queueManager.setExecutedLocal(this);
-    sendSuccessCallback();
+    EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
   }
 
   @Override

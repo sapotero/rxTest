@@ -24,10 +24,6 @@ public class ReturnToPrimaryConsideration extends OperationResultCommand {
     return null;
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
   @Override
   public String getType() {
     return "return_to_the_primary_consideration";
@@ -43,7 +39,6 @@ public class ReturnToPrimaryConsideration extends OperationResultCommand {
     startRejectedOperationInDb();
     setAsProcessed();
 
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 

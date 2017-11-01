@@ -45,7 +45,7 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
-public class ToolbarManager implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
+public class ToolbarManager implements SelectOshsDialogFragment.Callback {
 
   private static final int ICON_TRANSPARENT_0 = 0xFF;
   private static final int ICON_TRANSPARENT_50 = 0x80;
@@ -68,7 +68,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
 
   ToolbarManager() {
     EsdApplication.getManagerComponent().inject(this);
-    operationManager.registerCallBack(this);
   }
 
   private void getDocument() {
@@ -808,29 +807,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
   public void onSearchError(Throwable error) {
   }
 
-  /* OperationManager.Callback */
-  @Override
-  public void onExecuteSuccess(String command) {
-    Timber.tag(TAG).w("updateFromJob %s", command );
-    switch (command){
-      case "check_for_control":
-        EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
-        break;
-      case "uncheck_control_label":
-        EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
-        break;
-
-      case "add_to_folder":
-        EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
-        break;
-      case "remove_from_folder":
-        EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
-        break;
-    }
-
-    invalidate();
-  }
-
   public void dropControlLabel(Boolean control){
     try {
       MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_control);
@@ -839,10 +815,6 @@ public class ToolbarManager implements SelectOshsDialogFragment.Callback, Operat
     } catch (Exception e) {
       Timber.e(e);
     }
-  }
-
-  @Override
-  public void onExecuteError() {
   }
 
   private void subscribeToDecisionActiveUid() {
