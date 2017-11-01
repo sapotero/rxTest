@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -133,8 +132,6 @@ public class ApproveDecision extends DecisionCommand {
       .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
       .removeLabel(LabelType.SYNC);
     store.process( transaction );
-
-    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }
 
   @Override

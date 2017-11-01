@@ -308,8 +308,8 @@ public abstract class DecisionCommand extends AbstractCommand {
     dataStore
       .update(decision)
       .toObservable()
-      .observeOn(Schedulers.io())
-      .subscribeOn(AndroidSchedulers.mainThread())
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
           Timber.tag(TAG).e("UPDATED %s", data.getSigner() );

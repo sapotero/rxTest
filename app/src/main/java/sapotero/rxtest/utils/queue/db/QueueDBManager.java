@@ -252,7 +252,7 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
           .insert(task)
           .toObservable()
           .subscribeOn(Schedulers.computation())
-          .subscribeOn(Schedulers.computation())
+          .observeOn(Schedulers.computation())
           .subscribe(data -> {
             Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
           }, Timber::e);

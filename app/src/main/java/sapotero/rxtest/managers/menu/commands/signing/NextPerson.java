@@ -144,7 +144,7 @@ public class NextPerson extends ApprovalSigningCommand {
       .insert(signImage)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .subscribeOn(Schedulers.computation())
+      .observeOn(Schedulers.computation())
       .subscribe(
         data -> Timber.tag(TAG).v( "inserted RSignImage %s", data.getImageId() ),
         Timber::e

@@ -1,11 +1,8 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 
 import rx.Observable;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -64,7 +61,6 @@ public class AddDecision extends DecisionCommand {
   public void finishOnDecisionSuccess(DecisionError data) {
     finishOperationOnSuccess();
     checkCreatorAndSignerIsCurrentUser(data);
-    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }
 
   @Override
