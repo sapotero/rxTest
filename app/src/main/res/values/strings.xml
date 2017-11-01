@@ -306,7 +306,7 @@
     <string name="dialog_empty_value"></string>
 
     <string name="decision_assignment_approve_body">Согласовать данную резолюцию?</string>
-    <string name="decision_approve_body">Согласовать данную резолюцию?</string>
+    <string name="decision_approve_body">Подписать данную резолюцию?</string>
     <string name="decision_reject_body"> Отклонить данную резолюцию?</string>
 
     <string name="document_from_the_report"> Исполнить без ответа</string>

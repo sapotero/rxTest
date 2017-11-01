@@ -362,8 +362,20 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           // resolved https://tasks.n-core.ru/browse/MVDESD-12765
           // выводить подтверждение при подписании резолюции
 
+          String contentText =  getString(R.string.decision_approve_body);
+          // Если подписывающий в резолюции и оператор в МП совпадают(на "первичном рассмотрении"), то текст модалки должен быть "Подписать данную резолюцию?", иначе "Согласовать данную резолюцию?"
+          if ( doc != null && doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
+            if ( decision != null &&
+              decision.getSignerId() != null &&
+              decision.getSignerId().equals( settings.getCurrentUserId() ) ){
+              contentText = getString(R.string.decision_approve_body);
+            } else {
+              contentText = getString(R.string.decision_assignment_approve_body);
+            }
+          }
+
           MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-            .content(R.string.decision_approve_body)
+            .content(contentText)
             .cancelable(true)
             .positiveText(R.string.yes)
             .negativeText(R.string.no)
