@@ -609,7 +609,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
       }
 
     } else {
-      finish();
+//      https://tasks.n-core.ru/browse/MPSED-2295
+//      при выходе проверяем наличие блоков, исполнителей, подписавшего
+      if (checkDecision()) {
+        finish();
+      }
 //      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
   }
