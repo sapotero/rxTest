@@ -10,7 +10,7 @@ public class SortExecutedLocal implements Reducer<CommandInfo, List<CommandInfo>
 
   private final Boolean isExecutedLocal;
 
-  public SortExecutedLocal(Boolean local) {
+  SortExecutedLocal(Boolean local) {
     this.isExecutedLocal = local;
   }
 
@@ -21,9 +21,7 @@ public class SortExecutedLocal implements Reducer<CommandInfo, List<CommandInfo>
   public List<CommandInfo> step ( List<CommandInfo> acc, CommandInfo item ) {
 
     if ( item.isExecutedLocal() == isExecutedLocal){
-      if (!acc.contains(item)){
-        acc.add(item);
-      }
+      acc.add(item);
     }
 
     return acc;

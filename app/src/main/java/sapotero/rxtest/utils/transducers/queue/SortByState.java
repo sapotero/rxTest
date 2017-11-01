@@ -6,12 +6,12 @@ import java.util.List;
 import sapotero.rxtest.utils.queue.models.CommandInfo;
 import sapotero.rxtest.utils.transducers.Reducer;
 
-public class SortNotRunning implements Reducer<CommandInfo, List<CommandInfo>> {
+public class SortByState implements Reducer<CommandInfo, List<CommandInfo>> {
 
   private final CommandInfo.STATE state;
 
-  public SortNotRunning(CommandInfo.STATE state) {
-    this.state = state;
+  SortByState(CommandInfo.STATE state) {
+    this.state    = state;
   }
 
   public List<CommandInfo> init() {
@@ -21,7 +21,7 @@ public class SortNotRunning implements Reducer<CommandInfo, List<CommandInfo>> {
   public List<CommandInfo> step ( List<CommandInfo> acc, CommandInfo item ) {
 
     if ( item.getState() == state ){
-        acc.add(item);
+      acc.add(item);
     }
 
     return acc;

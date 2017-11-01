@@ -16,6 +16,6 @@ public class QueueTransduce {
   }
 
   public static List<CommandInfo> sortByState(Collection<List<CommandInfo>> queue, CommandInfo.STATE state) {
-    return new QueueReader(queue).reduce( new SortNotRunning(state) );
+    return new QueueReader(queue).reduce( new SortByState(state) );
   }
 }

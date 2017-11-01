@@ -32,8 +32,10 @@ public class AddToFolder extends SharedCommand {
 
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
     queueManager.add(this);
+    queueManager.setAsRunning(this, true);
 
     setAsProcessed();
+
   }
 
   @Override

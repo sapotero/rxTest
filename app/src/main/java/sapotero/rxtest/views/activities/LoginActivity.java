@@ -34,6 +34,7 @@ import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
@@ -47,6 +48,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   @Inject ISettings settings;
   @Inject MemoryStore store;
+  @Inject QueueManager queueManager;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -264,6 +266,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     settings.setShowPrimaryConsideration( false );
     settings.setLastClickTime( 0 );
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
+
+    queueManager.init();
   }
 
   @Override

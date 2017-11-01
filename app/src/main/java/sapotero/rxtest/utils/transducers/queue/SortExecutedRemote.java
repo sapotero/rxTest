@@ -10,7 +10,7 @@ public class SortExecutedRemote implements Reducer<CommandInfo, List<CommandInfo
 
   private final Boolean isExecutedRemote;
 
-  public SortExecutedRemote(Boolean remote) {
+  SortExecutedRemote(Boolean remote) {
     this.isExecutedRemote = remote;
   }
 
@@ -21,9 +21,7 @@ public class SortExecutedRemote implements Reducer<CommandInfo, List<CommandInfo
   public List<CommandInfo> step ( List<CommandInfo> acc, CommandInfo item ) {
 
     if ( item.isExecutedRemote() == isExecutedRemote ){
-      if (!acc.contains(item)){
-        acc.add(item);
-      }
+      acc.add(item);
     }
 
     return acc;

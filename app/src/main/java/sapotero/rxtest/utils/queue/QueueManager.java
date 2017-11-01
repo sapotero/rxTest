@@ -2,7 +2,6 @@ package sapotero.rxtest.utils.queue;
 
 import java.util.List;
 
-import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
@@ -21,10 +20,13 @@ public class QueueManager implements QueueRepository {
   private final String TAG = this.getClass().getSimpleName();
 
   public QueueManager() {
-
     supervisor    = new QueueSupervisor();
     dBManager     = new QueueDBManager();
     memoryManager = new QueueMemoryManager();
+  }
+
+  public void init(){
+    memoryManager.init( dBManager.getUncompleteTasks() );
   }
 
   @Override
@@ -59,51 +61,35 @@ public class QueueManager implements QueueRepository {
   }
 
   @Override
-  public void setAsRunning(Command command) {
-    dBManager.setAsRunning(command);
-    memoryManager.setAsRunning(command);
+  public void setAsRunning(Command command, Boolean value) {
+    dBManager.setAsRunning(command, value);
+    memoryManager.setAsRunning(command, value);
   }
 
   public void getUncompleteTasks(){
 
     if (supervisor.getRunningJobsCount() < THREAD_POOL_SIZE){
 
-
-      List<QueueEntity> uncompleteSignTasks  = dBManager.getUncompleteSignTasks(8);
-      if ( uncompleteSignTasks.size() > 0 ){
-        for ( QueueEntity command : uncompleteSignTasks ) {
-          push(command, false);
-        }
+      for ( Command command : memoryManager.getUncompleteCommands(false) ) {
+        push(command, false);
       }
 
-      List<QueueEntity> uncompleteLocalTasks  = dBManager.getUncompleteLocalTasks(THREAD_POOL_SIZE - supervisor.getRunningJobsCount());
-      if ( uncompleteLocalTasks.size() > 0 ){
-        for ( QueueEntity command : uncompleteLocalTasks ) {
-          push(command, false);
-        }
+      for ( Command command : memoryManager.getUncompleteCommands(true) ) {
+        push(command, true);
       }
-
-      List<QueueEntity> uncompleteRemoteTasks = dBManager.getUncompleteRemoteTasks(THREAD_POOL_SIZE - uncompleteLocalTasks.size());
-      if ( uncompleteRemoteTasks.size() > 0 ){
-        for ( QueueEntity command : uncompleteRemoteTasks ) {
-          push(command, true);
-        }
-      }
-
     }
 
-    if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
-      dBManager.dropRunningJobs();
-    }
+//    if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
+//      dBManager.dropRunningJobs();
+//    }
 
   }
 
-  private void push(QueueEntity command, Boolean remote) {
-    Command cmd = supervisor.create(command);
+  private void push(Command command, Boolean remote) {
 
-    if (cmd != null) {
-      dBManager.setAsRunning(cmd);
-      memoryManager.setAsRunning(cmd);
+    if (command != null) {
+      dBManager.setAsRunning(command, true);
+      memoryManager.setAsRunning(command, true);
 
       if (remote){
         supervisor.addRemote(command);
