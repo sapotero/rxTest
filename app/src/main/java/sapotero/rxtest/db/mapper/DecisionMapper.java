@@ -104,9 +104,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
         model.getBlocks().add(blockModel);
       }
 
-      if ( !formatted ) {
-        Collections.sort(model.getBlocks(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-      }
+      Collections.sort(model.getBlocks(), (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0);
     }
   }
 }
