@@ -29,22 +29,19 @@ public class SaveAndApproveDecision extends DecisionCommand {
   }
 
   @Override
-  public void execute() {
-    setRemoveRedLabel();
-
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    updateLocal();
-    setAsProcessed();
-  }
-
-  @Override
   public String getType() {
     return "save_and_approve_decision";
   }
 
   @Override
   public void executeLocal() {
+    setRemoveRedLabel();
+
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    updateLocal();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

@@ -32,13 +32,6 @@ public class ApprovalPerformance extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-    setAsProcessed();
-  }
-
-  @Override
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
@@ -84,6 +77,10 @@ public class ApprovalPerformance extends AbstractCommand {
 
   @Override
   public void executeLocal() {
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+    setAsProcessed();
+
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, true)

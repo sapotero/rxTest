@@ -34,14 +34,6 @@ public class ApproveDecision extends DecisionCommand {
     this.callback = callback;
   }
 
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    updateLocal();
-    setAsProcessed();
-  }
-
   private void updateLocal() {
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( getParams() ));
 
@@ -84,6 +76,11 @@ public class ApproveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    updateLocal();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

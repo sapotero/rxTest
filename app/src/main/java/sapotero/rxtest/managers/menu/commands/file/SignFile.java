@@ -35,20 +35,13 @@ public class SignFile extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
-  @Override
   public String getType() {
     return "file_sign";
   }
 
   @Override
   public void executeLocal() {
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
-    setAsProcessed();
   }
 
   @Override

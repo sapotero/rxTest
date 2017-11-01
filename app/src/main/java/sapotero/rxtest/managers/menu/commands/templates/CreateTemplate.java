@@ -31,17 +31,13 @@ public class CreateTemplate extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
-  @Override
   public String getType() {
     return "create_template";
   }
 
   @Override
   public void executeLocal() {
+    queueManager.add(this);
     queueManager.setExecutedLocal(this);
   }
 

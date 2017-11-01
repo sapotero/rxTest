@@ -26,25 +26,22 @@ public class NextPerson extends ApprovalSigningCommand {
   }
 
   @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startProcessedOperationInMemory();
-
-    setTaskStarted( getParams().getDocument(), false );
-    setAsProcessed();
-  }
-
-  @Override
   public String getType() {
     return "next_person";
   }
 
   @Override
   public void executeLocal() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    startProcessedOperationInMemory();
     startProcessedOperationInDb();
+
+    setTaskStarted( getParams().getDocument(), false );
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

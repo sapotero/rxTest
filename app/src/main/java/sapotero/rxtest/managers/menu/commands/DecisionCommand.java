@@ -230,7 +230,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     _params.setDocument( getParams().getDocument() );
     _params.setAssignment( getParams().isAssignment() );
     Command command = operation.getCommand(null, _params);
-    command.execute();
+    command.executeLocal();
   }
 
   private void generateTemporaryDecisionId() {

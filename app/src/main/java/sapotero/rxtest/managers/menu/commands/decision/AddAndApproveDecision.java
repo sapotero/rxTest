@@ -28,19 +28,6 @@ public class AddAndApproveDecision extends DecisionCommand {
     this.callback = callback;
   }
 
-  @Override
-  public void execute() {
-    setRemoveRedLabel();
-
-    getParams().getDecisionModel().setApproved( true );
-    createTemporaryDecision();
-
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    updateLocal();
-    setAsProcessed();
-  }
-
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
@@ -66,6 +53,16 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
+    setRemoveRedLabel();
+
+    getParams().getDecisionModel().setApproved( true );
+    createTemporaryDecision();
+
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    updateLocal();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

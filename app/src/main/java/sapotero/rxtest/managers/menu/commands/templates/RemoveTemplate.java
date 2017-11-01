@@ -26,17 +26,13 @@ public class RemoveTemplate extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
-  @Override
   public String getType() {
     return "remove_template";
   }
 
   @Override
   public void executeLocal() {
+    queueManager.add(this);
     queueManager.setExecutedLocal(this);
     sendSuccessCallback();
   }

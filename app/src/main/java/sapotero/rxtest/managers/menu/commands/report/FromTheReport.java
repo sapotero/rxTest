@@ -25,24 +25,20 @@ public class FromTheReport extends OperationResultCommand {
   }
 
   @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startProcessedOperationInMemory();
-
-    setAsProcessed();
-  }
-
-  @Override
   public String getType() {
     return "from_the_report";
   }
 
   @Override
   public void executeLocal() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    startProcessedOperationInMemory();
     startProcessedOperationInDb();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

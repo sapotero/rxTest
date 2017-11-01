@@ -19,23 +19,20 @@ public class PrevPerson extends ApprovalSigningCommand {
   }
 
   @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startRejectedOperationInMemory();
-    setAsProcessed();
-  }
-
-  @Override
   public String getType() {
     return "prev_person";
   }
 
   @Override
   public void executeLocal() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    startRejectedOperationInMemory();
     startRejectedOperationInDb();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

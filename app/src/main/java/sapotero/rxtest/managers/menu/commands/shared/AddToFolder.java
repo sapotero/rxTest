@@ -22,7 +22,12 @@ public class AddToFolder extends SharedCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "add_to_folder";
+  }
+
+  @Override
+  public void executeLocal() {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
@@ -34,16 +39,8 @@ public class AddToFolder extends SharedCommand {
     queueManager.add(this);
 
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "add_to_folder";
-  }
-
-  @Override
-  public void executeLocal() {
-    Integer count = dataStore
+    int count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, true )
       .set( RDocumentEntity.CHANGED, true )

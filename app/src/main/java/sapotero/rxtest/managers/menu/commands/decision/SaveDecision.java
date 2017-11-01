@@ -23,7 +23,12 @@ public class SaveDecision extends DecisionCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "save_decision";
+  }
+
+  @Override
+  public void executeLocal() {
     setRemoveRedLabel();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
@@ -37,15 +42,7 @@ public class SaveDecision extends DecisionCommand {
 
     queueManager.add(this);
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "save_decision";
-  }
-
-  @Override
-  public void executeLocal() {
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

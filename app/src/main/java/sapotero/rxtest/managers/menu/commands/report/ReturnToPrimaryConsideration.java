@@ -29,23 +29,20 @@ public class ReturnToPrimaryConsideration extends OperationResultCommand {
   }
 
   @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startRejectedOperationInMemory();
-    setAsProcessed();
-  }
-
-  @Override
   public String getType() {
     return "return_to_the_primary_consideration";
   }
 
   @Override
   public void executeLocal() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    startRejectedOperationInMemory();
     startRejectedOperationInDb();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

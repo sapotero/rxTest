@@ -23,7 +23,12 @@ public class AddDecision extends DecisionCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "add_decision";
+  }
+
+  @Override
+  public void executeLocal() {
     setRemoveRedLabel();
 
     getParams().getDecisionModel().setApproved( false );
@@ -35,21 +40,12 @@ public class AddDecision extends DecisionCommand {
 
     queueManager.add(this);
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "add_decision";
-  }
-
-  @Override
-  public void executeLocal() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
     setChangedInDb();
 
     sendSuccessCallback();
-
     queueManager.setExecutedLocal(this);
   }
 

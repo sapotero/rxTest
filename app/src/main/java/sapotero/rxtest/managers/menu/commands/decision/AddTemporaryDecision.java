@@ -31,21 +31,18 @@ public class AddTemporaryDecision extends DecisionCommand {
   }
 
   @Override
-  public void execute() {
-    addDecision();
-    queueManager.add(this);
-
-    setSyncLabelInMemory();
-    setAsProcessed();
-  }
-
-  @Override
   public String getType() {
     return "add_temporary_decision";
   }
 
   @Override
   public void executeLocal() {
+    addDecision();
+    queueManager.add(this);
+
+    setSyncLabelInMemory();
+    setAsProcessed();
+
     queueManager.setExecutedLocal(this);
   }
 

@@ -32,18 +32,6 @@ public class NextPerson extends ApprovalSigningCommand {
     this.callback = callback;
   }
 
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startProcessedOperationInMemory();
-
-    resetSignImageError();
-    setAsProcessed();
-  }
-
   private void resetSignImageError() {
     Timber.tag(TAG).e("Resetting sign image errors");
     RDocumentEntity doc = getDocument( getParams().getDocument() );
@@ -66,7 +54,16 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    startProcessedOperationInMemory();
     startProcessedOperationInDb();
+
+    resetSignImageError();
+    setAsProcessed();
+
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }

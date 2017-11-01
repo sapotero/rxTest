@@ -16,17 +16,13 @@ public class DoNothing extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
-  @Override
   public String getType() {
     return "do_nothing";
   }
 
   @Override
   public void executeLocal() {
+    queueManager.add(this);
     update();
   }
 

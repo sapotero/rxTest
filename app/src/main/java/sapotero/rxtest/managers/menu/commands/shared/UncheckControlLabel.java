@@ -19,7 +19,12 @@ public class UncheckControlLabel extends SharedCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "uncheck_control_label";
+  }
+
+  @Override
+  public void executeLocal() {
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
     queueManager.add(this);
 
@@ -32,15 +37,7 @@ public class UncheckControlLabel extends SharedCommand {
     );
 
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "uncheck_control_label";
-  }
-
-  @Override
-  public void executeLocal() {
     Timber.tag("RecyclerViewRefresh").d("UncheckControlLabel: executeLocal - update in DB");
 
     dataStore

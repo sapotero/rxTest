@@ -26,11 +26,6 @@ public class UpdateDocumentCommand extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
-    // Not used in this command
-  }
-
-  @Override
   public String getType() {
     return "update_document";
   }
@@ -43,8 +38,9 @@ public class UpdateDocumentCommand extends AbstractCommand {
     if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getFirstUpdateDelay() ) ) {
       Timber.tag(TAG).d("executeLocal - updating document");
       jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, false ) );
-      sendSuccessCallback();
       queueManager.setExecutedLocal(this);
+
+      // From UpdateDocumentCommand we don't call sendSuccessCallback(), because it is not needed in this command
     }
   }
 

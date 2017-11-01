@@ -12,7 +12,6 @@ import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -28,7 +27,12 @@ public class RemoveFromFolder extends SharedCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "remove_from_folder";
+  }
+
+  @Override
+  public void executeLocal() {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, false )
@@ -46,15 +50,7 @@ public class RemoveFromFolder extends SharedCommand {
     queueManager.add(this);
 
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "remove_from_folder";
-  }
-
-  @Override
-  public void executeLocal() {
     queueManager.setExecutedLocal(this);
     sendSuccessCallback();
   }

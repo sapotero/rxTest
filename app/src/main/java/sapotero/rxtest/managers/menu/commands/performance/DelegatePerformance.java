@@ -31,7 +31,12 @@ public class DelegatePerformance extends AbstractCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "delegate_performance";
+  }
+
+  @Override
+  public void executeLocal() {
     EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
@@ -69,17 +74,6 @@ public class DelegatePerformance extends AbstractCommand {
       );
 
     setAsProcessed();
-
-  }
-
-  @Override
-  public String getType() {
-    return "delegate_performance";
-  }
-
-  @Override
-  public void executeLocal() {
-
   }
 
   @Override

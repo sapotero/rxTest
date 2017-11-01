@@ -559,7 +559,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     public abstract String getRussianName();
   }
 
-  public CommandFactory() {
+  private CommandFactory() {
   }
 
   public CommandFactory withParams(CommandParams params) {

@@ -19,7 +19,12 @@ public class CheckControlLabel extends SharedCommand {
   }
 
   @Override
-  public void execute() {
+  public String getType() {
+    return "check_for_control";
+  }
+
+  @Override
+  public void executeLocal() {
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
     queueManager.add(this);
 
@@ -27,20 +32,12 @@ public class CheckControlLabel extends SharedCommand {
 
     store.process(
       store.startTransactionFor(getParams().getDocument())
-      .setLabel(LabelType.SYNC)
-      .setLabel(LabelType.CONTROL)
+        .setLabel(LabelType.SYNC)
+        .setLabel(LabelType.CONTROL)
     );
 
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "check_for_control";
-  }
-
-  @Override
-  public void executeLocal() {
     Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: executeLocal - update in DB");
 
     dataStore
@@ -52,7 +49,6 @@ public class CheckControlLabel extends SharedCommand {
       .value();
 
     queueManager.setExecutedLocal(this);
-
     sendSuccessCallback();
   }
 
