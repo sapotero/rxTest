@@ -28,6 +28,7 @@ public class CommandParams implements Serializable {
   private String uuid;
   private String label;
   private String filePath;
+  private String updatedAt;
 
   private boolean returnedOldValue;
   private boolean againOldValue;
@@ -189,5 +190,13 @@ public class CommandParams implements Serializable {
 
   public void setTemporaryDecision(boolean temporaryDecision) {
     this.temporaryDecision = temporaryDecision;
+  }
+
+  public String getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(String updatedAt) {
+    this.updatedAt = updatedAt;
   }
 }

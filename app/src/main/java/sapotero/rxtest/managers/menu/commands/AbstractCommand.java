@@ -1,5 +1,6 @@
 package sapotero.rxtest.managers.menu.commands;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.google.gson.Gson;
 
 import org.acra.ACRA;
@@ -7,6 +8,7 @@ import org.acra.ACRA;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.HttpException;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
@@ -31,6 +34,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -57,6 +61,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
   @Inject public MemoryStore store;
+  @Inject public JobManager jobManager;
 
   protected static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
 
@@ -201,36 +206,20 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( setUpdatedAt ) {
       store.process(
         store.startTransactionFor( getParams().getDocument() )
-          .removeLabel(LabelType.SYNC)
           .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
-          .setState(InMemoryState.READY)
-      );
-
-    } else {
-      store.process(
-        store.startTransactionFor( getParams().getDocument() )
-          .removeLabel(LabelType.SYNC)
-          .setState(InMemoryState.READY)
       );
     }
 
     removeChangedInDb( setUpdatedAt );
+
+    addUpdateDocumentTask();
   }
 
   protected void removeChangedInDb(boolean setUpdatedAt) {
     if ( setUpdatedAt ) {
       dataStore
         .update(RDocumentEntity.class)
-        .set( RDocumentEntity.CHANGED, false)
         .set( RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp() )
-        .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-        .get()
-        .value();
-
-    } else {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.CHANGED, false)
         .where(RDocumentEntity.UID.eq(getParams().getDocument()))
         .get()
         .value();
@@ -359,10 +348,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   protected void finishRejectedProcessedOperationOnError(List<String> errors) {
     Transaction transaction = store.startTransactionFor( getParams().getDocument() )
-      .removeLabel(LabelType.SYNC)
       .removeLabel(LabelType.REJECTED)
-      .setField(FieldType.PROCESSED, false)
-      .setState(InMemoryState.READY);
+      .setField(FieldType.PROCESSED, false);
 
     boolean returnedOldValue = getParams().getReturnedOldValue();
     boolean againOldValue = getParams().getAgainOldValue();
@@ -379,7 +366,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CHANGED, false)
       .set( RDocumentEntity.REJECTED, false)
       .set( RDocumentEntity.RETURNED, returnedOldValue)
       .set( RDocumentEntity.AGAIN, againOldValue)
@@ -389,6 +375,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
 
     queueManager.setExecutedWithError( this, errors );
+
+    addUpdateDocumentTask();
   }
 
   protected void startProcessedOperationInMemory() {
@@ -439,10 +427,32 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   protected boolean isOnline(Throwable error) {
     Timber.tag(TAG).d("settings.isOnline() ? %s", settings.isOnline());
     Timber.tag(TAG).d("error instanceof IOException ? %s", error instanceof IOException);
-    Timber.tag(TAG).d("settings.isUnauthorized() ? %s", settings.isUnauthorized());
 
-    return settings.isOnline() && !(error instanceof IOException) && !settings.isUnauthorized();
+    boolean isUnauthorized = ( error instanceof HttpException ) && ((HttpException) error).code() == HttpURLConnection.HTTP_UNAUTHORIZED;
+
+    Timber.tag(TAG).d("isUnauthorized ? %s", isUnauthorized);
+
+    return settings.isOnline() && !(error instanceof IOException) && !isUnauthorized;
   }
 
   public abstract void finishOnOperationError(List<String> errors);
+
+  // resolved https://tasks.n-core.ru/browse/MPSED-2286
+  // В конце каждой операции ставить задачу на обновление документа.
+  // Метод вызывается во всех операциях, кроме:
+  // AddTemporaryDecision (так как не меняет документ на сервере),
+  // SignFile (так как после нее всегда отрабатывает Signing NextPerson),
+  // AddToFolder, RemoveFromFolder (так как не меняют документа),
+  // DoNothing (так как пустая операция),
+  // CreateTemplate, RemoveTemplate, UpdateTemplate (так как не меняют документов)
+  protected void addUpdateDocumentTask() {
+    Timber.tag(TAG).e("addUpdateDocumentTask");
+
+    CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DOCUMENT;
+    CommandParams params = new CommandParams();
+    params.setDocument( getParams().getDocument() );
+    params.setUpdatedAt( DateUtil.getTimestamp() );
+    Command command = operation.getCommand(null, params);
+    queueManager.add(command);
+  }
 }
