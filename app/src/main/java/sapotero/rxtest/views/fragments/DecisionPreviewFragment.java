@@ -362,8 +362,17 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
           // resolved https://tasks.n-core.ru/browse/MVDESD-12765
           // выводить подтверждение при подписании резолюции
 
+          //resolved https://tasks.n-core.ru/browse/MPSED-2293
+          // Если подписывающий в резолюции и оператор в МП совпадают(на "первичном рассмотрении"), то текст модалки должен быть "Подписать данную резолюцию?", иначе "Согласовать данную резолюцию?"
+          String contentText =  getString(R.string.decision_approve_body);
+          if ( isMatchSignerAndCurrentUser() ){
+            contentText = getString(R.string.decision_assignment_approve_body);
+          } else {
+            contentText = getString(R.string.decision_approve_body);
+          }
+
           MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-            .content(R.string.decision_approve_body)
+            .content(contentText)
             .cancelable(true)
             .positiveText(R.string.yes)
             .negativeText(R.string.no)
@@ -505,6 +514,14 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
 
     return view;
   }
+  //Если подписывающий в резолюции и оператор в МП совпадают на "первичном рассмотрении", то возвращает true, иначе false
+  private boolean isMatchSignerAndCurrentUser() {
+    boolean result = false;
+    if ( doc != null && doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
+      result = !(decision != null && decision.getSignerId() != null && decision.getSignerId().equals(settings.getCurrentUserId()));
+    }
+    return result;
+  }
 
   public void updateTextSize(Integer size){
     for (TextView view : textLabels) {
@@ -600,23 +617,19 @@ public class DecisionPreviewFragment extends PreviewFragment implements Decision
     // resolved https://tasks.n-core.ru/browse/MVDESD-13146
     // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
     // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
-    if ( doc != null && doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
-      if ( decision != null &&
-           decision.getSignerId() != null &&
-           decision.getSignerId().equals( settings.getCurrentUserId() ) ){
-        next_person_button.setText( getString(R.string.menu_info_next_person));
-        setSignEnabled(true);
-      } else {
-        next_person_button.setText( getString(R.string.menu_info_sign_next_person) );
+    if( isMatchSignerAndCurrentUser() ){
+      next_person_button.setText( getString(R.string.menu_info_sign_next_person) );
 
-        // resolved https://tasks.n-core.ru/browse/MVDESD-13438
-        // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-        if (!settings.isShowApproveOnPrimary()){
-          setSignEnabled(false);
-        } else {
-          setSignEnabled(true);
-        }
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+      // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
+      if (!settings.isShowApproveOnPrimary()){
+        setSignEnabled(false);
+      } else {
+        setSignEnabled(true);
       }
+    } else {
+      next_person_button.setText( getString(R.string.menu_info_next_person));
+      setSignEnabled(true);
     }
 
     if ( decision != null && decision.isChanged() ){
