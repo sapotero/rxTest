@@ -47,6 +47,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.DecisionManager;
+import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -141,22 +142,23 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
           Timber.tag(TAG).d("Primary consideration press handle");
 
           if (rDecisionEntity != null) {
-            settings.setShowPrimaryConsideration(true);
 
-            Decision primary_decision = manager.getDecision();
+            if( checkDecision() ) {
+              settings.setShowPrimaryConsideration(true);
 
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String json = gson.toJson( primary_decision );
-            Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
+              Decision primary_decision = manager.getDecision();
+              Gson gson = new GsonBuilder().setPrettyPrinting().create();
+              String json = gson.toJson( primary_decision );
+              Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
 
-            operation = CommandFactory.Operation.SAVE_DECISION;
+              operation = CommandFactory.Operation.SAVE_DECISION;
+              commandParams = new CommandParams();
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              commandParams.setDecisionModel( manager.getDecision() );
+              operationManager.execute( operation, commandParams );
+              finish();
+            }
 
-            commandParams = new CommandParams();
-            commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( manager.getDecision() );
-            operationManager.execute( operation, commandParams );
-
-            finish();
           }
 
           break;
@@ -509,7 +511,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
     if ( manager.isChanged() ){
       Boolean showSaveDialog = checkDecision();
-
+      Timber.tag(TAG).w("showSaveDialog = "+ showSaveDialog);
       String content = "Резолюция была изменена";
 
       if ( settings.isDecisionWithAssignment() ){
@@ -669,81 +671,82 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Se
 
   }
 
-    private boolean checkDecision () {
-      boolean showSaveDialog = true;
+  private boolean checkDecision () {
+    boolean showSaveDialog = true;
 
-      if (!manager.allSignersSet()) {
-        showSaveDialog = false;
-        new MaterialDialog.Builder(this)
-          .title("Внимание")
-          .content("Укажите хотя бы одного исполнителя")
-          .positiveText("Ок")
-          .negativeText("Выход")
-          .onPositive( (dialog, which) -> dialog.dismiss() )
-          .onNegative( (dialog, which) -> finish() )
-          .show();
-      }
+    if (!manager.hasBlocks() | !manager.hasBlocksUi())  {
+      showSaveDialog = false;
+      new MaterialDialog.Builder(this)
+        .title("Внимание")
+        .content("Необходимо добавить хотя бы один блок")
+        .positiveText("Ок")
+        .negativeText("Выход")
+        .onPositive( (dialog, which) -> dialog.dismiss() )
+        .onNegative( (dialog, which) -> finish() )
+        .show();
+    }
 
-      if (showSaveDialog && !manager.hasBlocks()) {
-        showSaveDialog = false;
-        new MaterialDialog.Builder(this)
-          .title("Внимание")
-          .content("Необходимо добавить хотя бы один блок")
-          .positiveText("Ок")
-          .onPositive( (dialog, which) -> dialog.dismiss() )
-          .show();
-      }
+    if (showSaveDialog && !manager.allSignersSet()) {
+      showSaveDialog = false;
+      new MaterialDialog.Builder(this)
+        .title("Внимание")
+        .content("Укажите хотя бы одного исполнителя")
+        .positiveText("Ок")
+        .negativeText("Выход")
+        .onPositive( (dialog, which) -> dialog.dismiss() )
+        .onNegative( (dialog, which) -> finish() )
+        .show();
+    }
 
-      if (showSaveDialog && !manager.hasSigner()) {
-        showSaveDialog = false;
-        new MaterialDialog.Builder(this)
-          .title("Внимание")
-          .content("Необходимо выбрать подписавшего")
-          .positiveText("Ок")
-          .onPositive( (dialog, which) -> dialog.dismiss() )
-          .show();
-      }
+    if (showSaveDialog && !manager.hasSigner()) {
+      showSaveDialog = false;
+      new MaterialDialog.Builder(this)
+        .title("Внимание")
+        .content("Необходимо выбрать подписавшего")
+        .positiveText("Ок")
+        .onPositive( (dialog, which) -> dialog.dismiss() )
+        .show();
+    }
 
-      // Check if signer and performers are different persons
-      if (showSaveDialog && manager.hasBlocks() && manager.hasSigner()) {
-        Decision decision = manager.getDecision();
-        if (decision != null) {
-          String signerId = decision.getSignerId();
-          String assistantId = decision.getAssistantId();
-          boolean signerEqualsPerformer = false;
-          List<Block> blocks = decision.getBlocks();
+    // Check if signer and performers are different persons
+    if (showSaveDialog && manager.hasBlocks() && manager.hasSigner()) {
+      Decision decision = manager.getDecision();
+      if (decision != null) {
+        String signerId = decision.getSignerId();
+        String assistantId = decision.getAssistantId();
+        boolean signerEqualsPerformer = false;
+        List<Block> blocks = decision.getBlocks();
 
-          for (Block block : blocks) {
-            List<Performer> performers = block.getPerformers();
-            for (Performer performer : performers) {
-              String performerId = performer.getPerformerId();
+        for (Block block : blocks) {
+          List<Performer> performers = block.getPerformers();
+          for (Performer performer : performers) {
+            String performerId = performer.getPerformerId();
 
-              // fix null pointer exception
-              if (signerId != null && performerId.equals(signerId) || assistantId != null && performerId.equals(assistantId)) {
-                signerEqualsPerformer = true;
-                break;
-              }
-            }
-            if (signerEqualsPerformer) {
+            // fix null pointer exception
+            if (signerId != null && performerId.equals(signerId) || assistantId != null && performerId.equals(assistantId)) {
+              signerEqualsPerformer = true;
               break;
             }
           }
-
           if (signerEqualsPerformer) {
-            showSaveDialog = false;
-            new MaterialDialog.Builder(this)
-              .title("Внимание")
-              .content("Подписавший и исполнитель совпадают")
-              .positiveText("Ок")
-              .onPositive( (dialog, which) -> dialog.dismiss() )
-              .show();
+            break;
           }
         }
-      }
 
-      return showSaveDialog;
+        if (signerEqualsPerformer) {
+          showSaveDialog = false;
+          new MaterialDialog.Builder(this)
+            .title("Внимание")
+            .content("Подписавший и исполнитель совпадают")
+            .positiveText("Ок")
+            .onPositive( (dialog, which) -> dialog.dismiss() )
+            .show();
+        }
+      }
     }
 
+    return showSaveDialog;
+  }
   private void loadDecision () {
     String decision_id = settings.getDecisionActiveUid();
     rDecisionEntity = dataStore

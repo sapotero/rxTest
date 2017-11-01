@@ -231,6 +231,14 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
     return result  ;
   }
 
+  public boolean hasBlocksUi(){
+    Boolean result = true;
+    if (decision_builder.size() == 0){
+      result = false;
+    }
+    return result;
+  }
+
   public boolean hasSigner() {
     Boolean result = true;
 

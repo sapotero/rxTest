@@ -39,6 +39,9 @@ public class DecisionBuilder implements DecisionInterface, BlockFactory.Callback
     block_builder.addNewBlock();
   }
 
+  public int size(){
+    return block_builder.size();
+  }
 
   /* DecisionInterface */
   @Override
