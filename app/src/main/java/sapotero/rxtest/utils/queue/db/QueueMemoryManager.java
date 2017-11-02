@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -166,5 +168,22 @@ public class QueueMemoryManager implements QueueRepository{
     }
 
     return command;
+  }
+
+  public void setUpdateDocumentCommandExecuted(String documentUid) {
+    for ( List<CommandInfo> commandInfoList : commands.values() ) {
+      for ( CommandInfo commandInfo : commandInfoList ) {
+        Command command = commandInfo.getCommand();
+
+        if ( command instanceof UpdateDocumentCommand
+          && Objects.equals( command.getParams().getDocument(), documentUid )
+          && !commandInfo.isExecutedRemote()
+          && commandInfo.getState() != CommandInfo.STATE.ERROR ) {
+
+          commandInfo.setExecutedRemote( true );
+          commandInfo.setState( CommandInfo.STATE.COMPLETE );
+        }
+      }
+    }
   }
 }

@@ -109,5 +109,6 @@ public class QueueManager implements QueueRepository {
 
   public void setUpdateDocumentCommandExecuted(String documentUid) {
     dBManager.setUpdateDocumentCommandExecuted( documentUid, false );
+    memoryManager.setUpdateDocumentCommandExecuted( documentUid );
   }
 }
