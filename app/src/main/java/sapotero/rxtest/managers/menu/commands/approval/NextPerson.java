@@ -35,6 +35,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
     if ( rApprovalNextPersonEntity != null && rApprovalNextPersonEntity.isTaskStarted() ) {
       Timber.tag(TAG).i( "Task already started, quit" );
+      queueManager.setAsRunning(this, false);
       return;
     }
 
