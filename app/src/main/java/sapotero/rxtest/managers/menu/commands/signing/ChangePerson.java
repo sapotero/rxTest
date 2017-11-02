@@ -22,7 +22,7 @@ public class ChangePerson extends ApprovalSigningCommand {
   @Override
   public void executeLocal() {
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
+    addToQueue();
     EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     startProcessedOperationInMemory();

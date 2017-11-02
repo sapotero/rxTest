@@ -33,7 +33,7 @@ public class SaveDecision extends DecisionCommand {
 
     setSyncLabelInMemory();
 
-    queueManager.add(this);
+    addToQueue();
     setAsProcessed();
 
     queueManager.setExecutedLocal(this);

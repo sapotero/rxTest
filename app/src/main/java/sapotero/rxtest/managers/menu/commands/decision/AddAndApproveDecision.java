@@ -55,7 +55,7 @@ public class AddAndApproveDecision extends DecisionCommand {
     createTemporaryDecision();
 
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
+    addToQueue();
     updateLocal();
     setAsProcessed();
 

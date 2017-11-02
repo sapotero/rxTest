@@ -435,4 +435,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     Command command = operation.getCommand(null, params);
     queueManager.add(command);
   }
+
+  public void addToQueue() {
+    queueManager.add(this);
+    queueManager.setAsRunning(this);
+  }
 }

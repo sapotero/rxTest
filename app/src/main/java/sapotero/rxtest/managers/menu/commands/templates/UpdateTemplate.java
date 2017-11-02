@@ -24,7 +24,7 @@ public class UpdateTemplate extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
+    addToQueue();
     queueManager.setExecutedLocal(this);
   }
 

@@ -56,7 +56,7 @@ public class RejectDecision extends DecisionCommand {
   @Override
   public void executeLocal() {
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
+    addToQueue();
     updateLocal();
     setAsProcessed();
 

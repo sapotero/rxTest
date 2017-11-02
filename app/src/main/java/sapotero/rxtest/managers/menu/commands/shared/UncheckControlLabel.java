@@ -25,7 +25,7 @@ public class UncheckControlLabel extends SharedCommand {
   @Override
   public void executeLocal() {
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
-    queueManager.add(this);
+    addToQueue();
 
     Timber.tag("RecyclerViewRefresh").d("UncheckControlLabel: execute - update in MemoryStore");
 

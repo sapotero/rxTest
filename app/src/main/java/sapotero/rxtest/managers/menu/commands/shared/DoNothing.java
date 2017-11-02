@@ -18,7 +18,7 @@ public class DoNothing extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
+    addToQueue();
     update();
   }
 

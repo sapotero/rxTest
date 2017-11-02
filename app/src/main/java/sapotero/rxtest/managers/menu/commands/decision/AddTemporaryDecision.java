@@ -34,7 +34,7 @@ public class AddTemporaryDecision extends DecisionCommand {
   @Override
   public void executeLocal() {
     addDecision();
-    queueManager.add(this);
+    addToQueue();
 
     setSyncLabelInMemory();
     setAsProcessed();

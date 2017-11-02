@@ -35,7 +35,7 @@ public class AddToFolder extends SharedCommand {
     store.process( transaction );
 
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
-    queueManager.add(this);
+    addToQueue();
 
     setAsProcessed();
 

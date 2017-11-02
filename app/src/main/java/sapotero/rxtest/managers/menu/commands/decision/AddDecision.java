@@ -31,7 +31,7 @@ public class AddDecision extends DecisionCommand {
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", getParams().isAssignment() );
 
-    queueManager.add(this);
+    addToQueue();
     setAsProcessed();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
