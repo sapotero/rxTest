@@ -25,8 +25,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    local( false );
     setTaskStarted( getParams().getDocument(), false );
+    local( false );
   }
 
   @Override

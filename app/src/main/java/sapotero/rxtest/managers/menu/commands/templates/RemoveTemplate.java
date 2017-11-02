@@ -28,8 +28,7 @@ public class RemoveTemplate extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    addToQueue();
-    queueManager.setExecutedLocal(this);
+    templateLocal();
   }
 
   @Override

@@ -47,8 +47,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    local( false );
     resetSignImageError();
+    local( false );
   }
 
   @Override
