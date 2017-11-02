@@ -35,9 +35,11 @@ public class AddToFolder extends SharedCommand {
     store.process( transaction );
 
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
+
     addToQueue();
 
     setAsProcessed();
+
 
     int count = dataStore
       .update(RDocumentEntity.class)

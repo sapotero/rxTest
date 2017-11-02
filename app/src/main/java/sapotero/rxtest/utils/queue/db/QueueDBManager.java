@@ -314,8 +314,8 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
   }
 
   @Override
-  public void setAsRunning(Command command) {
-    updateRunningStatus(command.getParams().getUuid(), true);
+  public void setAsRunning(Command command, Boolean value) {
+    updateRunningStatus(command.getParams().getUuid(), value);
   }
 
   @Override
@@ -346,5 +346,17 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
   @Override
   public int getRunningJobsCount(){
     return dataStore.count(QueueEntity.class).where(QueueEntity.RUNNING.eq(true)).get().value();
+  }
+
+  public List<QueueEntity> getUncompleteTasks() {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.REMOTE.eq(false))
+      .or( QueueEntity.LOCAL.eq(true) )
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .and(QueueEntity.CANCELED.eq(false))
+      .get()
+      .toList();
   }
 }

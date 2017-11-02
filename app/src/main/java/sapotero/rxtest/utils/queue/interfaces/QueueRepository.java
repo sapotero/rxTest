@@ -11,5 +11,5 @@ public interface QueueRepository {
   void setExecutedLocal(Command command);
   void setExecutedRemote(Command command);
   void setExecutedWithError(Command command, List<String> errors);
-  void setAsRunning(Command command);
+  void setAsRunning(Command command, Boolean value);
 }
