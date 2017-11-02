@@ -31,14 +31,14 @@ android {
     productFlavors {
         prod {
             applicationId "sapotero.rxtest"
-            versionCode 80
-            versionName "8.0.0"
+            versionCode 82
+            versionName "8.2.0"
         }
 
         develop {
             applicationId "sapotero.rxtest"
-            versionCode 180
-            versionName "8.0.0"
+            versionCode 182
+            versionName "8.2.0"
         }
     }
 

@@ -72,7 +72,7 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void executeRemote() {
-    queueManager.setAsRunning(this);
+    queueManager.setAsRunning(this, true);
 
     Timber.tag(TAG).i( "type: %s", new Gson().toJson(getParams()) );
 

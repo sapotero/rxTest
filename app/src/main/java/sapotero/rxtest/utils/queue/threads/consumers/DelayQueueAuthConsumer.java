@@ -4,7 +4,7 @@ import android.content.Context;
 
 import java.util.concurrent.BlockingQueue;
 
-import sapotero.rxtest.utils.queue.objects.DelayedCommand;
+import sapotero.rxtest.utils.queue.models.DelayedCommand;
 import timber.log.Timber;
 
 public class DelayQueueAuthConsumer {

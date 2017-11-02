@@ -181,7 +181,7 @@ public class MainService extends Service {
     // Tasks will be removed on cancellation
     scheduller.setRemoveOnCancelPolicy(true);
 
-    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,10, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,2, TimeUnit.SECONDS );
 
     CheckNetworkEvent checkNetworkEvent = EventBus.getDefault().removeStickyEvent(CheckNetworkEvent.class);
     if ( checkNetworkEvent != null ) {

@@ -14,6 +14,7 @@ import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
+import sapotero.rxtest.utils.queue.db.QueueMemoryManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.FileSignActivity;

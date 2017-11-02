@@ -71,8 +71,16 @@ public class QueueSupervisor implements JobCountInterface {
   public void addLocal(QueueEntity command){
     add(command, true);
   }
+  public void addLocal(Command command){
+    add(command, true);
+  }
+
 
   public void addRemote(QueueEntity command){
+    add(command, false);
+  }
+
+  public void addRemote(Command command){
     add(command, false);
   }
 
@@ -83,6 +91,20 @@ public class QueueSupervisor implements JobCountInterface {
       producedCommand = new LocalCommandProducer(  create(command) );
     } else {
       producedCommand = new RemoteCommandProducer( create(command) );
+    }
+
+    Timber.tag(TAG).i("local %s | %s", executeLocal, producedCommand.toString() );
+
+    commandPool.execute( producedCommand );
+  }
+
+  public void add(Command command, boolean executeLocal) {
+    Runnable producedCommand;
+
+    if ( executeLocal) {
+      producedCommand = new LocalCommandProducer(  command );
+    } else {
+      producedCommand = new RemoteCommandProducer( command );
     }
 
     Timber.tag(TAG).i("local %s | %s", executeLocal, producedCommand.toString() );

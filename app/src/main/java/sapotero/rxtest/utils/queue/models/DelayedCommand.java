@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.queue.objects;
+package sapotero.rxtest.utils.queue.models;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

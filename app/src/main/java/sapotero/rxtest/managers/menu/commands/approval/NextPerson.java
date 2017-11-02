@@ -29,6 +29,8 @@ public class NextPerson extends ApprovalSigningCommand {
   public void execute() {
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
+    queueManager.setAsRunning(this, true);
+
     EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     startProcessedOperationInMemory();

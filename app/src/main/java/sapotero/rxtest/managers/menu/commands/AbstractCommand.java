@@ -417,6 +417,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     if ( isOnline( error ) ) {
       finishOnOperationError( Collections.singletonList( errorMessage ) );
+    } else {
+      queueManager.setAsRunning(this, false);
     }
   }
 
