@@ -100,13 +100,13 @@ public class QueueMemoryManager implements QueueRepository{
     List<Command> result = new ArrayList<>();
 
     List<CommandInfo> availableCommands = QueueTransduce.sortByState(
-      commands.values(),
+      sequence(commands.values()).map(info -> info.get(0) ).toList(),
       CommandInfo.STATE.READY
     );
 
     if (availableCommands.size() > 0){
       List<CommandInfo> uncompleteCommands  = QueueTransduce.sort(
-        Collections.singletonList(availableCommands),
+        availableCommands,
         remote,
         false);
 
@@ -131,11 +131,11 @@ public class QueueMemoryManager implements QueueRepository{
       if (cmd != null) {
         CommandInfo command = new CommandInfo( cmd );
 //
-        if ( command.isExecutedLocal() ){
+        if ( entity.isLocal() ){
           command.setExecutedLocal(true);
         }
 
-        if ( command.isExecutedRemote() ){
+        if ( entity.isRemote() ){
           command.setExecutedRemote(true);
         }
         Timber.e("new task: %s", command);
