@@ -2,15 +2,11 @@ package sapotero.rxtest.managers.menu.commands.decision;
 
 import com.google.gson.Gson;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 import java.util.Objects;
 
 import rx.Observable;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
@@ -26,18 +22,6 @@ public class RejectDecision extends DecisionCommand {
 
   public RejectDecision(CommandParams params) {
     super(params);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    updateLocal();
-    setAsProcessed();
   }
 
   private void updateLocal() {
@@ -71,7 +55,11 @@ public class RejectDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    sendSuccessCallback();
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    addToQueue();
+    updateLocal();
+    setAsProcessed();
+
     queueManager.setExecutedLocal(this);
   }
 
@@ -109,8 +97,6 @@ public class RejectDecision extends DecisionCommand {
       .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
       .removeLabel(LabelType.SYNC);
     store.process( transaction );
-
-    EventBus.getDefault().post( new UpdateDocumentEvent( getParams().getDocument() ));
   }
 
   @Override

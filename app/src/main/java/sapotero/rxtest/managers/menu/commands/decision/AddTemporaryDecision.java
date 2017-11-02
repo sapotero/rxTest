@@ -26,19 +26,6 @@ public class AddTemporaryDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    addDecision();
-    queueManager.add(this);
-
-    setSyncLabelInMemory();
-    setAsProcessed();
-  }
-
   @Override
   public String getType() {
     return "add_temporary_decision";
@@ -46,6 +33,12 @@ public class AddTemporaryDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
+    addDecision();
+    addToQueue();
+
+    setSyncLabelInMemory();
+    setAsProcessed();
+
     queueManager.setExecutedLocal(this);
   }
 

@@ -4,6 +4,7 @@ import com.birbit.android.jobqueue.JobManager;
 import com.google.gson.Gson;
 
 import org.acra.ACRA;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
@@ -80,12 +82,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   public String getTAG() {
     return TAG;
-  }
-
-  public Callback callback;
-  public interface Callback {
-    void onCommandExecuteSuccess(String command);
-    void onCommandExecuteError(String type);
   }
 
   protected Retrofit getOperationsRetrofit() {
@@ -215,7 +211,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     addUpdateDocumentTask();
   }
 
-  protected void removeChangedInDb(boolean setUpdatedAt) {
+  private void removeChangedInDb(boolean setUpdatedAt) {
     if ( setUpdatedAt ) {
       dataStore
         .update(RDocumentEntity.class)
@@ -257,18 +253,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
   }
 
-  protected void sendSuccessCallback() {
-    if ( callback != null ) {
-      callback.onCommandExecuteSuccess( getType() );
-    }
-  }
-
-  protected void sendErrorCallback(String errorMessage) {
-    if ( callback != null ) {
-      callback.onCommandExecuteError( errorMessage );
-    }
-  }
-
   protected void saveOldLabelValues() {
     InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
     getParams().setReturnedOldValue( inMemoryDocument.getDocument().isReturned() );
@@ -298,6 +282,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
+  }
+
+  private void startRejectedOperation() {
+    startRejectedOperationInMemory();
+    startRejectedOperationInDb();
+    setAsProcessed();
   }
 
   protected void finishRejectedOperationOnSuccess() {
@@ -402,6 +392,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
+  private void startProcessedOperation() {
+    startProcessedOperationInMemory();
+    startProcessedOperationInDb();
+    setAsProcessed();
+  }
+
   protected void finishProcessedOperationOnSuccess() {
     removeSyncChanged(true);
     setDocumentCondition( DocumentCondition.PROCESSED );
@@ -412,8 +408,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     String errorMessage = error.getLocalizedMessage();
 
     Timber.tag(TAG).i("error: %s", errorMessage);
-
-    sendErrorCallback( errorMessage );
 
     if ( isOnline( error ) ) {
       finishOnOperationError( Collections.singletonList( errorMessage ) );
@@ -456,5 +450,29 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     params.setUpdatedAt( DateUtil.getTimestamp() );
     Command command = operation.getCommand(null, params);
     queueManager.add(command);
+  }
+
+  public void addToQueue() {
+    queueManager.add(this);
+    queueManager.setAsRunning(this, true);
+  }
+
+  public void local(boolean rejected) {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    addToQueue();
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    if ( rejected ) {
+      startRejectedOperation();
+    } else {
+      startProcessedOperation();
+    }
+
+    queueManager.setExecutedLocal(this);
+  }
+
+  public void templateLocal() {
+    addToQueue();
+    queueManager.setExecutedLocal(this);
   }
 }

@@ -17,15 +17,6 @@ public class UpdateTemplate extends AbstractCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
   @Override
   public String getType() {
     return "update_template";
@@ -33,8 +24,7 @@ public class UpdateTemplate extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.setExecutedLocal(this);
-    sendSuccessCallback();
+    templateLocal();
   }
 
   @Override

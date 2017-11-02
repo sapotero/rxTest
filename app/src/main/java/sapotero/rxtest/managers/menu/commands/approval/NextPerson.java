@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.approval;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -9,7 +7,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -21,24 +18,6 @@ public class NextPerson extends ApprovalSigningCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    queueManager.setAsRunning(this, true);
-
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startProcessedOperationInMemory();
-
-    setTaskStarted( getParams().getDocument(), false );
-    setAsProcessed();
-  }
-
   @Override
   public String getType() {
     return "next_person";
@@ -46,9 +25,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    startProcessedOperationInDb();
-    sendSuccessCallback();
-    queueManager.setExecutedLocal(this);
+    setTaskStarted( getParams().getDocument(), false );
+    local( false );
   }
 
   @Override
@@ -82,7 +60,6 @@ public class NextPerson extends ApprovalSigningCommand {
         );
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }

@@ -30,15 +30,6 @@ public class SignFile extends AbstractCommand {
     return null;
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
   @Override
   public String getType() {
     return "file_sign";
@@ -46,9 +37,7 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
-    setAsProcessed();
   }
 
   @Override
@@ -125,8 +114,6 @@ public class SignFile extends AbstractCommand {
 
   private void onError(Throwable error) {
     Timber.tag(TAG).i("Sign error");
-
-    sendErrorCallback( getType() );
 
     if ( isOnline( error ) ) {
       String errorMessage = error.getLocalizedMessage();

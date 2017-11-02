@@ -26,12 +26,13 @@ public class DelegatePerformance extends AbstractCommand {
     return null;
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
+  @Override
+  public String getType() {
+    return "delegate_performance";
   }
 
   @Override
-  public void execute() {
+  public void executeLocal() {
     EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
@@ -60,26 +61,12 @@ public class DelegatePerformance extends AbstractCommand {
           Timber.tag(TAG).i("ok: %s", data.getOk());
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
-
-          sendSuccessCallback();
         },
         error -> {
-          sendErrorCallback( getType() );
         }
       );
 
     setAsProcessed();
-
-  }
-
-  @Override
-  public String getType() {
-    return "delegate_performance";
-  }
-
-  @Override
-  public void executeLocal() {
-
   }
 
   @Override

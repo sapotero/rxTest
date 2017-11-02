@@ -1,8 +1,11 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -14,26 +17,6 @@ public class CheckControlLabel extends SharedCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
-    queueManager.add(this);
-
-    Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: execute - update in MemoryStore");
-
-    store.process(
-      store.startTransactionFor(getParams().getDocument())
-      .setLabel(LabelType.SYNC)
-      .setLabel(LabelType.CONTROL)
-    );
-
-    setAsProcessed();
-  }
-
   @Override
   public String getType() {
     return "check_for_control";
@@ -41,6 +24,19 @@ public class CheckControlLabel extends SharedCommand {
 
   @Override
   public void executeLocal() {
+    Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
+    addToQueue();
+
+    Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: execute - update in MemoryStore");
+
+    store.process(
+      store.startTransactionFor(getParams().getDocument())
+        .setLabel(LabelType.SYNC)
+        .setLabel(LabelType.CONTROL)
+    );
+
+    setAsProcessed();
+
     Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: executeLocal - update in DB");
 
     dataStore
@@ -52,8 +48,7 @@ public class CheckControlLabel extends SharedCommand {
       .value();
 
     queueManager.setExecutedLocal(this);
-
-    sendSuccessCallback();
+    EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
   }
 
   @Override

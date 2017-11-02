@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -28,18 +27,6 @@ public class ApproveDecision extends DecisionCommand {
 
   public ApproveDecision(CommandParams params) {
     super(params);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    updateLocal();
-    setAsProcessed();
   }
 
   private void updateLocal() {
@@ -84,7 +71,11 @@ public class ApproveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    sendSuccessCallback();
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    addToQueue();
+    updateLocal();
+    setAsProcessed();
+
     queueManager.setExecutedLocal(this);
   }
 
@@ -113,7 +104,6 @@ public class ApproveDecision extends DecisionCommand {
       sendDecisionOperationRequest( info );
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
@@ -142,8 +132,6 @@ public class ApproveDecision extends DecisionCommand {
       .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
       .removeLabel(LabelType.SYNC);
     store.process( transaction );
-
-    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }
 
   @Override

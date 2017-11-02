@@ -24,20 +24,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    setRemoveRedLabel();
-
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    updateLocal();
-    setAsProcessed();
-  }
-
   @Override
   public String getType() {
     return "save_and_approve_decision";
@@ -45,7 +31,13 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    sendSuccessCallback();
+    setRemoveRedLabel();
+
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    addToQueue();
+    updateLocal();
+    setAsProcessed();
+
     queueManager.setExecutedLocal(this);
   }
 
@@ -101,7 +93,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
       sendDecisionOperationRequest( info );
 
     } else {
-      sendErrorCallback( SIGN_ERROR_MESSAGE );
       finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }

@@ -1,9 +1,12 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -17,12 +20,13 @@ public class AddToFolder extends SharedCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
+  @Override
+  public String getType() {
+    return "add_to_folder";
   }
 
   @Override
-  public void execute() {
+  public void executeLocal() {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
@@ -31,21 +35,13 @@ public class AddToFolder extends SharedCommand {
     store.process( transaction );
 
     Timber.tag(TAG).i("execute for %s - %s", getType(), getParams().getDocument());
-    queueManager.add(this);
-    queueManager.setAsRunning(this, true);
+
+    addToQueue();
 
     setAsProcessed();
 
-  }
 
-  @Override
-  public String getType() {
-    return "add_to_folder";
-  }
-
-  @Override
-  public void executeLocal() {
-    Integer count = dataStore
+    int count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, true )
       .set( RDocumentEntity.CHANGED, true )
@@ -54,8 +50,7 @@ public class AddToFolder extends SharedCommand {
     Timber.tag(TAG).w( "updated: %s", count );
 
     queueManager.setExecutedLocal(this);
-
-    sendSuccessCallback();
+    EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
   }
 
   @Override

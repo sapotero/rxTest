@@ -1,11 +1,8 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 
 import rx.Observable;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -18,12 +15,13 @@ public class AddDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
+  @Override
+  public String getType() {
+    return "add_decision";
   }
 
   @Override
-  public void execute() {
+  public void executeLocal() {
     setRemoveRedLabel();
 
     getParams().getDecisionModel().setApproved( false );
@@ -33,22 +31,12 @@ public class AddDecision extends DecisionCommand {
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", getParams().isAssignment() );
 
-    queueManager.add(this);
+    addToQueue();
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "add_decision";
-  }
-
-  @Override
-  public void executeLocal() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
     setChangedInDb();
-
-    sendSuccessCallback();
 
     queueManager.setExecutedLocal(this);
   }
@@ -73,7 +61,6 @@ public class AddDecision extends DecisionCommand {
   public void finishOnDecisionSuccess(DecisionError data) {
     finishOperationOnSuccess();
     checkCreatorAndSignerIsCurrentUser(data);
-    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }
 
   @Override

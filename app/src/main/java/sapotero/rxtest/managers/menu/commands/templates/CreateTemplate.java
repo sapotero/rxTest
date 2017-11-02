@@ -26,15 +26,6 @@ public class CreateTemplate extends AbstractCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
   @Override
   public String getType() {
     return "create_template";
@@ -42,7 +33,7 @@ public class CreateTemplate extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.setExecutedLocal(this);
+    templateLocal();
   }
 
   @Override

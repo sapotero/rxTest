@@ -8,11 +8,11 @@ import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -23,12 +23,13 @@ public class RemoveFromFolder extends SharedCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
+  @Override
+  public String getType() {
+    return "remove_from_folder";
   }
 
   @Override
-  public void execute() {
+  public void executeLocal() {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, false )
@@ -43,20 +44,12 @@ public class RemoveFromFolder extends SharedCommand {
       .removeLabel(LabelType.FAVORITES);
     store.process( transaction );
 
-    queueManager.add(this);
+    addToQueue();
 
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "remove_from_folder";
-  }
-
-  @Override
-  public void executeLocal() {
     queueManager.setExecutedLocal(this);
-    sendSuccessCallback();
+    EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
   }
 
   @Override

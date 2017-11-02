@@ -46,7 +46,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.notification.RemoveAllNotificationEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
@@ -395,6 +394,7 @@ public class InfoActivity extends AppCompatActivity {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowSnackEvent event) throws Exception {
     Snackbar.make( wrapper, event.message, Snackbar.LENGTH_LONG ).show();
+    toolbarManager.invalidate();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -434,12 +434,6 @@ public class InfoActivity extends AppCompatActivity {
     Intent intent = new Intent( this, DecisionConstructorActivity.class);
     InfoActivity activity = (InfoActivity) this;
     activity.startActivity(intent);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
-    Timber.d("UpdateDocumentEvent");
-    updateCurrent();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

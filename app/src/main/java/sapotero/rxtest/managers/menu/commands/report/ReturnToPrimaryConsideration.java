@@ -1,13 +1,10 @@
 package sapotero.rxtest.managers.menu.commands.report;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.OperationResultCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
@@ -24,20 +21,6 @@ public class ReturnToPrimaryConsideration extends OperationResultCommand {
     return null;
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startRejectedOperationInMemory();
-    setAsProcessed();
-  }
-
   @Override
   public String getType() {
     return "return_to_the_primary_consideration";
@@ -45,9 +28,7 @@ public class ReturnToPrimaryConsideration extends OperationResultCommand {
 
   @Override
   public void executeLocal() {
-    startRejectedOperationInDb();
-    sendSuccessCallback();
-    queueManager.setExecutedLocal(this);
+    local( true );
   }
 
   @Override

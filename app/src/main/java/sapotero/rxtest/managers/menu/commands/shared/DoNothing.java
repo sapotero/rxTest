@@ -11,15 +11,6 @@ public class DoNothing extends AbstractCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    queueManager.add(this);
-  }
-
   @Override
   public String getType() {
     return "do_nothing";
@@ -27,6 +18,7 @@ public class DoNothing extends AbstractCommand {
 
   @Override
   public void executeLocal() {
+    addToQueue();
     update();
   }
 

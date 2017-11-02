@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.signing;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +9,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
@@ -26,22 +23,6 @@ public class NextPerson extends ApprovalSigningCommand {
 
   public NextPerson(CommandParams params) {
     super(params);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-  @Override
-  public void execute() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startProcessedOperationInMemory();
-
-    resetSignImageError();
-    setAsProcessed();
   }
 
   private void resetSignImageError() {
@@ -66,9 +47,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    startProcessedOperationInDb();
-    sendSuccessCallback();
-    queueManager.setExecutedLocal(this);
+    resetSignImageError();
+    local( false );
   }
 
   @Override
@@ -84,8 +64,6 @@ public class NextPerson extends ApprovalSigningCommand {
     if ( result == IMAGE_SIGN_ERROR ) {
       String errorMessage = "Электронные образы не были подписаны";
       Timber.tag(TAG).i("error: %s", errorMessage);
-
-      sendErrorCallback( errorMessage );
 
       finishOnOperationError( Collections.singletonList( errorMessage ) );
     }
@@ -154,7 +132,7 @@ public class NextPerson extends ApprovalSigningCommand {
       .insert(signImage)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .subscribeOn(Schedulers.computation())
+      .observeOn(Schedulers.computation())
       .subscribe(
         data -> Timber.tag(TAG).v( "inserted RSignImage %s", data.getImageId() ),
         Timber::e

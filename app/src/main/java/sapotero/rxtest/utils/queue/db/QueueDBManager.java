@@ -213,24 +213,24 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
       CommandParams params = command.getParams();
       String commandClass = command.getClass().getCanonicalName();
 
-      // Если поступила новая операция SaveDecision или SaveAndApproveDecision, то отменить все невыполненные
-      // операции SaveDecision и AddDecision для данной резолюции
-      if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
-        Decision decision = params.getDecisionModel();
-        setDecisionCommandAsCanceled( decision.getId() );
-      }
-
-      // Если поступила новая операция UpdateDocumentCommand, то отменить все невыполненные
-      // операции UpdateDocumentCommand для данного документа (чтобы не порождать лишних запросов на загрузку документа)
-      if ( params.getUuid() != null && commandClass.endsWith("UpdateDocumentCommand") ) {
-        setUpdateDocumentCommandExecuted( params.getDocument(), true );
-      }
-
       if (
           params.getUuid() != null
             && !exist( params.getUuid() )          // если такой задачи нет в базе
             && !commandClass.endsWith("DoNothing") // и если не заглушка
         ){
+
+        // Если поступила новая операция SaveDecision или SaveAndApproveDecision, то отменить все невыполненные
+        // операции SaveDecision и AddDecision для данной резолюции
+        if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
+          Decision decision = params.getDecisionModel();
+          setDecisionCommandAsCanceled( decision.getId() );
+        }
+
+        // Если поступила новая операция UpdateDocumentCommand, то отменить все невыполненные
+        // операции UpdateDocumentCommand для данного документа (чтобы не порождать лишних запросов на загрузку документа)
+        if ( params.getUuid() != null && commandClass.endsWith("UpdateDocumentCommand") ) {
+          setUpdateDocumentCommandExecuted( params.getDocument(), true );
+        }
 
         Gson gson = new Gson();
 
@@ -252,10 +252,11 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
           .insert(task)
           .toObservable()
           .subscribeOn(Schedulers.computation())
-          .subscribeOn(Schedulers.computation())
+          .observeOn(Schedulers.computation())
           .subscribe(data -> {
             Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
           }, Timber::e);
+
       } else {
         Timber.tag(TAG).v("UUID exist!");
       }

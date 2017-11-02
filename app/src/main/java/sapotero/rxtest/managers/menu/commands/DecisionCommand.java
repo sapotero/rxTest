@@ -118,7 +118,6 @@ public abstract class DecisionCommand extends AbstractCommand {
 
   private void onDecisionSuccess(DecisionError data) {
     if ( notEmpty( data.getErrors() ) ) {
-      sendErrorCallback( "error" );
       finishOnOperationError( data.getErrors() );
 
       Transaction transaction = new Transaction();
@@ -230,7 +229,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     _params.setDocument( getParams().getDocument() );
     _params.setAssignment( getParams().isAssignment() );
     Command command = operation.getCommand(null, _params);
-    command.execute();
+    command.executeLocal();
   }
 
   private void generateTemporaryDecisionId() {
@@ -309,8 +308,8 @@ public abstract class DecisionCommand extends AbstractCommand {
     dataStore
       .update(decision)
       .toObservable()
-      .observeOn(Schedulers.io())
-      .subscribeOn(AndroidSchedulers.mainThread())
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
           Timber.tag(TAG).e("UPDATED %s", data.getSigner() );

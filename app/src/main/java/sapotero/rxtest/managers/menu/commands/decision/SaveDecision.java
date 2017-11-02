@@ -1,11 +1,8 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 
 import rx.Observable;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -18,12 +15,13 @@ public class SaveDecision extends DecisionCommand {
     super(params);
   }
 
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
+  @Override
+  public String getType() {
+    return "save_decision";
   }
 
   @Override
-  public void execute() {
+  public void executeLocal() {
     setRemoveRedLabel();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
@@ -35,18 +33,9 @@ public class SaveDecision extends DecisionCommand {
 
     setSyncLabelInMemory();
 
-    queueManager.add(this);
+    addToQueue();
     setAsProcessed();
-  }
 
-  @Override
-  public String getType() {
-    return "save_decision";
-  }
-
-  @Override
-  public void executeLocal() {
-    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -65,7 +54,6 @@ public class SaveDecision extends DecisionCommand {
   public void finishOnDecisionSuccess(DecisionError data) {
     finishOperationOnSuccess();
     checkCreatorAndSignerIsCurrentUser(data);
-    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }
 
   @Override

@@ -27,7 +27,6 @@ public abstract class OperationResultCommand extends AbstractCommand {
     printOperationResult( data );
 
     if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-      sendErrorCallback( data.getMessage() );
       finishOnOperationError( Collections.singletonList( data.getMessage() ) );
 
     } else {
