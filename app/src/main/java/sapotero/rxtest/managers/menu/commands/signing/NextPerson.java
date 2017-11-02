@@ -59,13 +59,15 @@ public class NextPerson extends ApprovalSigningCommand {
 
     if ( result == ALL_IMAGES_SIGNED ) {
       approvalSigningRemote();
-    }
 
-    if ( result == IMAGE_SIGN_ERROR ) {
+    } else if ( result == IMAGE_SIGN_ERROR ) {
       String errorMessage = "Электронные образы не были подписаны";
       Timber.tag(TAG).i("error: %s", errorMessage);
 
       finishOnOperationError( Collections.singletonList( errorMessage ) );
+
+    } else {
+      queueManager.setAsRunning(this, false);
     }
   }
 

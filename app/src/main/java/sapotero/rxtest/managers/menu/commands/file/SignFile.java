@@ -49,6 +49,7 @@ public class SignFile extends AbstractCommand {
 
     if ( signImage == null ) {
       Timber.tag(TAG).d("signImage == null, quit");
+      queueManager.setAsRunning(this, false);
       return;
     }
 
@@ -60,6 +61,7 @@ public class SignFile extends AbstractCommand {
 
     if ( signImage.isSignTaskStarted() != null && signImage.isSignTaskStarted() ) {
       Timber.tag(TAG).d("Sign task already started, quit");
+      queueManager.setAsRunning(this, false);
       return;
     }
 
@@ -119,6 +121,8 @@ public class SignFile extends AbstractCommand {
       String errorMessage = error.getLocalizedMessage();
       queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
       setSignError( getParams().getImageId() );
+    } else {
+      queueManager.setAsRunning(this, false);
     }
 
     setSignTaskStarted( getParams().getImageId(), false );
