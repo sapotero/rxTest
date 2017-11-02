@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.approval;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -9,7 +7,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -28,17 +25,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    addToQueue();
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startProcessedOperationInMemory();
-    startProcessedOperationInDb();
-
+    local( false );
     setTaskStarted( getParams().getDocument(), false );
-    setAsProcessed();
-
-    queueManager.setExecutedLocal(this);
   }
 
   @Override

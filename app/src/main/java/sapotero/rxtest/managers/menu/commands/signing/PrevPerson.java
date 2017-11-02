@@ -1,10 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.signing;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 
@@ -21,15 +18,7 @@ public class PrevPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
-    addToQueue();
-    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
-
-    startRejectedOperationInMemory();
-    startRejectedOperationInDb();
-    setAsProcessed();
-
-    queueManager.setExecutedLocal(this);
+    local( true );
   }
 
   @Override

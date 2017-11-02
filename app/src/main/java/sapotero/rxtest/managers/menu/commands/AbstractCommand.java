@@ -4,6 +4,7 @@ import com.birbit.android.jobqueue.JobManager;
 import com.google.gson.Gson;
 
 import org.acra.ACRA;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
@@ -209,7 +211,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     addUpdateDocumentTask();
   }
 
-  protected void removeChangedInDb(boolean setUpdatedAt) {
+  private void removeChangedInDb(boolean setUpdatedAt) {
     if ( setUpdatedAt ) {
       dataStore
         .update(RDocumentEntity.class)
@@ -280,6 +282,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
+  }
+
+  private void startRejectedOperation() {
+    startRejectedOperationInMemory();
+    startRejectedOperationInDb();
+    setAsProcessed();
   }
 
   protected void finishRejectedOperationOnSuccess() {
@@ -384,6 +392,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
+  private void startProcessedOperation() {
+    startProcessedOperationInMemory();
+    startProcessedOperationInDb();
+    setAsProcessed();
+  }
+
   protected void finishProcessedOperationOnSuccess() {
     removeSyncChanged(true);
     setDocumentCondition( DocumentCondition.PROCESSED );
@@ -439,5 +453,19 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public void addToQueue() {
     queueManager.add(this);
     queueManager.setAsRunning(this);
+  }
+
+  public void local(boolean rejected) {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
+    addToQueue();
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
+
+    if ( rejected ) {
+      startRejectedOperation();
+    } else {
+      startProcessedOperation();
+    }
+
+    queueManager.setExecutedLocal(this);
   }
 }
