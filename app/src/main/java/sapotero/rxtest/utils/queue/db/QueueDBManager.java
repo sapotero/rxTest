@@ -221,14 +221,14 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
 
         // Если поступила новая операция SaveDecision или SaveAndApproveDecision, то отменить все невыполненные
         // операции SaveDecision и AddDecision для данной резолюции
-        if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) ) {
+        if ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveAndApproveDecision") ) {
           Decision decision = params.getDecisionModel();
           setDecisionCommandAsCanceled( decision.getId() );
         }
 
         // Если поступила новая операция UpdateDocumentCommand, то отменить все невыполненные
         // операции UpdateDocumentCommand для данного документа (чтобы не порождать лишних запросов на загрузку документа)
-        if ( params.getUuid() != null && commandClass.endsWith("UpdateDocumentCommand") ) {
+        if ( commandClass.endsWith("UpdateDocumentCommand") ) {
           setUpdateDocumentCommandExecuted( params.getDocument(), true );
         }
 

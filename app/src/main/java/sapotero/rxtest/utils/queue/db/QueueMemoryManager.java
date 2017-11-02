@@ -12,6 +12,10 @@ import java.util.Objects;
 
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
+import sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision;
+import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
+import sapotero.rxtest.managers.menu.commands.shared.DoNothing;
 import sapotero.rxtest.managers.menu.commands.update.UpdateDocumentCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
@@ -34,7 +38,27 @@ public class QueueMemoryManager implements QueueRepository{
 
   @Override
   public void add(Command command) {
-    commands.put( command.getParams().getUuid(), Collections.singletonList( new CommandInfo(command) ));
+    CommandParams params = command.getParams();
+
+    if ( params.getUuid() != null
+      && !commands.containsKey( params.getUuid() )  // если такой задачи нет в очереди
+      && !(command instanceof DoNothing)            // и если не заглушка
+      ) {
+
+      // Если поступила новая операция SaveDecision или SaveAndApproveDecision, то отменить все невыполненные
+      // операции SaveDecision и AddDecision для данной резолюции
+      if ( command instanceof SaveDecision || command instanceof SaveAndApproveDecision ) {
+        setDecisionCommandAsCanceled( command.getParams().getDecisionId() );
+      }
+
+      // Если поступила новая операция UpdateDocumentCommand, то отменить все невыполненные
+      // операции UpdateDocumentCommand для данного документа (чтобы не порождать лишних запросов на загрузку документа)
+      if ( command instanceof UpdateDocumentCommand ) {
+        setUpdateDocumentCommandExecuted( command.getParams().getDocument() );
+      }
+
+      commands.put( command.getParams().getUuid(), Collections.singletonList( new CommandInfo(command) ));
+    }
   }
 
   @Override
@@ -170,6 +194,28 @@ public class QueueMemoryManager implements QueueRepository{
     return command;
   }
 
+  private void setDecisionCommandAsCanceled(String decision_id) {
+    for ( List<CommandInfo> commandInfoList : commands.values() ) {
+      for ( CommandInfo commandInfo : commandInfoList ) {
+        Command command = commandInfo.getCommand();
+
+        if ( ( command instanceof AddDecision || command instanceof SaveDecision )
+          && Objects.equals( command.getParams().getDecisionId(), decision_id )
+          && !commandInfo.isExecutedRemote()
+          && commandInfo.getState() != CommandInfo.STATE.ERROR ) {
+
+          setComplete( commandInfo );
+        }
+      }
+    }
+  }
+
+  private void setComplete(CommandInfo commandInfo) {
+    commandInfo.setExecutedLocal( true );
+    commandInfo.setExecutedRemote( true );
+    commandInfo.setState( CommandInfo.STATE.COMPLETE );
+  }
+
   public void setUpdateDocumentCommandExecuted(String documentUid) {
     for ( List<CommandInfo> commandInfoList : commands.values() ) {
       for ( CommandInfo commandInfo : commandInfoList ) {
@@ -180,8 +226,7 @@ public class QueueMemoryManager implements QueueRepository{
           && !commandInfo.isExecutedRemote()
           && commandInfo.getState() != CommandInfo.STATE.ERROR ) {
 
-          commandInfo.setExecutedRemote( true );
-          commandInfo.setState( CommandInfo.STATE.COMPLETE );
+          setComplete( commandInfo );
         }
       }
     }
