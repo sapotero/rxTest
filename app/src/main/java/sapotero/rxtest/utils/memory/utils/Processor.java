@@ -230,17 +230,14 @@ public class Processor {
 
           if ( Filter.isChanged(doc.getFilter(), filter) ){
             updateJob(doc.getUid(), doc.getMd5());
-
-            NotifyMessageModel notifyMessageModel3 = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
-            notifyPubSubject.onNext(notifyMessageModel3);
+            sendNotification(document, filter, index, documentType);
           } else {
             EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
           }
         } else {
           updateJob(doc.getUid(), doc.getMd5());
-          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
           if (!doc.getDocument().getChanged() && Objects.equals(doc.getMd5(), "")){
-            notifyPubSubject.onNext(notifyMessageModel);
+            sendNotification(document, filter, index, documentType);
           }
         }
       } else {
@@ -249,9 +246,21 @@ public class Processor {
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
-      NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source, documentType);
-      notifyPubSubject.onNext(notifyMessageModel);
+      sendNotification(document, filter, index, documentType);
     }
+  }
+
+  private void sendNotification(Document newAddedDocument, String filter, String index, DocumentType documentType){
+    Timber.tag("NotifyManager").e("--sendNotification --");
+    final NotifyMessageModel notifyMessageModel = new NotifyMessageModel(newAddedDocument, filter, index, source, documentType);
+
+    if(notifyManager.isMustResubscribe()){
+      notifyManager.unSubscribe();
+      notifyManager.subscribeOnNotifyEvents(notifyPubSubject);
+      Timber.tag("NotifyManager").e("--Resubscribe--");
+    }
+
+    notifyPubSubject.onNext(notifyMessageModel);
   }
 
   private ArrayList<String> intersect(){
