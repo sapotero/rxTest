@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
@@ -23,7 +23,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class QueueMemoryManager implements QueueRepository{
 
-  private final HashMap<String, List<CommandInfo>> commands;
+  private final HashMap<String, ArrayList<CommandInfo>> commands;
   private final String TAG = this.getClass().getSimpleName();
 
   public QueueMemoryManager() {
@@ -32,13 +32,39 @@ public class QueueMemoryManager implements QueueRepository{
 
   @Override
   public void add(Command command) {
-    commands.put( command.getParams().getUuid(), Collections.singletonList( new CommandInfo(command) ));
+
+    try {
+      if ( !commands.containsKey( command.getParams().getDocument() ) ) {
+        commands.put( command.getParams().getDocument(), new ArrayList<>());
+      }
+
+      ArrayList<CommandInfo> list = commands.get(command.getParams().getDocument());
+      list.add( new CommandInfo(command) );
+      commands.put( command.getParams().getDocument(), list);
+    } catch (Exception e) {
+      Timber.e( e );
+    }
+
+    showQueueInfo();
   }
 
   @Override
   public void remove(AbstractCommand command) {
-    if ( commands.containsKey(command.getParams().getUuid()) ){
-      commands.remove(command.getParams().getUuid());
+    Timber.tag(TAG).d(" --- remove --- ");
+    if ( commands.containsKey(command.getParams().getDocument()) ){
+      ArrayList<CommandInfo> list = commands.get(command.getParams().getDocument());
+
+      Iterator<CommandInfo> iterator = list.iterator();
+      while ( iterator.hasNext() ) {
+        CommandInfo actual = iterator.next();
+        if( actual.getCommand().getParams().getDocument().equals( command.getParams().getDocument() ) ) {
+          iterator.remove();
+        }
+      }
+
+      if (list.size() == 0) {
+        commands.remove(command.getParams().getDocument());
+      }
     }
   }
 
@@ -55,8 +81,8 @@ public class QueueMemoryManager implements QueueRepository{
   @Override
   public void setExecutedWithError(Command command, List<String> errors) {
     Timber.tag(TAG).d("\n --- executed-with-error [%s]--- \n\n%s\n\n", command, errors);
-    if ( commands.containsKey(command.getParams().getUuid()) ){
-      List<CommandInfo> commandInfoList = commands.get(command.getParams().getUuid());
+    if ( commands.containsKey(command.getParams().getDocument()) ){
+      List<CommandInfo> commandInfoList = commands.get(command.getParams().getDocument());
 
       if (commandInfoList.size() > 0) {
         commandInfoList.get(0).setState(CommandInfo.STATE.ERROR);
@@ -66,8 +92,8 @@ public class QueueMemoryManager implements QueueRepository{
 
   @Override
   public void setAsRunning(Command command, Boolean value) {
-    if ( commands.containsKey(command.getParams().getUuid()) ){
-      List<CommandInfo> commandInfoList = commands.get(command.getParams().getUuid());
+    if ( commands.containsKey(command.getParams().getDocument()) ){
+      List<CommandInfo> commandInfoList = commands.get(command.getParams().getDocument());
 
       if (commandInfoList.size() > 0) {
         commandInfoList.get(0).setState( value ? CommandInfo.STATE.RUNNING : CommandInfo.STATE.READY);
@@ -77,14 +103,14 @@ public class QueueMemoryManager implements QueueRepository{
 
 
   private void setExecuted(Command command, Boolean remote) {
-    if ( commands.containsKey(command.getParams().getUuid()) ){
-      List<CommandInfo> commandInfoList = commands.get(command.getParams().getUuid());
+    if ( commands.containsKey(command.getParams().getDocument()) ){
+      List<CommandInfo> commandInfoList = commands.get(command.getParams().getDocument());
       if (commandInfoList.size() > 0) {
 
         if (remote){
           commandInfoList.get(0).setExecutedRemote(true);
           commandInfoList.get(0).setState(CommandInfo.STATE.COMPLETE);
-//          delayedRemove(command);
+          remove((AbstractCommand) command);
         } else {
           commandInfoList.get(0).setExecutedLocal(true);
           commandInfoList.get(0).setState(CommandInfo.STATE.READY);
@@ -97,6 +123,9 @@ public class QueueMemoryManager implements QueueRepository{
   }
 
   public List<Command> getUncompleteCommands(Boolean remote){
+
+    showQueueInfo();
+
     List<Command> result = new ArrayList<>();
 
     List<CommandInfo> availableCommands = QueueTransduce.sortByState(
@@ -138,9 +167,20 @@ public class QueueMemoryManager implements QueueRepository{
         if ( entity.isRemote() ){
           command.setExecutedRemote(true);
         }
+
         Timber.e("new task: %s", command);
 
-        commands.put( command.getCommand().getParams().getUuid(), Collections.singletonList( command ));
+        try {
+          if ( !commands.containsKey( cmd.getParams().getDocument() ) ) {
+            commands.put( cmd.getParams().getDocument(), new ArrayList<>());
+          }
+
+          ArrayList<CommandInfo> list = commands.get(cmd.getParams().getDocument());
+          list.add( command );
+          commands.put( cmd.getParams().getDocument(), list);
+        } catch (Exception e) {
+          Timber.e( e );
+        }
       }
     }
   }
@@ -167,4 +207,22 @@ public class QueueMemoryManager implements QueueRepository{
 
     return command;
   }
+
+  private void showQueueInfo() {
+    Timber.tag(TAG).d("\n\n--- showQueueInfo ---");
+    for ( String uid: commands.keySet() ) {
+      Timber.tag(TAG).d(" * %s [%s] \n%s", uid, commands.get(uid).size(), showCommandDetails(commands.get(uid)) );
+    }
+  }
+
+  private String showCommandDetails(ArrayList<CommandInfo> commandInfos) {
+    StringBuilder result = new StringBuilder("\n");
+    for ( CommandInfo uid: commandInfos ) {
+      result.append("   - ");
+      result.append(uid.toString());
+    }
+
+    return result.toString();
+  }
+
 }
