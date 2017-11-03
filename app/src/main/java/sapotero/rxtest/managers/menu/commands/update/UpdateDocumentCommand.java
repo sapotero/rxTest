@@ -49,12 +49,12 @@ public class UpdateDocumentCommand extends AbstractCommand {
     // After second delay time has passed, force update document even if MD5 hasn't changed
     Timber.tag(TAG).d("executeRemote - start");
 
-    if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getSecondUpdateDelay() ) ) {
+    if ( isOnline( new Throwable("Offline") ) && DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getSecondUpdateDelay() ) ) {
       Timber.tag(TAG).d("executeRemote - force updating document");
       jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, true ) );
-    } else {
-      queueManager.setAsRunning(this, false);
     }
+
+    queueManager.setAsRunning(this, false);
 
     // UpdateDocumentCommand is set executed remote only from inside UpdateDocumentJob in case of document update success.
     // Here we do not call setExecutedRemote(), because at this moment we don't know, whether the document has been updated or not, yet.

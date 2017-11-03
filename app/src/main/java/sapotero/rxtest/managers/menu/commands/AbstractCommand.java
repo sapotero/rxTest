@@ -471,7 +471,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     queueManager.setExecutedLocal(this);
   }
 
-  public void templateLocal() {
+  protected void templateLocal() {
     addToQueue();
     queueManager.setExecutedLocal(this);
   }
