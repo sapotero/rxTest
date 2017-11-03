@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.memory.utils;
+package sapotero.rxtest.managers.notifications;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import rx.Subscription;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -26,6 +27,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
+import sapotero.rxtest.utils.memory.utils.NotificationDismissedReceiver;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
@@ -35,51 +37,115 @@ import timber.log.Timber;
  */
 public class NotifyManager {
 
-  private final String TAG = NotifyManager.class.getSimpleName();
   @Inject ISettings settings;
+
+  private final String TAG = NotifyManager.class.getSimpleName();
   private Context appContext = EsdApplication.getApplication();
   private NotificationManagerCompat notificationManagerCompat = MainService.getNotificationManagerCompat();
   private int notViewedDocumentQuantity = 0;
+  private Subscription subscription;
+  /*дефолтное время буфера для notifyPubSubject*/
+  private int bufferTimeSpan = 5;
+  private long currentTimeMillis;
+  private boolean isChangeMode;
+  /*в миллисекундах. Д.б. всегда больше чем bufferTimeSpan в режиме замещения,
+   иначе теряем накопленные уведомления */
+  private final long DELAY_TIME_AFTER_ENTRY_SUBSTITUDE = 65_000;
+
+
 
   public NotifyManager() {
     EsdApplication.getManagerComponent().inject(this);
     EventBus.getDefault().register(this);
+    subscribeToSubstituteMode();
   }
 
-  public void subscribeOnNotifyEvents(PublishSubject<NotifyMessageModel> notifyPubSubject) {
-    if (!notifyPubSubject.hasObservers()) {
-      notifyPubSubject
-        .filter(notifyMessageModel -> !notifyMessageModel.isFirstRunApp())
-        .filter(notifyMessageModel -> !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER"))
-        .filter(notifyMessageModel -> Objects.equals(notifyMessageModel.getDocumentType().name(), "DOCUMENT"))
-        .filter(notifyMessageModel -> {
-          /*приводим строку index к виду JournalStatus. Проверяем в разрешенных журналах*/
-          JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
-          return checkAllowedJournal(itemJournalStatus);
-        })
-        .buffer(5 ,TimeUnit.SECONDS)
-        .filter(notifyMessageModels -> !notifyMessageModels.isEmpty())
-        .subscribe(notifyMessageModels -> {
-          if(notifyMessageModels.size() > 1) {
-            notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
-            String contentTitle = "Вам поступило новых документов: " + notifyMessageModels.size();
-            String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
-            generateSummaryNotifyMsg(contentTitle, contentText, 1);
-            Timber.tag(TAG).e("-> SummaryNotifyMsg");
-          } else {
-            for (NotifyMessageModel item : notifyMessageModels){
-              Document document = item.getDocument();
-              String filter = item.getFilter();
+  public Subscription subscribeOnNotifyEvents(PublishSubject<NotifyMessageModel> notifyPubSubject) {
+      if (!notifyPubSubject.hasObservers()) {
+        subscription = notifyPubSubject
+          .filter(notifyMessageModel -> !settings.isFirstRun())
+          .filter(notifyMessageModel -> !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER"))
+          .filter(notifyMessageModel -> Objects.equals(notifyMessageModel.getDocumentType().name(), "DOCUMENT"))
+          .filter(notifyMessageModel -> {
+         /*приводим строку index к виду JournalStatus. Проверяем в разрешенных журналах*/
+            JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
+            return checkAllowedJournal(itemJournalStatus);
+          })
+          .buffer(bufferTimeSpan, TimeUnit.SECONDS)
+          .filter(notifyMessageModels -> !notifyMessageModels.isEmpty())
+          .subscribe(notifyMessageModels -> {
+            if (notifyMessageModels.size() > 1) {
               notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
-              String contentTitle = getTitle(getJournal(item)) + item.getDocument().getTitle();
+              String contentTitle = "Вам поступило новых документов: " + notifyMessageModels.size();
               String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
-              generateSingleNotifyMsg(contentTitle, contentText, document, filter, 1);
-              Timber.tag(TAG).e("-> SingleNotifyMsg. getChanged() = %s | Md5 = %s | Uid() = %s",item.getDocument().getChanged(),item.getDocument().getMd5(),item.getDocument().getUid());
+              generateSummaryNotifyMsg(contentTitle, contentText, 1);
+              Timber.tag(TAG).e("-> SummaryNotifyMsg");
+            } else {
+              for (NotifyMessageModel item : notifyMessageModels) {
+                Document document = item.getDocument();
+                String filter = item.getFilter();
+                notViewedDocumentQuantity = notViewedDocumentQuantity + notifyMessageModels.size();
+                String contentTitle = getTitle(getJournal(item)) + item.getDocument().getTitle();
+                String contentText = "Итого требующих рассмотрения: " + notViewedDocumentQuantity;
+                generateSingleNotifyMsg(contentTitle, contentText, document, filter, 1);
+                Timber.tag(TAG).e("-> SingleNotifyMsg. getChanged() = %s | Md5 = %s | Uid() = %s", item.getDocument().getChanged(), item.getDocument().getMd5(), item.getDocument().getUid());
+              }
             }
-          }
-        }, throwable -> Timber.tag(TAG).e("throwable = " + throwable));
-    }
+          }, throwable -> Timber.tag(TAG).e("throwable = " + throwable));
+      }
+
+    return subscription;
   }
+
+  public void unSubscribe(){
+    if (subscription != null){subscription.unsubscribe();}
+  }
+
+  private boolean isPassedDelay(){
+    boolean result = false;
+    final long deltaTime = System.currentTimeMillis() - currentTimeMillis;
+    if (deltaTime > DELAY_TIME_AFTER_ENTRY_SUBSTITUDE) {
+      result = true;
+    }
+    return result;
+  }
+
+  /*переподписываемся, если поменялся режим пользователя
+  или прошло больше DELAY_TIME_AFTER_ENTRY_SUBSTITUDE в режиме замещения */
+  public boolean isMustResubscribe(){
+    boolean result;
+    if (isChangeMode){
+      result = true;
+      isChangeMode = false;
+    } else {
+      result = false;
+    }
+
+    if (isPassedDelay() & settings.getSubstituteModePreference().get()){
+      result = true;
+      isChangeMode = false;
+      bufferTimeSpan = 5;
+   }
+    return result;
+  }
+
+  /*если поменялся режим - меняем время буфера для notifyPubSubject*/
+  private void subscribeToSubstituteMode(){
+    settings.getSubstituteModePreference().asObservable()
+      .subscribe(aBoolean -> {
+        if (aBoolean){
+          currentTimeMillis = System.currentTimeMillis();
+          bufferTimeSpan = 60;
+          isChangeMode = true;
+        } else {
+          bufferTimeSpan = 5;
+          isChangeMode = true;
+        }
+      }, throwable -> Timber.tag(TAG).e("throwable = " + throwable));
+  }
+
+
+
 
   private void generateSummaryNotifyMsg(String contentTitle, String contentText, int currentNotificationId ){
     NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);

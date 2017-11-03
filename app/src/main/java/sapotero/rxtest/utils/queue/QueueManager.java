@@ -67,6 +67,7 @@ public class QueueManager implements QueueRepository {
   }
 
   public void getUncompleteTasks(){
+    Timber.tag(TAG).d("getUncompleteTasks %s", supervisor.getRunningJobsCount() < THREAD_POOL_SIZE);
 
     if (supervisor.getRunningJobsCount() < THREAD_POOL_SIZE){
 
@@ -79,9 +80,9 @@ public class QueueManager implements QueueRepository {
       }
     }
 
-//    if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
-//      dBManager.dropRunningJobs();
-//    }
+    if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
+      dBManager.dropRunningJobs();
+    }
 
   }
 

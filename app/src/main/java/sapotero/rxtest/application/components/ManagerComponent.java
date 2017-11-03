@@ -13,7 +13,7 @@ import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
-import sapotero.rxtest.utils.memory.utils.NotifyManager;
+import sapotero.rxtest.managers.notifications.NotifyManager;
 import sapotero.rxtest.utils.memory.utils.NotifyManagerModule;
 import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
