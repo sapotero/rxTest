@@ -352,7 +352,6 @@ public class QueueDBManager implements JobCountInterface, QueueRepository {
     return dataStore
       .select(QueueEntity.class)
       .where(QueueEntity.REMOTE.eq(false))
-      .or( QueueEntity.LOCAL.eq(true) )
       .and(QueueEntity.RUNNING.eq(false))
       .and(QueueEntity.WITH_ERROR.eq(false))
       .and(QueueEntity.CANCELED.eq(false))

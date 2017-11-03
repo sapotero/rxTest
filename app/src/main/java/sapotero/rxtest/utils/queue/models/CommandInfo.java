@@ -77,8 +77,6 @@ public class CommandInfo {
       " state = " + state +
       ", executedLocal = " + executedLocal +
       ", executedRemote = " + executedRemote +
-      ", createdAt = " + createdAt +
-      ", commandUid = " + command.getParams().getUuid() +
        "}\n";
   }
 }
