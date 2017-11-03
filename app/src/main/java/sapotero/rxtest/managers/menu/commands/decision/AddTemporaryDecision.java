@@ -106,7 +106,8 @@ public class AddTemporaryDecision extends DecisionCommand {
       decision.setRed( dec.getRed() );
       decision.setAssistantId( null );
 
-      decision.setDate( dec.getDate() );
+      decision.setLetterheadFontSize( dec.getLetterheadFontSize() );
+      decision.setPerformerFontSize( dec.getPerformersFontSize() );
 
       for (Block _block: dec.getBlocks()) {
         RBlockEntity block = new BlockMapper().toEntity(_block);
