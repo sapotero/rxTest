@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.memory.utils;
+package sapotero.rxtest.managers.notifications;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import rx.Subscription;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -29,6 +27,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
+import sapotero.rxtest.utils.memory.utils.NotificationDismissedReceiver;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
@@ -46,11 +45,13 @@ public class NotifyManager {
   private int notViewedDocumentQuantity = 0;
   private Subscription subscription;
   /*дефолтное время буфера для notifyPubSubject*/
-  private int timeSpan = 5;
+  private int bufferTimeSpan = 5;
   private long currentTimeMillis;
   private boolean isChangeMode;
-  /*в миллисекундах*/
-  private final int TIME_BUFFER_AFTER_ENTRY_SUBSTITUDE = 30_000;
+  /*в миллисекундах. Д.б. всегда больше чем bufferTimeSpan в режиме замещения,
+   иначе теряем накопленные уведомления */
+  private final long DELAY_TIME_AFTER_ENTRY_SUBSTITUDE = 65_000;
+
 
 
   public NotifyManager() {
@@ -70,7 +71,7 @@ public class NotifyManager {
             JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
             return checkAllowedJournal(itemJournalStatus);
           })
-          .buffer(timeSpan, TimeUnit.SECONDS)
+          .buffer(bufferTimeSpan, TimeUnit.SECONDS)
           .filter(notifyMessageModels -> !notifyMessageModels.isEmpty())
           .subscribe(notifyMessageModels -> {
             if (notifyMessageModels.size() > 1) {
@@ -103,14 +104,14 @@ public class NotifyManager {
   private boolean isPassedDelay(){
     boolean result = false;
     final long deltaTime = System.currentTimeMillis() - currentTimeMillis;
-    if (deltaTime > TIME_BUFFER_AFTER_ENTRY_SUBSTITUDE) {
+    if (deltaTime > DELAY_TIME_AFTER_ENTRY_SUBSTITUDE) {
       result = true;
     }
     return result;
   }
 
   /*переподписываемся, если поменялся режим пользователя
-  или прошло больше TIME_BUFFER_AFTER_ENTRY_SUBSTITUDE в режиме замещения */
+  или прошло больше DELAY_TIME_AFTER_ENTRY_SUBSTITUDE в режиме замещения */
   public boolean isMustResubscribe(){
     boolean result;
     if (isChangeMode){
@@ -121,9 +122,9 @@ public class NotifyManager {
     }
 
     if (isPassedDelay() & settings.getSubstituteModePreference().get()){
-     timeSpan = 5;
-     result = true;
-     isChangeMode = false;
+      result = true;
+      isChangeMode = false;
+      bufferTimeSpan = 5;
    }
     return result;
   }
@@ -131,24 +132,16 @@ public class NotifyManager {
   /*если поменялся режим - меняем время буфера для notifyPubSubject*/
   private void subscribeToSubstituteMode(){
     settings.getSubstituteModePreference().asObservable()
-      .subscribe(new Action1<Boolean>() {
-      @Override
-      public void call(Boolean aBoolean) {
+      .subscribe(aBoolean -> {
         if (aBoolean){
           currentTimeMillis = System.currentTimeMillis();
-          timeSpan = 30;
+          bufferTimeSpan = 60;
           isChangeMode = true;
         } else {
-          timeSpan = 5;
+          bufferTimeSpan = 5;
           isChangeMode = true;
         }
-      }
-    }, new Action1<Throwable>() {
-      @Override
-      public void call(Throwable throwable) {
-        Timber.tag(TAG).e("throwable = " + throwable);
-      }
-    });
+      }, throwable -> Timber.tag(TAG).e("throwable = " + throwable));
   }
 
 

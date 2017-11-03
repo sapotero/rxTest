@@ -32,6 +32,7 @@ import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
+import sapotero.rxtest.managers.notifications.NotifyManager;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -251,15 +252,11 @@ public class Processor {
   }
 
   private void sendNotification(Document newAddedDocument, String filter, String index, DocumentType documentType){
-    Timber.tag("NotifyManager").e("--sendNotification --");
     final NotifyMessageModel notifyMessageModel = new NotifyMessageModel(newAddedDocument, filter, index, source, documentType);
-
     if(notifyManager.isMustResubscribe()){
       notifyManager.unSubscribe();
       notifyManager.subscribeOnNotifyEvents(notifyPubSubject);
-      Timber.tag("NotifyManager").e("--Resubscribe--");
     }
-
     notifyPubSubject.onNext(notifyMessageModel);
   }
 
