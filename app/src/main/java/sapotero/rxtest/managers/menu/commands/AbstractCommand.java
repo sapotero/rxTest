@@ -448,7 +448,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     CommandParams params = new CommandParams();
     params.setDocument( getParams().getDocument() );
     params.setUpdatedAt( DateUtil.getTimestamp() );
-    Command command = operation.getCommand(null, params);
+    Command command = operation.getCommand(params);
     queueManager.add(command);
   }
 

@@ -181,7 +181,7 @@ public class QueueMemoryManager implements QueueRepository{
       Timber.e("OPERATION: %s", operation);
       Timber.e("params: %s", params);
 
-      command = operation.getCommand(null, params);
+      command = operation.getCommand(params);
 
       if (command != null) {
         Timber.tag(TAG).v("create command %s", command.getParams().toString() );

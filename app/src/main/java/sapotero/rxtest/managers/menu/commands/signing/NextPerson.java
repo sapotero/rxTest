@@ -161,7 +161,7 @@ public class NextPerson extends ApprovalSigningCommand {
     params.setImageId( image.getImageId() );
     params.setFilePath( image.getFileName() );
     params.setDocument( getParams().getDocument() );
-    Command command = operation.getCommand(null, params);
+    Command command = operation.getCommand(params);
     Timber.tag(TAG).e("image: %s", getParams().getDocument());
     queueManager.add(command);
   }

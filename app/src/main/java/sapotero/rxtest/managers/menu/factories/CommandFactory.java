@@ -42,9 +42,8 @@ public class CommandFactory {
   public enum Operation {
     FILE_SIGN {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        SignFile command = new SignFile(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new SignFile(params);
       }
 
       @Override
@@ -55,9 +54,8 @@ public class CommandFactory {
 
     FROM_THE_REPORT {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        FromTheReport command = new FromTheReport(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new FromTheReport(params);
       }
 
       @Override
@@ -68,9 +66,8 @@ public class CommandFactory {
 
     RETURN_TO_THE_PRIMARY_CONSIDERATION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        ReturnToPrimaryConsideration command = new ReturnToPrimaryConsideration(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new ReturnToPrimaryConsideration(params);
       }
 
       @Override
@@ -81,9 +78,8 @@ public class CommandFactory {
 
     DELEGATE_PERFORMANCE {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        DelegatePerformance command = new DelegatePerformance(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new DelegatePerformance(params);
       }
 
       @Override
@@ -94,9 +90,8 @@ public class CommandFactory {
 
     TO_THE_APPROVAL_PERFORMANCE {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        ApprovalPerformance command = new ApprovalPerformance(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new ApprovalPerformance(params);
       }
 
       @Override
@@ -107,9 +102,8 @@ public class CommandFactory {
 
     TO_THE_PRIMARY_CONSIDERATION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        PrimaryConsideration command = new PrimaryConsideration(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new PrimaryConsideration(params);
       }
 
       @Override
@@ -120,9 +114,8 @@ public class CommandFactory {
 
     APPROVAL_CHANGE_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.approval.ChangePerson command = new sapotero.rxtest.managers.menu.commands.approval.ChangePerson(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new sapotero.rxtest.managers.menu.commands.approval.ChangePerson(params);
       }
 
       @Override
@@ -133,9 +126,8 @@ public class CommandFactory {
 
     APPROVAL_NEXT_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.approval.NextPerson command = new sapotero.rxtest.managers.menu.commands.approval.NextPerson(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new sapotero.rxtest.managers.menu.commands.approval.NextPerson(params);
       }
 
       @Override
@@ -146,9 +138,8 @@ public class CommandFactory {
 
     APPROVAL_PREV_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.approval.PrevPerson command = new sapotero.rxtest.managers.menu.commands.approval.PrevPerson(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new sapotero.rxtest.managers.menu.commands.approval.PrevPerson(params);
       }
 
       @Override
@@ -159,9 +150,8 @@ public class CommandFactory {
 
     SIGNING_CHANGE_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(params);
       }
 
       @Override
@@ -172,9 +162,8 @@ public class CommandFactory {
 
     SIGNING_NEXT_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.NextPerson command = new sapotero.rxtest.managers.menu.commands.signing.NextPerson(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new sapotero.rxtest.managers.menu.commands.signing.NextPerson(params);
       }
 
       @Override
@@ -185,9 +174,8 @@ public class CommandFactory {
 
     SIGNING_PREV_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.PrevPerson command = new sapotero.rxtest.managers.menu.commands.signing.PrevPerson(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new sapotero.rxtest.managers.menu.commands.signing.PrevPerson(params);
       }
 
       @Override
@@ -198,9 +186,8 @@ public class CommandFactory {
 
     ADD_TO_FOLDER {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        AddToFolder command = new AddToFolder(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new AddToFolder(params);
       }
 
       @Override
@@ -211,9 +198,8 @@ public class CommandFactory {
 
     REMOVE_FROM_FOLDER {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        RemoveFromFolder command = new RemoveFromFolder(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new RemoveFromFolder(params);
       }
 
       @Override
@@ -224,9 +210,8 @@ public class CommandFactory {
 
     CHECK_CONTROL_LABEL {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        CheckControlLabel command = new CheckControlLabel(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new CheckControlLabel(params);
       }
 
       @Override
@@ -237,9 +222,8 @@ public class CommandFactory {
 
     UNCHECK_CONTROL_LABEL {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        UncheckControlLabel command = new UncheckControlLabel(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new UncheckControlLabel(params);
       }
 
       @Override
@@ -250,9 +234,8 @@ public class CommandFactory {
 
     INCORRECT {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        DoNothing command = new DoNothing(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new DoNothing(params);
       }
 
       @Override
@@ -263,9 +246,8 @@ public class CommandFactory {
 
     SAVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        SaveDecision command = new SaveDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new SaveDecision(params);
       }
 
       @Override
@@ -276,9 +258,8 @@ public class CommandFactory {
 
     CREATE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        AddDecision command = new AddDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new AddDecision(params);
       }
 
       @Override
@@ -289,9 +270,8 @@ public class CommandFactory {
 
     CREATE_TEMPORARY_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        AddTemporaryDecision command = new AddTemporaryDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new AddTemporaryDecision(params);
       }
 
       @Override
@@ -302,9 +282,8 @@ public class CommandFactory {
 
     SAVE_AND_APPROVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        SaveAndApproveDecision command = new SaveAndApproveDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new SaveAndApproveDecision(params);
       }
 
       @Override
@@ -315,9 +294,8 @@ public class CommandFactory {
 
     CREATE_AND_APPROVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        AddAndApproveDecision command = new AddAndApproveDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new AddAndApproveDecision(params);
       }
 
       @Override
@@ -328,9 +306,8 @@ public class CommandFactory {
 
     APPROVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        ApproveDecision command = new ApproveDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new ApproveDecision(params);
       }
 
       @Override
@@ -341,9 +318,8 @@ public class CommandFactory {
 
     REJECT_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        RejectDecision command = new RejectDecision(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new RejectDecision(params);
       }
 
       @Override
@@ -354,9 +330,8 @@ public class CommandFactory {
 
     CREATE_DECISION_TEMPLATE {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        CreateTemplate command = new CreateTemplate(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new CreateTemplate(params);
       }
 
       @Override
@@ -367,9 +342,8 @@ public class CommandFactory {
 
     UPDATE_DECISION_TEMPLATE {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        UpdateTemplate command = new UpdateTemplate(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new UpdateTemplate(params);
       }
 
       @Override
@@ -380,9 +354,8 @@ public class CommandFactory {
 
     DELETE_DECISION_TEMPLATE {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        RemoveTemplate command = new RemoveTemplate(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new RemoveTemplate(params);
       }
 
       @Override
@@ -393,9 +366,8 @@ public class CommandFactory {
 
     UPDATE_DOCUMENT {
       @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        UpdateDocumentCommand command = new UpdateDocumentCommand(params);
-        return command;
+      public Command getCommand(CommandParams params) {
+        return new UpdateDocumentCommand(params);
       }
 
       @Override
@@ -514,7 +486,7 @@ public class CommandFactory {
       return operation;
     }
 
-    public abstract Command getCommand(CommandFactory instance, CommandParams params);
+    public abstract Command getCommand(CommandParams params);
     public abstract String getRussianName();
   }
 
@@ -530,7 +502,7 @@ public class CommandFactory {
   public Command build(CommandFactory.Operation operation) {
     Timber.tag(TAG).w("build" );
 
-    Command command = operation.getCommand(this, params);
+    Command command = operation.getCommand(params);
 
     Timber.tag("CommandFactory").w("after build" );
     return command;

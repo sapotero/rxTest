@@ -416,7 +416,7 @@ public class UpdateDocumentJob extends DocumentJob {
       CommandParams params = new CommandParams();
       params.setDocument( uid );
       params.setUpdatedAt( updatedAt );
-      Command command = operation.getCommand(null, params);
+      Command command = operation.getCommand(params);
       queueManager.add(command);
       queueManager.setExecutedLocal(command); // Skip executeLocal, so that document would be force updated
     }

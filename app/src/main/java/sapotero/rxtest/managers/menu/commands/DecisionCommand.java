@@ -228,7 +228,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     _params.setDecisionModel( getParams().getDecisionModel() );
     _params.setDocument( getParams().getDocument() );
     _params.setAssignment( getParams().isAssignment() );
-    Command command = operation.getCommand(null, _params);
+    Command command = operation.getCommand(_params);
     command.executeLocal();
   }
 
