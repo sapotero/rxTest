@@ -77,6 +77,7 @@ abstract class DocumentJob extends BaseJob {
         },
         error -> {
           Timber.tag(TAG).e(error);
+          onLoadError();
           EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info") );
         }
       );
@@ -102,6 +103,8 @@ abstract class DocumentJob extends BaseJob {
   }
 
   abstract public void doAfterLoad(DocumentInfo document);
+
+  abstract public void onLoadError();
 
   RDocumentEntity createDocument(DocumentInfo documentReceived, String status, boolean shared) {
     DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
@@ -157,11 +160,16 @@ abstract class DocumentJob extends BaseJob {
           loadLinkedData( documentReceived, result, isLink );
           doAfterUpdate(result);
         },
-        error -> Timber.tag(TAG).e(error)
+        error -> {
+          Timber.tag(TAG).e(error);
+          onInsertError();
+        }
       );
   }
 
   abstract public void doAfterUpdate(RDocumentEntity document);
+
+  abstract public void onInsertError();
 
   private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved, boolean isLink) {
     if ( !isLink ) {

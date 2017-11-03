@@ -19,6 +19,9 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import timber.log.Timber;
@@ -41,13 +44,25 @@ public class UpdateDocumentJob extends DocumentJob {
 
   private boolean fromLinks = false;
 
-  public UpdateDocumentJob(String uid, String login, String currentUserId, boolean ignoreSyncLabel, boolean forceUpdate) {
+  private boolean createdByCommand = false; // true, if UpdateDocumentJob was created from UpdateDocumentCommand
+  private String updatedAt;
+
+  public UpdateDocumentJob(String uid, String login, String currentUserId) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+    this.uid = uid;
+    this.login = login;
+    this.currentUserId = currentUserId;
+  }
+
+  public UpdateDocumentJob(String uid, String login, String currentUserId, String updatedAt, boolean forceUpdate) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.login = login;
     this.currentUserId = currentUserId;
 
-    this.ignoreSyncLabel = ignoreSyncLabel;
+    this.createdByCommand = true;
+    this.ignoreSyncLabel = true;
+    this.updatedAt = updatedAt;
     this.forceUpdate = forceUpdate;
   }
 
@@ -244,6 +259,8 @@ public class UpdateDocumentJob extends DocumentJob {
         if ( getDocumentExisting() == null ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
           insert( documentReceived, documentNew, false, true, TAG );
+        } else {
+          addUpdateDocumentTask();
         }
 
       } else {
@@ -254,6 +271,11 @@ public class UpdateDocumentJob extends DocumentJob {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
       Timber.tag(TAG).d("documentExisting == null ? %s", documentExisting == null);
     }
+  }
+
+  @Override
+  public void onLoadError() {
+    addUpdateDocumentTask();
   }
 
   private void copyDocumentState(RDocumentEntity documentNew, RDocumentEntity documentExisting) {
@@ -370,9 +392,33 @@ public class UpdateDocumentJob extends DocumentJob {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, filter, index );
       store.process( document, filter, index );
 
-      // if MD5 changed and document has been updated after first update delay, set UpdateDocumentCommand for this document as executed,
-      // so that it will not start UpdateDocumentJob again after second update delay
-      queueManager.setUpdateDocumentCommandExecuted( document.getUid() );
+      if ( createdByCommand ) {
+        // if MD5 changed and document has been updated after first update delay, set UpdateDocumentCommand for this document as executed,
+        // so that it will not start UpdateDocumentJob again after second update delay
+        queueManager.setUpdateDocumentCommandExecuted( document.getUid() );
+      }
+    }
+  }
+
+  @Override
+  public void onInsertError() {
+    addUpdateDocumentTask();
+  }
+
+  // If UpdateDocumentJob has been created by UpdateDocumentCommand.executeRemote(), then in case of network or database error
+  // this method must be called to add new UpdateDocumentCommand into queue, so that document will be finally force updated after operation
+  // (and Sync label removed).
+  private void addUpdateDocumentTask() {
+    if ( createdByCommand && forceUpdate ) {  // forceUpdate = true, if created by UpdateDocumentCommand.executeRemote()
+      Timber.tag(TAG).e("addUpdateDocumentTask");
+
+      CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DOCUMENT;
+      CommandParams params = new CommandParams();
+      params.setDocument( uid );
+      params.setUpdatedAt( updatedAt );
+      Command command = operation.getCommand(null, params);
+      queueManager.add(command);
+      queueManager.setExecutedLocal(command); // Skip executeLocal, so that document would be force updated
     }
   }
 

@@ -33,7 +33,7 @@ public class UpdateDocumentCommand extends AbstractCommand {
 
     if ( DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getFirstUpdateDelay() ) ) {
       Timber.tag(TAG).d("executeLocal - updating document");
-      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, false ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), getParams().getUpdatedAt(), false ) );
       queueManager.setExecutedLocal(this);
     } else {
       queueManager.setAsRunning(this, false);
@@ -51,13 +51,11 @@ public class UpdateDocumentCommand extends AbstractCommand {
 
     if ( isOnline( new Throwable("Offline") ) && DateUtil.isSomeTimePassed( getParams().getUpdatedAt(), getSecondUpdateDelay() ) ) {
       Timber.tag(TAG).d("executeRemote - force updating document");
-      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), true, true ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( getParams().getDocument(), getParams().getLogin(), getParams().getCurrentUserId(), getParams().getUpdatedAt(), true ) );
+      queueManager.setExecutedRemote(this);
+    } else {
+      queueManager.setAsRunning(this, false);
     }
-
-    queueManager.setAsRunning(this, false);
-
-    // UpdateDocumentCommand is set executed remote only from inside UpdateDocumentJob in case of document update success.
-    // Here we do not call setExecutedRemote(), because at this moment we don't know, whether the document has been updated or not, yet.
   }
 
   private int getSecondUpdateDelay() {

@@ -130,7 +130,15 @@ public class CreateLinksJob extends DocumentJob {
   }
 
   @Override
+  public void onLoadError() {
+  }
+
+  @Override
   public void doAfterUpdate(RDocumentEntity document) {
+  }
+
+  @Override
+  public void onInsertError() {
   }
 
   @Override

@@ -58,11 +58,19 @@ public class CreateFavoriteDocumentsJob extends DocumentJob {
   }
 
   @Override
+  public void onLoadError() {
+  }
+
+  @Override
   public void doAfterUpdate(RDocumentEntity document) {
     if (document != null) {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, null, null );
       store.process( document, null, null );
     }
+  }
+
+  @Override
+  public void onInsertError() {
   }
 
   @Override
